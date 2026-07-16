@@ -1,0 +1,60 @@
+import type { Metadata, Viewport } from 'next'
+import { Fraunces, Inter, JetBrains_Mono } from 'next/font/google'
+import './globals.css'
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-display',
+  weight: ['400', '500', '600', '700', '900'],
+  style: ['normal', 'italic'],
+})
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-body',
+  weight: ['400', '500', '600', '700'],
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  weight: ['400', '500'],
+})
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | Tanguá App',
+    default: 'Tanguá App — A cidade em um só lugar',
+  },
+  description:
+    'Encontre profissionais e comércios de Tanguá, vagas de emprego e tudo o que acontece na cidade.',
+  manifest: '/manifest.json',
+  openGraph: {
+    type: 'website',
+    locale: 'pt_BR',
+    url: 'https://tangua.app',
+    siteName: 'Tanguá App',
+    title: 'Tanguá App — A cidade em um só lugar',
+    description:
+      'Encontre profissionais e comércios de Tanguá, vagas de emprego e tudo o que acontece na cidade.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@tanguaapp',
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#EF7A1A',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="pt-BR" className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable}`}>
+      <body className="font-body antialiased">{children}</body>
+    </html>
+  )
+}

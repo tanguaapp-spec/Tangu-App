@@ -1,0 +1,166 @@
+export type PapelUsuario = 'morador' | 'profissional' | 'admin'
+export type StatusReivindicacao = 'pendente' | 'aprovado' | 'rejeitado'
+export type StatusVaga = 'aberta' | 'pausada' | 'encerrada'
+export type TipoPost = 'novidade' | 'promocao' | 'vaga_propria'
+export type TipoAviso = 'aviso' | 'evento' | 'utilidade_publica' | 'achados_perdidos'
+
+export type Perfil = {
+  id: string
+  nome_completo: string
+  telefone: string | null
+  whatsapp: string | null
+  avatar_url: string | null
+  papel: PapelUsuario
+  bairro: string | null
+  criado_em: string
+  atualizado_em: string
+}
+
+export type Categoria = {
+  id: string
+  nome: string
+  slug: string
+  icone: string | null
+  ordem: number
+}
+
+export type Negocio = {
+  id: string
+  google_place_id: string | null
+  origem: 'importado' | 'cadastro_manual'
+  nome: string
+  categoria_id: string | null
+  categoria?: Categoria
+  descricao: string | null
+  endereco: string | null
+  bairro: string | null
+  latitude: number | null
+  longitude: number | null
+  telefone: string | null
+  whatsapp: string | null
+  instagram: string | null
+  site: string | null
+  horario_funcionamento: Record<string, string> | null
+  foto_capa_url: string | null
+  galeria: string[]
+  nota_google: number | null
+  total_avaliacoes_google: number | null
+  verificado: boolean
+  reivindicado_por: string | null
+  reivindicado_em: string | null
+  destaque_ativo: boolean
+  destaque_expira_em: string | null
+  formas_pagamento: string[] | null
+  aberto_agora: boolean | null
+  ativo: boolean
+  criado_em: string
+  atualizado_em: string
+}
+
+export type SolicitacaoReivindicacao = {
+  id: string
+  negocio_id: string
+  solicitante_id: string
+  documento_url: string | null
+  mensagem: string | null
+  status: StatusReivindicacao
+  revisado_por: string | null
+  revisado_em: string | null
+  criado_em: string
+}
+
+export type PostNegocio = {
+  id: string
+  negocio_id: string
+  autor_id: string
+  tipo: TipoPost
+  titulo: string
+  conteudo: string | null
+  imagem_url: string | null
+  link_externo: string | null
+  ativo: boolean
+  visualizacoes: number
+  cliques_contato: number
+  criado_em: string
+  expira_em: string | null
+  negocio?: Negocio
+}
+
+export type Avaliacao = {
+  id: string
+  negocio_id: string
+  autor_id: string
+  nota: number
+  comentario: string | null
+  resposta_profissional: string | null
+  respondido_em: string | null
+  criado_em: string
+  autor?: Perfil
+}
+
+export type Vaga = {
+  id: string
+  titulo: string
+  empresa_nome: string
+  negocio_id: string | null
+  descricao: string
+  requisitos: string | null
+  area: string | null
+  tipo_contrato: string | null
+  salario_faixa: string | null
+  bairro: string | null
+  contato_whatsapp: string | null
+  contato_email: string | null
+  status: StatusVaga
+  publicado_por: string
+  criado_em: string
+  expira_em: string | null
+}
+
+export type AvisoCidade = {
+  id: string
+  tipo: TipoAviso
+  titulo: string
+  conteudo: string
+  imagem_url: string | null
+  bairro: string | null
+  local_evento: string | null
+  data_evento: string | null
+  publicado_por: string
+  fixado: boolean
+  ativo: boolean
+  criado_em: string
+}
+
+type TabelaGenerica<T> = {
+  Row: T
+  Insert: Partial<T>
+  Update: Partial<T>
+  Relationships: []
+}
+
+export type Database = {
+  public: {
+    Tables: {
+      perfis: TabelaGenerica<Perfil>
+      categorias: TabelaGenerica<Categoria>
+      negocios: TabelaGenerica<Negocio>
+      solicitacoes_reivindicacao: TabelaGenerica<SolicitacaoReivindicacao>
+      posts_negocio: TabelaGenerica<PostNegocio>
+      avaliacoes: TabelaGenerica<Avaliacao>
+      vagas: TabelaGenerica<Vaga>
+      avisos_cidade: TabelaGenerica<AvisoCidade>
+      favoritos: TabelaGenerica<{ perfil_id: string; negocio_id: string; criado_em: string }>
+    }
+    Views: Record<string, never>
+    Functions: Record<string, never>
+    Enums: {
+      user_role: PapelUsuario
+      claim_status: StatusReivindicacao
+      vaga_status: StatusVaga
+      post_tipo: TipoPost
+      aviso_tipo: TipoAviso
+    }
+    CompositeTypes: Record<string, never>
+  }
+}

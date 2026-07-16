@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #FBF4E9;
+    color: #2E2219;
+  }
+
+  /* foco visível para navegação por teclado — acessibilidade */
+  :focus-visible {
+    outline: 3px solid #EF7A1A;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* textura sutil de "papel de feira" usada em seções de destaque */
+  .textura-papel {
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(74, 55, 42, 0.04) 1px, transparent 0);
+    background-size: 18px 18px;
+  }
+
+  .casca-divisor {
+    position: relative;
+  }
+  .casca-divisor::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: repeating-linear-gradient(
+      90deg,
+      #EF7A1A 0px,
+      #EF7A1A 12px,
+      transparent 12px,
+      transparent 20px
+    );
+  }
+}
