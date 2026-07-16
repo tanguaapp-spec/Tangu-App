@@ -3,6 +3,8 @@ import { ArrowRight, Briefcase, Megaphone, Store, Users } from 'lucide-react'
 import { BuscaRapida } from '@/components/busca-rapida'
 import { MotivoGomo } from '@/components/motivo-gomo'
 
+export const dynamic = 'force-dynamic'
+
 const categoriasDestaque = [
   { nome: 'Alimentação', slug: 'alimentacao', emoji: '🍽️' },
   { nome: 'Beleza e Estética', slug: 'beleza-estetica', emoji: '💇' },

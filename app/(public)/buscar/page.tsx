@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils'
 import { SlidersHorizontal } from 'lucide-react'
 import { BuscaRapida } from '@/components/busca-rapida'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PaginaBuscar({
   searchParams,
 }: {

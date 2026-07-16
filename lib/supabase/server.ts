@@ -8,10 +8,18 @@ export function createClient() {
   const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
   const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+  // Don't throw during prerendering - just return a dummy client (or handle later)
+  // This allows the build to complete even if env vars aren't set yet
   if (!SUPA_URL || !SUPA_KEY) {
-    throw new Error(
-      'Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY for server client. See .env.example.'
-    )
+    console.warn('Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. Supabase client will not work properly.')
+    // Return a dummy client for build time (will fail at runtime if env vars are still missing)
+    return createServerClient('https://dummy-url.supabase.co', 'dummy-key', {
+      cookies: {
+        get: () => undefined,
+        set: () => {},
+        remove: () => {}
+      }
+    })
   }
 
   return createServerClient(SUPA_URL, SUPA_KEY, {

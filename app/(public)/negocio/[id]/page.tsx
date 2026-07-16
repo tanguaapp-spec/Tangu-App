@@ -15,6 +15,8 @@ import { SeloVerificado, Selo } from '@/components/ui/selo'
 import { linkWhatsapp } from '@/lib/utils'
 import { BotaoReivindicar } from '@/components/negocio/botao-reivindicar'
 
+export const dynamic = 'force-dynamic'
+
 const diasSemana: Record<string, string> = {
   seg: 'Segunda',
   ter: 'Terça',

@@ -2,6 +2,8 @@ import { buscarVagas } from '@/lib/queries/cidade'
 import { CardVaga } from '@/components/negocio/card-vaga'
 import { Briefcase } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PaginaVagas() {
   const vagas = await buscarVagas()
 
