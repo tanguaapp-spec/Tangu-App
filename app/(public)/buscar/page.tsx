@@ -1,8 +1,8 @@
-import { buscarNegocios, buscarCategorias } from '@/lib/queries/negocios'
+import { buscarNegocios, buscarCategorias, buscarBairros } from '@/lib/queries/negocios'
 import { CardNegocio } from '@/components/negocio/card-negocio'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { SlidersHorizontal } from 'lucide-react'
+import { SlidersHorizontal, MapPin } from 'lucide-react'
 import { BuscaRapida } from '@/components/busca-rapida'
 
 export const dynamic = 'force-dynamic'
@@ -10,11 +10,12 @@ export const dynamic = 'force-dynamic'
 export default async function PaginaBuscar({
   searchParams,
 }: {
-  searchParams: { q?: string; categoria?: string }
+  searchParams: { q?: string; categoria?: string; bairro?: string }
 }) {
-  const [negocios, categorias] = await Promise.all([
-    buscarNegocios({ termo: searchParams.q, categoriaSlug: searchParams.categoria }),
+  const [negocios, categorias, bairros] = await Promise.all([
+    buscarNegocios({ termo: searchParams.q, categoriaSlug: searchParams.categoria, bairro: searchParams.bairro }),
     buscarCategorias(),
+    buscarBairros(),
   ])
 
   return (
@@ -46,7 +47,7 @@ export default async function PaginaBuscar({
         {categorias.map((cat) => (
           <Link
             key={cat.id}
-            href={`/buscar?categoria=${cat.slug}`}
+            href={`/buscar?categoria=${cat.slug}${searchParams.q ? `&q=${searchParams.q}` : ''}${searchParams.bairro ? `&bairro=${searchParams.bairro}` : ''}`}
             className={cn(
               'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
               searchParams.categoria === cat.slug
@@ -58,6 +59,37 @@ export default async function PaginaBuscar({
           </Link>
         ))}
       </div>
+
+      {bairros.length > 0 && (
+        <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2">
+          <span className="flex shrink-0 items-center gap-1 text-sm text-barro-500">
+            <MapPin className="h-4 w-4" /> Bairro:
+          </span>
+          <Link
+            href={`/buscar${searchParams.categoria ? `?categoria=${searchParams.categoria}` : ''}${searchParams.q ? (searchParams.categoria ? '&' : '?') + `q=${searchParams.q}` : ''}`}
+            className={cn(
+              'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
+              !searchParams.bairro ? 'bg-mata-500 text-white' : 'bg-white text-barro-700 hover:bg-barro-100'
+            )}
+          >
+            Todos
+          </Link>
+          {bairros.map((bairro) => (
+            <Link
+              key={bairro}
+              href={`/buscar${searchParams.categoria || searchParams.q ? '?' : ''}${searchParams.categoria ? `categoria=${searchParams.categoria}${searchParams.q ? '&' : ''}` : ''}${searchParams.q ? `q=${searchParams.q}&` : ''}bairro=${bairro}`}
+              className={cn(
+                'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
+                searchParams.bairro === bairro
+                  ? 'bg-mata-500 text-white'
+                  : 'bg-white text-barro-700 hover:bg-barro-100'
+              )}
+            >
+              {bairro}
+            </Link>
+          ))}
+        </div>
+      )}
 
       {negocios.length === 0 ? (
         <div className="mt-16 text-center">

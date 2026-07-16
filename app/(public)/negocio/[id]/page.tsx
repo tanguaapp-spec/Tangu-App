@@ -1,4 +1,4 @@
-import { buscarNegocioPorId } from '@/lib/queries/negocios'
+import { buscarNegocioPorId, isFavorito } from '@/lib/queries/negocios'
 import { createClient } from '@/lib/supabase/server'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
@@ -14,8 +14,8 @@ import {
 import { SeloVerificado, Selo } from '@/components/ui/selo'
 import { linkWhatsapp } from '@/lib/utils'
 import { BotaoReivindicar } from '@/components/negocio/botao-reivindicar'
-
-export const dynamic = 'force-dynamic'
+import { BotaoFavoritar } from '@/components/negocio/botao-favoritar'
+import { FormularioAvaliacao } from '@/components/negocio/formulario-avaliacao'
 
 const diasSemana: Record<string, string> = {
   seg: 'Segunda',
@@ -27,11 +27,16 @@ const diasSemana: Record<string, string> = {
   dom: 'Domingo',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function PaginaNegocio({ params }: { params: { id: string } }) {
   const negocio = await buscarNegocioPorId(params.id)
   if (!negocio) notFound()
 
   const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const isFav = await isFavorito(params.id)
+
   const { data: avaliacoes } = await supabase
     .from('avaliacoes')
     .select('*, autor:perfis(nome_completo, avatar_url)')
@@ -53,6 +58,11 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
         ) : (
           <div className="flex h-full items-center justify-center text-barro-300">
             <Store className="h-16 w-16" />
+          </div>
+        )}
+        {user && (
+          <div className="absolute top-3 right-3 bg-white/80 rounded-full">
+            <BotaoFavoritar negocioId={params.id} initialIsFavorito={isFav} />
           </div>
         )}
       </div>
@@ -120,6 +130,7 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
             <h3 className="font-display text-xl font-semibold text-barro-900">
               Avaliações da comunidade
             </h3>
+            {user && <FormularioAvaliacao negocioId={params.id} />}
             {!avaliacoes || avaliacoes.length === 0 ? (
               <p className="mt-2 text-barro-500">Seja o primeiro a avaliar este negócio.</p>
             ) : (

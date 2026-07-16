@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Menu, X, MapPin, Briefcase, Megaphone, Search, User, LogOut, Store, Settings } from 'lucide-react'
+import { Menu, X, MapPin, Briefcase, Megaphone, Search, User, LogOut, Store, Settings, Heart } from 'lucide-react'
 import { Botao } from '@/components/ui/botao'
 import { createClient } from '@/lib/supabase/client'
 import type { Perfil } from '@/lib/types/database'
@@ -11,6 +11,7 @@ const linksNav = [
   { href: '/buscar', rotulo: 'Profissionais', icone: Search },
   { href: '/vagas', rotulo: 'Vagas', icone: Briefcase },
   { href: '/mural', rotulo: 'Mural da cidade', icone: Megaphone },
+  { href: '/favoritos', rotulo: 'Favoritos', icone: Heart },
 ]
 
 export function Cabecalho() {
@@ -79,6 +80,12 @@ export function Cabecalho() {
         <div className="hidden items-center gap-2 md:flex">
           {user ? (
             <>
+              <Link href="/perfil">
+                <Botao variante="fantasma" tamanho="sm">
+                  <User className="h-4 w-4" />
+                  Meu perfil
+                </Botao>
+              </Link>
               <Link href="/painel/negocio">
                 <Botao variante="fantasma" tamanho="sm">
                   <Store className="h-4 w-4" />
@@ -132,30 +139,38 @@ export function Cabecalho() {
             ))}
             <hr className="my-2 border-barro-100" />
             {user ? (
-              <>
-                <div className="px-3 py-2 text-sm text-barro-700 font-medium">
-                  Olá, {perfil?.nome_completo?.split(' ')[0] || 'usuário'}!
-                </div>
-                <Link
-                  href="/painel/negocio"
-                  onClick={() => setMenuAberto(false)}
-                  className="flex items-center gap-2 rounded-lg px-3 py-3 text-barro-800 hover:bg-barro-100"
-                >
-                  <Store className="h-5 w-5" />
-                  Meu painel
-                </Link>
-                <button
-                  onClick={() => {
-                    handleLogout()
-                    setMenuAberto(false)
-                  }}
-                  className="flex items-center gap-2 rounded-lg px-3 py-3 text-barro-800 hover:bg-barro-100 text-left"
-                >
-                  <LogOut className="h-5 w-5" />
-                  Sair
-                </button>
-              </>
-            ) : (
+            <>
+              <div className="px-3 py-2 text-sm text-barro-700 font-medium">
+                Olá, {perfil?.nome_completo?.split(' ')[0] || 'usuário'}!
+              </div>
+              <Link
+                href="/perfil"
+                onClick={() => setMenuAberto(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-3 text-barro-800 hover:bg-barro-100"
+              >
+                <User className="h-5 w-5" />
+                Meu perfil
+              </Link>
+              <Link
+                href="/painel/negocio"
+                onClick={() => setMenuAberto(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-3 text-barro-800 hover:bg-barro-100"
+              >
+                <Store className="h-5 w-5" />
+                Meu painel
+              </Link>
+              <button
+                onClick={() => {
+                  handleLogout()
+                  setMenuAberto(false)
+                }}
+                className="flex items-center gap-2 rounded-lg px-3 py-3 text-barro-800 hover:bg-barro-100 text-left"
+              >
+                <LogOut className="h-5 w-5" />
+                Sair
+              </button>
+            </>
+          ) : (
               <>
                 <Link
                   href="/entrar"

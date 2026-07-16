@@ -1,0 +1,28 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
+
+export async function atualizarPerfil(data: {
+  nome_completo?: string
+  telefone?: string
+  bio?: string
+}) {
+  console.log('[LOG] Atualizar perfil:', data)
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Usuário não autenticado' }
+
+  const { error } = await supabase
+    .from('perfis')
+    .update(data)
+    .eq('id', user.id)
+  if (error) {
+    console.error('[ERROR] Erro ao atualizar perfil:', error)
+    return { erro: error.message }
+  }
+  revalidatePath('/perfil')
+  return { erro: null }
+}

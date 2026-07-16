@@ -72,3 +72,48 @@ export async function buscarCategorias() {
   }
   return data
 }
+
+export async function buscarFavoritosUsuario() {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data, error } = await supabase
+    .from('favoritos')
+    .select('negocio:negocios(*, categoria:categorias(*))')
+    .eq('perfil_id', user.id)
+  if (error) {
+    console.error('Erro ao buscar favoritos:', error)
+    return []
+  }
+  return data.map(fav => fav.negocio as unknown as Negocio)
+}
+
+export async function isFavorito(negocioId: string) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return false
+
+  const { data } = await supabase
+    .from('favoritos')
+    .select('*')
+    .eq('perfil_id', user.id)
+    .eq('negocio_id', negocioId)
+    .maybeSingle()
+  return !!data
+}
+
+export async function buscarBairros() {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('negocios')
+    .select('bairro')
+    .eq('ativo', true)
+    .not('bairro', 'is', null)
+  if (error) {
+    console.error(error)
+    return []
+  }
+  const uniqueBairros = Array.from(new Set(data.map(n => n.bairro))).sort()
+  return uniqueBairros
+}
