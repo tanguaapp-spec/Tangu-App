@@ -12,11 +12,40 @@ create extension if not exists pg_trgm;
 -- ---------------------------------------------------------------------
 -- ENUMS
 -- ---------------------------------------------------------------------
-create type user_role as enum ('morador', 'profissional', 'admin');
-create type claim_status as enum ('pendente', 'aprovado', 'rejeitado');
-create type vaga_status as enum ('aberta', 'pausada', 'encerrada');
-create type post_tipo as enum ('novidade', 'promocao', 'vaga_propria');
-create type aviso_tipo as enum ('aviso', 'evento', 'utilidade_publica', 'achados_perdidos');
+do $$
+begin
+    if not exists (select 1 from pg_type where typname = 'user_role') then
+        create type user_role as enum ('morador', 'profissional', 'admin');
+    end if;
+end $$;
+
+do $$
+begin
+    if not exists (select 1 from pg_type where typname = 'claim_status') then
+        create type claim_status as enum ('pendente', 'aprovado', 'rejeitado');
+    end if;
+end $$;
+
+do $$
+begin
+    if not exists (select 1 from pg_type where typname = 'vaga_status') then
+        create type vaga_status as enum ('aberta', 'pausada', 'encerrada');
+    end if;
+end $$;
+
+do $$
+begin
+    if not exists (select 1 from pg_type where typname = 'post_tipo') then
+        create type post_tipo as enum ('novidade', 'promocao', 'vaga_propria');
+    end if;
+end $$;
+
+do $$
+begin
+    if not exists (select 1 from pg_type where typname = 'aviso_tipo') then
+        create type aviso_tipo as enum ('aviso', 'evento', 'utilidade_publica', 'achados_perdidos');
+    end if;
+end $$;
 
 -- ---------------------------------------------------------------------
 -- PERFIS DE USUÁRIO (estende auth.users)
