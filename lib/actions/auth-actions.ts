@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 
 export async function entrarComEmail(formData: FormData) {
   console.log('[LOG] Iniciando login com email');
+  console.log('[LOG] FormData entries:', Array.from(formData.entries()));
   const email = formData.get('email') as string
   console.log('[LOG] Email:', email);
   const senha = formData.get('senha') as string
@@ -24,6 +25,7 @@ export async function entrarComEmail(formData: FormData) {
 
 export async function cadastrarComEmail(formData: FormData) {
   console.log('[LOG] Iniciando cadastro');
+  console.log('[LOG] FormData entries:', Array.from(formData.entries()));
   const email = formData.get('email') as string
   const senha = formData.get('senha') as string
   const nomeCompleto = formData.get('nomeCompleto') as string
@@ -38,7 +40,7 @@ export async function cadastrarComEmail(formData: FormData) {
       data: { nome_completo: nomeCompleto, papel },
     },
   })
-  console.log('[LOG] SignUp response:', { data: data ? 'data received' : null, error: error?.message });
+  console.log('[LOG] SignUp response:', { data: data ? JSON.stringify(data) : null, error: error });
 
   if (error) {
     console.error('[ERROR] SignUp failed:', error);
