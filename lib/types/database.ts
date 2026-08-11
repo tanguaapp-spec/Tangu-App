@@ -52,6 +52,8 @@ export type Negocio = {
   destaque_expira_em: string | null
   formas_pagamento: string[] | null
   aberto_agora: boolean | null
+  status_cadastro: StatusReivindicacao
+  motivo_rejeicao: string | null
   ativo: boolean
   criado_em: string
   atualizado_em: string

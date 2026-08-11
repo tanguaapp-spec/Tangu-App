@@ -72,9 +72,17 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="font-display text-3xl font-semibold text-barro-900">{negocio.nome}</h1>
             {negocio.verificado && <SeloVerificado />}
+            {negocio.aberto_agora !== null && (
+              <Selo tom={negocio.aberto_agora ? 'verde' : 'neutro'}>
+                {negocio.aberto_agora ? 'Aberto agora' : 'Fechado agora'}
+              </Selo>
+            )}
           </div>
 
-          {negocio.categoria && <Selo tom="laranja" className="mt-2">{negocio.categoria.nome}</Selo>}
+          <div className="mt-2 flex flex-wrap gap-2">
+            {negocio.categoria && <Selo tom="laranja">{negocio.categoria.nome}</Selo>}
+            {negocio.bairro && <Selo tom="neutro">{negocio.bairro}</Selo>}
+          </div>
 
           {negocio.descricao && <p className="mt-4 text-barro-700">{negocio.descricao}</p>}
 
@@ -104,6 +112,32 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
                   </li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {negocio.formas_pagamento && negocio.formas_pagamento.length > 0 && (
+            <div className="mt-5">
+              <h3 className="font-semibold text-barro-800">Formas de pagamento</h3>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {negocio.formas_pagamento.map((forma) => (
+                  <Selo key={forma} tom="neutro">
+                    {forma}
+                  </Selo>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {negocio.galeria && negocio.galeria.length > 0 && (
+            <div className="mt-8">
+              <h3 className="font-display text-xl font-semibold text-barro-900">Fotos</h3>
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {negocio.galeria.map((url) => (
+                  <div key={url} className="relative h-32 overflow-hidden rounded-xl bg-barro-100">
+                    <Image src={url} alt={`Foto de ${negocio.nome}`} fill className="object-cover" />
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

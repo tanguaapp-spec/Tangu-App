@@ -15,11 +15,18 @@ export function FormularioCadastrar({ papelInicial }: { papelInicial: 'morador' 
     setCarregando(true)
     setErro(null)
     formData.set('papel', papel)
+
     const resultado = await cadastrarComEmail(formData)
+
     if (resultado?.erro) {
       setErro(resultado.erro)
       setCarregando(false)
+      return
     }
+
+    // Sucesso: a server action deve redirecionar.
+    // Se por algum motivo não redirecionar, mostramos um fallback.
+    setCarregando(false)
   }
 
   return (

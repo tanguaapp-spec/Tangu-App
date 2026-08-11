@@ -4,57 +4,48 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
 export async function entrarComEmail(formData: FormData) {
-  console.log('[LOG] Iniciando login com email');
-  console.log('[LOG] FormData entries:', Array.from(formData.entries()));
   const email = formData.get('email') as string
-  console.log('[LOG] Email:', email);
   const senha = formData.get('senha') as string
 
   const supabase = createClient()
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha })
-  console.log('[LOG] Login response:', { data: data ? 'data received' : null, error: error?.message });
+  const { error } = await supabase.auth.signInWithPassword({ email, password: senha })
 
   if (error) {
-    console.error('[ERROR] Login failed:', error);
+    // sem console.error para evitar logs sensíveis
     return { erro: 'E-mail ou senha incorretos.' }
   }
 
-  console.log('[LOG] Login successful, redirecting to /');
   redirect('/')
 }
 
+
 export async function cadastrarComEmail(formData: FormData) {
-  console.log('[LOG] Iniciando cadastro');
-  console.log('[LOG] FormData entries:', Array.from(formData.entries()));
   const email = formData.get('email') as string
   const senha = formData.get('senha') as string
   const nomeCompleto = formData.get('nomeCompleto') as string
   const papel = (formData.get('papel') as string) || 'morador'
-  console.log('[LOG] Cadastro params:', { email, nomeCompleto, papel });
+
 
   const supabase = createClient()
-  const { data, error } = await supabase.auth.signUp({
+  const { error } = await supabase.auth.signUp({
     email,
     password: senha,
     options: {
       data: { nome_completo: nomeCompleto, papel },
     },
   })
-  console.log('[LOG] SignUp response:', { data: data ? JSON.stringify(data) : null, error: error });
 
   if (error) {
-    console.error('[ERROR] SignUp failed:', error);
-    return { erro: error.message }
+    return { erro: error.message || 'Falha ao cadastrar. Tente novamente.' }
   }
 
-  console.log('[LOG] SignUp successful, redirecting to /cadastrar/confirme-seu-email');
   redirect('/cadastrar/confirme-seu-email')
 }
 
+
 export async function sair() {
-  console.log('[LOG] Iniciando signOut');
   const supabase = createClient()
   await supabase.auth.signOut()
-  console.log('[LOG] SignOut complete, redirecting to /');
   redirect('/')
 }
+

@@ -1,14 +1,17 @@
 import { createClient } from '@/lib/supabase/server'
 import { AcoesReivindicacao } from '@/components/painel/acoes-reivindicacao'
 import { ShieldCheck } from 'lucide-react'
+import { requireAdminOrRedirect } from '@/lib/auth/require-admin'
 
 export default async function PainelReivindicacoes() {
+  await requireAdminOrRedirect()
   const supabase = createClient()
   const { data: solicitacoes } = await supabase
     .from('solicitacoes_reivindicacao')
     .select('*, negocio:negocios(nome, endereco), solicitante:perfis(nome_completo, telefone)')
     .eq('status', 'pendente')
     .order('criado_em', { ascending: true })
+    .limit(50)
 
   return (
     <div>

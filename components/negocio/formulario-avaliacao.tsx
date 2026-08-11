@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Star } from 'lucide-react'
-import { Campo } from '@/components/ui/campo'
+import { Campo, AreaTexto } from '@/components/ui/campo'
 import { Botao } from '@/components/ui/botao'
 import { enviarAvaliacao } from '@/lib/actions/negocio-actions'
 import { useRouter } from 'next/navigation'
@@ -49,14 +49,14 @@ export function FormularioAvaliacao({ negocioId }: Props) {
         ))}
       </div>
 
-      <Campo
-        label="Comentário (opcional)"
+      <AreaTexto
+        rotulo="Comentário (opcional)"
         id="comentario"
-        as="textarea"
         value={comentario}
         onChange={(e) => setComentario(e.target.value)}
         rows={3}
       />
+
 
       <Botao type="submit" className="mt-4" disabled={enviando || nota === 0}>
         {enviando ? 'Enviando...' : 'Enviar avaliação'}

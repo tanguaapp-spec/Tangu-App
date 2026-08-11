@@ -62,17 +62,18 @@ export default function PaginaPerfil() {
 
       <form onSubmit={handleSalvar} className="space-y-4 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
         <Campo
-          label="Nome completo"
+          rotulo="Nome completo"
           id="nome"
           value={nome}
           onChange={(e) => setNome(e.target.value)}
         />
         <Campo
-          label="Telefone"
+          rotulo="Telefone"
           id="telefone"
           value={telefone}
           onChange={(e) => setTelefone(e.target.value)}
         />
+
 
         <Botao type="submit" className="mt-4" disabled={salvando}>
           {salvando ? 'Salvando...' : 'Salvar perfil'}

@@ -4,18 +4,26 @@ import { Store, ShieldCheck, Briefcase, Megaphone, Users } from 'lucide-react'
 export default async function PainelAdminVisaoGeral() {
   const supabase = createClient()
 
-  const [{ count: totalNegocios }, { count: totalVerificados }, { count: solicitacoesPendentes }, { count: vagasAbertas }, { count: totalUsuarios }] =
-    await Promise.all([
-      supabase.from('negocios').select('*', { count: 'exact', head: true }),
-      supabase.from('negocios').select('*', { count: 'exact', head: true }).eq('verificado', true),
-      supabase.from('solicitacoes_reivindicacao').select('*', { count: 'exact', head: true }).eq('status', 'pendente'),
-      supabase.from('vagas').select('*', { count: 'exact', head: true }).eq('status', 'aberta'),
-      supabase.from('perfis').select('*', { count: 'exact', head: true }),
-    ])
+  const [
+    { count: totalNegocios },
+    { count: totalVerificados },
+    { count: cadastrosPendentes },
+    { count: solicitacoesPendentes },
+    { count: vagasAbertas },
+    { count: totalUsuarios },
+  ] = await Promise.all([
+    supabase.from('negocios').select('*', { count: 'exact', head: true }),
+    supabase.from('negocios').select('*', { count: 'exact', head: true }).eq('verificado', true),
+    supabase.from('negocios').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'pendente'),
+    supabase.from('solicitacoes_reivindicacao').select('*', { count: 'exact', head: true }).eq('status', 'pendente'),
+    supabase.from('vagas').select('*', { count: 'exact', head: true }).eq('status', 'aberta'),
+    supabase.from('perfis').select('*', { count: 'exact', head: true }),
+  ])
 
   const cartoes = [
     { rotulo: 'Negócios cadastrados', valor: totalNegocios ?? 0, icone: Store, cor: 'casca' },
     { rotulo: 'Perfis verificados', valor: totalVerificados ?? 0, icone: ShieldCheck, cor: 'mata' },
+    { rotulo: 'Cadastros pendentes', valor: cadastrosPendentes ?? 0, icone: Store, cor: 'casca' },
     { rotulo: 'Reivindicações pendentes', valor: solicitacoesPendentes ?? 0, icone: ShieldCheck, cor: 'casca' },
     { rotulo: 'Vagas abertas', valor: vagasAbertas ?? 0, icone: Briefcase, cor: 'mata' },
     { rotulo: 'Usuários cadastrados', valor: totalUsuarios ?? 0, icone: Users, cor: 'casca' },

@@ -16,6 +16,7 @@ export default async function LayoutPainel({ children }: { children: React.React
   ]
   const linksAdmin = [
     { href: '/painel/admin', rotulo: 'Visão geral', icone: LayoutDashboard },
+    { href: '/painel/admin/negocios-pendentes', rotulo: 'Cadastros pendentes', icone: Store },
     { href: '/painel/admin/reivindicacoes', rotulo: 'Reivindicações', icone: ShieldCheck },
     { href: '/painel/admin/vagas', rotulo: 'Vagas', icone: Briefcase },
     { href: '/painel/admin/avisos', rotulo: 'Avisos da cidade', icone: Megaphone },

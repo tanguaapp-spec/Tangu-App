@@ -50,7 +50,7 @@ end $$;
 -- ---------------------------------------------------------------------
 -- PERFIS DE USUÁRIO (estende auth.users)
 -- ---------------------------------------------------------------------
-create table public.perfis (
+create table if not exists public.perfis (
   id uuid primary key references auth.users(id) on delete cascade,
   nome_completo text not null,
   telefone text,
@@ -67,7 +67,7 @@ comment on table public.perfis is 'Dados extras de cada usuário autenticado, vi
 -- ---------------------------------------------------------------------
 -- CATEGORIAS DE NEGÓCIO/PROFISSÃO
 -- ---------------------------------------------------------------------
-create table public.categorias (
+create table if not exists public.categorias (
   id uuid primary key default uuid_generate_v4(),
   nome text not null unique,
   slug text not null unique,
@@ -78,7 +78,7 @@ create table public.categorias (
 -- ---------------------------------------------------------------------
 -- NEGÓCIOS / PROFISSIONAIS (núcleo do diretório)
 -- ---------------------------------------------------------------------
-create table public.negocios (
+create table if not exists public.negocios (
   id uuid primary key default uuid_generate_v4(),
 
   -- dados de origem (importação Google Places)
@@ -130,10 +130,10 @@ create table public.negocios (
   atualizado_em timestamptz not null default now()
 );
 
-create index negocios_categoria_idx on public.negocios(categoria_id);
-create index negocios_bairro_idx on public.negocios(bairro);
-create index negocios_localizacao_idx on public.negocios using gist(localizacao);
-create index negocios_nome_trgm_idx on public.negocios using gin (nome gin_trgm_ops);
+create index if not exists negocios_categoria_idx on public.negocios(categoria_id);
+create index if not exists negocios_bairro_idx on public.negocios(bairro);
+create index if not exists negocios_localizacao_idx on public.negocios using gist(localizacao);
+create index if not exists negocios_nome_trgm_idx on public.negocios using gin (nome gin_trgm_ops);
 
 comment on table public.negocios is 'Diretório de profissionais e comércios, populado via Google Places e mantido pelos donos após reivindicação.';
 
@@ -149,14 +149,17 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger negocios_sync_localizacao
-  before insert or update on public.negocios
-  for each row execute function public.sync_localizacao();
+do $$ begin
+  drop trigger if exists negocios_sync_localizacao on public.negocios;
+  create trigger negocios_sync_localizacao
+    before insert or update on public.negocios
+    for each row execute function public.sync_localizacao();
+end $$;
 
 -- ---------------------------------------------------------------------
 -- SOLICITAÇÕES DE REIVINDICAÇÃO DE PERFIL
 -- ---------------------------------------------------------------------
-create table public.solicitacoes_reivindicacao (
+create table if not exists public.solicitacoes_reivindicacao (
   id uuid primary key default uuid_generate_v4(),
   negocio_id uuid not null references public.negocios(id) on delete cascade,
   solicitante_id uuid not null references public.perfis(id) on delete cascade,
@@ -171,7 +174,7 @@ create table public.solicitacoes_reivindicacao (
 -- ---------------------------------------------------------------------
 -- POSTS DOS PROFISSIONAIS (feed de novidades/promoções)
 -- ---------------------------------------------------------------------
-create table public.posts_negocio (
+create table if not exists public.posts_negocio (
   id uuid primary key default uuid_generate_v4(),
   negocio_id uuid not null references public.negocios(id) on delete cascade,
   autor_id uuid not null references public.perfis(id),
@@ -187,12 +190,12 @@ create table public.posts_negocio (
   expira_em timestamptz
 );
 
-create index posts_negocio_idx on public.posts_negocio(negocio_id, criado_em desc);
+create index if not exists posts_negocio_idx on public.posts_negocio(negocio_id, criado_em desc);
 
 -- ---------------------------------------------------------------------
 -- AVALIAÇÕES DA COMUNIDADE
 -- ---------------------------------------------------------------------
-create table public.avaliacoes (
+create table if not exists public.avaliacoes (
   id uuid primary key default uuid_generate_v4(),
   negocio_id uuid not null references public.negocios(id) on delete cascade,
   autor_id uuid not null references public.perfis(id) on delete cascade,
@@ -207,7 +210,7 @@ create table public.avaliacoes (
 -- ---------------------------------------------------------------------
 -- VAGAS DE EMPREGO
 -- ---------------------------------------------------------------------
-create table public.vagas (
+create table if not exists public.vagas (
   id uuid primary key default uuid_generate_v4(),
   titulo text not null,
   empresa_nome text not null,
@@ -226,12 +229,12 @@ create table public.vagas (
   expira_em timestamptz
 );
 
-create index vagas_status_idx on public.vagas(status, criado_em desc);
+create index if not exists vagas_status_idx on public.vagas(status, criado_em desc);
 
 -- ---------------------------------------------------------------------
 -- MURAL DA CIDADE (avisos, eventos, utilidade pública)
 -- ---------------------------------------------------------------------
-create table public.avisos_cidade (
+create table if not exists public.avisos_cidade (
   id uuid primary key default uuid_generate_v4(),
   tipo aviso_tipo not null default 'aviso',
   titulo text not null,
@@ -246,12 +249,12 @@ create table public.avisos_cidade (
   criado_em timestamptz not null default now()
 );
 
-create index avisos_tipo_idx on public.avisos_cidade(tipo, criado_em desc);
+create index if not exists avisos_tipo_idx on public.avisos_cidade(tipo, criado_em desc);
 
 -- ---------------------------------------------------------------------
 -- FAVORITOS
 -- ---------------------------------------------------------------------
-create table public.favoritos (
+create table if not exists public.favoritos (
   perfil_id uuid not null references public.perfis(id) on delete cascade,
   negocio_id uuid not null references public.negocios(id) on delete cascade,
   criado_em timestamptz not null default now(),
@@ -288,70 +291,177 @@ returns boolean as $$
 $$ language sql stable security definer;
 
 -- PERFIS: qualquer um lê, só o próprio usuário edita o seu
+drop policy if exists "perfis_select_publico" on public.perfis;
+drop policy if exists "perfis_update_proprio" on public.perfis;
+drop policy if exists "perfis_insert_proprio" on public.perfis;
+
 create policy "perfis_select_publico" on public.perfis for select using (true);
 create policy "perfis_update_proprio" on public.perfis for update using (auth.uid() = id);
 create policy "perfis_insert_proprio" on public.perfis for insert with check (auth.uid() = id);
 
 -- CATEGORIAS: leitura pública, escrita só admin
+drop policy if exists "categorias_select_publico" on public.categorias;
+drop policy if exists "categorias_admin_all" on public.categorias;
+
 create policy "categorias_select_publico" on public.categorias for select using (true);
 create policy "categorias_admin_all" on public.categorias for all using (public.meu_papel() = 'admin');
 
 -- NEGÓCIOS: leitura pública; dono ou admin edita
-create policy "negocios_select_publico" on public.negocios for select using (ativo = true or public.meu_papel() = 'admin');
-create policy "negocios_update_dono_ou_admin" on public.negocios for update
-  using (reivindicado_por = auth.uid() or public.meu_papel() = 'admin');
-create policy "negocios_insert_admin" on public.negocios for insert
-  with check (public.meu_papel() = 'admin');
-create policy "negocios_delete_admin" on public.negocios for delete
-  using (public.meu_papel() = 'admin');
+drop policy if exists "negocios_select_publico" on public.negocios;
+drop policy if exists "negocios_update_dono_ou_admin" on public.negocios;
+drop policy if exists "negocios_insert_admin" on public.negocios;
+drop policy if exists "negocios_delete_admin" on public.negocios;
+
+create policy "negocios_select_publico" on public.negocios
+for select using (ativo = true or public.meu_papel() = 'admin');
+
+create policy "negocios_update_dono_ou_admin" on public.negocios
+for update
+using (reivindicado_por = auth.uid() or public.meu_papel() = 'admin');
+
+create policy "negocios_insert_admin" on public.negocios
+for insert
+with check (public.meu_papel() = 'admin');
+
+create policy "negocios_delete_admin" on public.negocios
+for delete
+using (public.meu_papel() = 'admin');
 
 -- SOLICITAÇÕES: o solicitante vê a própria; admin vê todas
-create policy "solicitacoes_select_proprio_ou_admin" on public.solicitacoes_reivindicacao for select
-  using (solicitante_id = auth.uid() or public.meu_papel() = 'admin');
-create policy "solicitacoes_insert_proprio" on public.solicitacoes_reivindicacao for insert
-  with check (solicitante_id = auth.uid());
-create policy "solicitacoes_update_admin" on public.solicitacoes_reivindicacao for update
-  using (public.meu_papel() = 'admin');
+drop policy if exists "solicitacoes_select_proprio_ou_admin" on public.solicitacoes_reivindicacao;
+drop policy if exists "solicitacoes_insert_proprio" on public.solicitacoes_reivindicacao;
+drop policy if exists "solicitacoes_update_admin" on public.solicitacoes_reivindicacao;
+
+create policy "solicitacoes_select_proprio_ou_admin" on public.solicitacoes_reivindicacao
+for select
+using (solicitante_id = auth.uid() or public.meu_papel() = 'admin');
+
+create policy "solicitacoes_insert_proprio" on public.solicitacoes_reivindicacao
+for insert
+with check (solicitante_id = auth.uid());
+
+create policy "solicitacoes_update_admin" on public.solicitacoes_reivindicacao
+for update
+using (public.meu_papel() = 'admin');
 
 -- POSTS: leitura pública; dono do negócio ou admin cria/edita
-create policy "posts_select_publico" on public.posts_negocio for select using (ativo = true or public.meu_papel() = 'admin');
-create policy "posts_insert_dono_ou_admin" on public.posts_negocio for insert
-  with check (public.eh_dono_negocio(negocio_id) or public.meu_papel() = 'admin');
-create policy "posts_update_dono_ou_admin" on public.posts_negocio for update
-  using (public.eh_dono_negocio(negocio_id) or public.meu_papel() = 'admin');
-create policy "posts_delete_dono_ou_admin" on public.posts_negocio for delete
-  using (public.eh_dono_negocio(negocio_id) or public.meu_papel() = 'admin');
+drop policy if exists "posts_select_publico" on public.posts_negocio;
+drop policy if exists "posts_insert_dono_ou_admin" on public.posts_negocio;
+drop policy if exists "posts_update_dono_ou_admin" on public.posts_negocio;
+drop policy if exists "posts_delete_dono_ou_admin" on public.posts_negocio;
 
--- AVALIAÇÕES: leitura pública; autor cria/edita a própria; profissional só responde (via update controlado na app)
-create policy "avaliacoes_select_publico" on public.avaliacoes for select using (true);
-create policy "avaliacoes_insert_proprio" on public.avaliacoes for insert with check (autor_id = auth.uid());
-create policy "avaliacoes_update_autor_ou_dono" on public.avaliacoes for update
-  using (autor_id = auth.uid() or public.eh_dono_negocio(negocio_id) or public.meu_papel() = 'admin');
-create policy "avaliacoes_delete_autor_ou_admin" on public.avaliacoes for delete
-  using (autor_id = auth.uid() or public.meu_papel() = 'admin');
+create policy "posts_select_publico" on public.posts_negocio
+for select
+using (ativo = true or public.meu_papel() = 'admin');
 
--- VAGAS: leitura pública; admin ou dono de negócio publica
-create policy "vagas_select_publico" on public.vagas for select using (status = 'aberta' or public.meu_papel() = 'admin' or publicado_por = auth.uid());
-create policy "vagas_insert_autenticado" on public.vagas for insert with check (publicado_por = auth.uid());
-create policy "vagas_update_dono_ou_admin" on public.vagas for update
-  using (publicado_por = auth.uid() or public.meu_papel() = 'admin');
-create policy "vagas_delete_dono_ou_admin" on public.vagas for delete
-  using (publicado_por = auth.uid() or public.meu_papel() = 'admin');
+create policy "posts_insert_dono_ou_admin" on public.posts_negocio
+for insert
+with check (public.eh_dono_negocio(negocio_id) or public.meu_papel() = 'admin');
 
--- AVISOS DA CIDADE: leitura pública; só admin publica
-create policy "avisos_select_publico" on public.avisos_cidade for select using (ativo = true or public.meu_papel() = 'admin');
-create policy "avisos_admin_insert" on public.avisos_cidade for insert with check (public.meu_papel() = 'admin');
-create policy "avisos_admin_update" on public.avisos_cidade for update using (public.meu_papel() = 'admin');
-create policy "avisos_admin_delete" on public.avisos_cidade for delete using (public.meu_papel() = 'admin');
+create policy "posts_update_dono_ou_admin" on public.posts_negocio
+for update
+using (public.eh_dono_negocio(negocio_id) or public.meu_papel() = 'admin');
+
+create policy "posts_delete_dono_ou_admin" on public.posts_negocio
+for delete
+using (public.eh_dono_negocio(negocio_id) or public.meu_papel() = 'admin');
+
+-- AVALIAÇÕES: leitura pública; autor cria/edita a própria
+drop policy if exists "avaliacoes_select_publico" on public.avaliacoes;
+drop policy if exists "avaliacoes_insert_proprio" on public.avaliacoes;
+drop policy if exists "avaliacoes_update_autor_ou_dono" on public.avaliacoes;
+drop policy if exists "avaliacoes_delete_autor_ou_admin" on public.avaliacoes;
+
+create policy "avaliacoes_select_publico" on public.avaliacoes
+for select
+using (true);
+
+create policy "avaliacoes_insert_proprio" on public.avaliacoes
+for insert
+with check (autor_id = auth.uid());
+
+create policy "avaliacoes_update_autor_ou_dono" on public.avaliacoes
+for update
+using (
+  autor_id = auth.uid()
+  or public.eh_dono_negocio(negocio_id)
+  or public.meu_papel() = 'admin'
+);
+
+create policy "avaliacoes_delete_autor_ou_admin" on public.avaliacoes
+for delete
+using (autor_id = auth.uid() or public.meu_papel() = 'admin');
+
+-- VAGAS: leitura pública; admin ou dono publica
+drop policy if exists "vagas_select_publico" on public.vagas;
+drop policy if exists "vagas_insert_autenticado" on public.vagas;
+drop policy if exists "vagas_update_dono_ou_admin" on public.vagas;
+drop policy if exists "vagas_delete_dono_ou_admin" on public.vagas;
+
+create policy "vagas_select_publico" on public.vagas
+for select
+using (
+  status = 'aberta'
+  or public.meu_papel() = 'admin'
+  or publicado_por = auth.uid()
+);
+
+create policy "vagas_insert_autenticado" on public.vagas
+for insert
+with check (publicado_por = auth.uid());
+
+create policy "vagas_update_dono_ou_admin" on public.vagas
+for update
+using (publicado_por = auth.uid() or public.meu_papel() = 'admin');
+
+create policy "vagas_delete_dono_ou_admin" on public.vagas
+for delete
+using (publicado_por = auth.uid() or public.meu_papel() = 'admin');
+
+-- AVISOS DA CIDADE
+drop policy if exists "avisos_select_publico" on public.avisos_cidade;
+drop policy if exists "avisos_admin_insert" on public.avisos_cidade;
+drop policy if exists "avisos_admin_update" on public.avisos_cidade;
+drop policy if exists "avisos_admin_delete" on public.avisos_cidade;
+
+create policy "avisos_select_publico" on public.avisos_cidade
+for select
+using (ativo = true or public.meu_papel() = 'admin');
+
+create policy "avisos_admin_insert" on public.avisos_cidade
+for insert
+with check (public.meu_papel() = 'admin');
+
+create policy "avisos_admin_update" on public.avisos_cidade
+for update
+using (public.meu_papel() = 'admin');
+
+create policy "avisos_admin_delete" on public.avisos_cidade
+for delete
+using (public.meu_papel() = 'admin');
 
 -- FAVORITOS: cada usuário só vê/gerencia os próprios
-create policy "favoritos_select_proprio" on public.favoritos for select using (perfil_id = auth.uid());
-create policy "favoritos_insert_proprio" on public.favoritos for insert with check (perfil_id = auth.uid());
-create policy "favoritos_delete_proprio" on public.favoritos for delete using (perfil_id = auth.uid());
+drop policy if exists "favoritos_select_proprio" on public.favoritos;
+drop policy if exists "favoritos_insert_proprio" on public.favoritos;
+drop policy if exists "favoritos_delete_proprio" on public.favoritos;
 
+create policy "favoritos_select_proprio" on public.favoritos
+for select
+using (perfil_id = auth.uid());
+
+create policy "favoritos_insert_proprio" on public.favoritos
+for insert
+with check (perfil_id = auth.uid());
+
+create policy "favoritos_delete_proprio" on public.favoritos
+for delete
+using (perfil_id = auth.uid());
+
+-- =====================================================================
 -- =====================================================================
 -- TRIGGER: criar perfil automaticamente ao registrar usuário
 -- =====================================================================
+
 create or replace function public.handle_novo_usuario()
 returns trigger as $$
 begin
@@ -361,18 +471,25 @@ begin
     coalesce(new.raw_user_meta_data->>'nome_completo', 'Novo usuário'),
     coalesce((new.raw_user_meta_data->>'papel')::user_role, 'morador')
   );
+
   return new;
 end;
 $$ language plpgsql security definer;
 
+-- Remove o trigger caso ele já exista
+drop trigger if exists on_auth_user_created on auth.users;
+
+-- Cria novamente o trigger
 create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute function public.handle_novo_usuario();
+after insert on auth.users
+for each row
+execute function public.handle_novo_usuario();
 
 -- =====================================================================
 -- SEED: categorias iniciais
 -- =====================================================================
-insert into public.categorias (nome, slug, icone, ordem) values
+insert into public.categorias (nome, slug, icone, ordem)
+values
   ('Alimentação', 'alimentacao', 'utensils', 1),
   ('Saúde e Bem-estar', 'saude-bem-estar', 'heart-pulse', 2),
   ('Beleza e Estética', 'beleza-estetica', 'scissors', 3),
@@ -384,4 +501,5 @@ insert into public.categorias (nome, slug, icone, ordem) values
   ('Agro e Produção Rural', 'agro-producao-rural', 'sprout', 9),
   ('Tecnologia', 'tecnologia', 'laptop', 10),
   ('Eventos e Festas', 'eventos-festas', 'party-popper', 11),
-  ('Outros', 'outros', 'store', 99);
+  ('Outros', 'outros', 'store', 99)
+on conflict (slug) do nothing;

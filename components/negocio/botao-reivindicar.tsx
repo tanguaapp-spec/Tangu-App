@@ -1,10 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ShieldCheck } from 'lucide-react'
 import { Botao } from '@/components/ui/botao'
 import { AreaTexto } from '@/components/ui/campo'
 import { solicitarReivindicacao } from '@/lib/actions/negocio-actions'
+
+const WHATSAPP_NUMERO = '21972652314'
+
+function criarLinkWhatsApp(mensagem: string) {
+  const texto = encodeURIComponent(mensagem)
+  return `https://wa.me/${WHATSAPP_NUMERO}?text=${texto}`
+}
 
 export function BotaoReivindicar({ negocioId }: { negocioId: string }) {
   const [aberto, setAberto] = useState(false)
@@ -12,6 +19,12 @@ export function BotaoReivindicar({ negocioId }: { negocioId: string }) {
   const [enviando, setEnviando] = useState(false)
   const [enviado, setEnviado] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
+
+  const linkWhatsApp = useMemo(() => {
+    return criarLinkWhatsApp(
+      `Oi! Fiz uma solicitação de reivindicação no app Cidade Conecta.\n\nNegócio: ${negocioId}\nMensagem: ${mensagem}`
+    )
+  }, [negocioId, mensagem])
 
   async function enviar() {
     setEnviando(true)
@@ -26,8 +39,13 @@ export function BotaoReivindicar({ negocioId }: { negocioId: string }) {
 
   if (enviado) {
     return (
-      <div className="rounded-xl bg-mata-50 p-4 text-sm text-mata-700">
-        Solicitação enviada! Vamos confirmar que você é o responsável e liberar o acesso em breve.
+      <div className="flex flex-col gap-3 rounded-xl bg-mata-50 p-4 text-sm text-mata-700">
+        <p>Solicitação enviada! Vamos confirmar que você é o responsável e liberar o acesso em breve.</p>
+        <a href={linkWhatsApp} target="_blank" rel="noreferrer">
+          <Botao tamanho="sm" variante="secundario" className="w-full">
+            Avisar no WhatsApp
+          </Botao>
+        </a>
       </div>
     )
   }

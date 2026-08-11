@@ -2,10 +2,16 @@ import { createClient } from '@/lib/supabase/server'
 import { FormularioCriarVaga } from '@/components/painel/formulario-criar-vaga'
 import { BotaoEncerrarVaga } from '@/components/painel/botao-encerrar-vaga'
 import { Selo } from '@/components/ui/selo'
+import { requireAdminOrRedirect } from '@/lib/auth/require-admin'
 
 export default async function PainelVagas() {
+  await requireAdminOrRedirect()
   const supabase = createClient()
-  const { data: vagas } = await supabase.from('vagas').select('*').order('criado_em', { ascending: false })
+  const { data: vagas } = await supabase
+    .from('vagas')
+    .select('*')
+    .order('criado_em', { ascending: false })
+    .limit(50)
 
   return (
     <div>

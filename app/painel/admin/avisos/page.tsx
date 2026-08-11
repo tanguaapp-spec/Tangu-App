@@ -2,14 +2,17 @@ import { createClient } from '@/lib/supabase/server'
 import { FormularioCriarAviso } from '@/components/painel/formulario-criar-aviso'
 import { BotaoRemoverAviso } from '@/components/painel/botao-remover-aviso'
 import { Selo } from '@/components/ui/selo'
+import { requireAdminOrRedirect } from '@/lib/auth/require-admin'
 
 export default async function PainelAvisos() {
+  await requireAdminOrRedirect()
   const supabase = createClient()
   const { data: avisos } = await supabase
     .from('avisos_cidade')
     .select('*')
     .eq('ativo', true)
     .order('criado_em', { ascending: false })
+    .limit(50)
 
   return (
     <div>
