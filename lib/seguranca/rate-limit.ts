@@ -11,6 +11,16 @@ import { headers } from 'next/headers'
  * extra, não pode virar o motivo do site inteiro parar de funcionar.
  */
 export async function dentroDoLimite(chave: string, limite: number, janelaSegundos: number): Promise<boolean> {
+  // Bypass só pros testes E2E locais (Playwright bate muitos logins/cadastros
+  // da mesma máquina em poucos minutos, o que trombaria com os limites de
+  // verdade). `next start` roda com NODE_ENV=production mesmo localmente,
+  // então não dá pra usar isso como trava — a proteção real é essa env var
+  // nunca existir nas Environment Variables da Vercel (só no .env local,
+  // que não é commitado). NUNCA adicionar E2E_RATE_LIMIT_BYPASS no projeto
+  // da Vercel.
+  if (process.env.E2E_RATE_LIMIT_BYPASS === '1') {
+    return true
+  }
   try {
     const supabase = createServiceClient()
     const { data, error } = await supabase.rpc('verificar_rate_limit', {

@@ -32,7 +32,15 @@ test.describe('Autenticação', () => {
       await loginPelaUI(page, usuario.email, usuario.senha)
       await expect(page).toHaveURL('/')
 
+      // no mobile o botão "Sair" fica dentro do menu hambúrguer colapsado
+      const botaoMenu = page.getByRole('button', { name: /abrir menu/i })
+      if (await botaoMenu.isVisible()) await botaoMenu.click()
+
       await page.getByRole('button', { name: /sair/i }).first().click()
+      await page.waitForURL('/')
+
+      const botaoMenuPosLogout = page.getByRole('button', { name: /abrir menu/i })
+      if (await botaoMenuPosLogout.isVisible()) await botaoMenuPosLogout.click()
       await expect(page.getByRole('link', { name: /entrar/i }).first()).toBeVisible()
     } finally {
       await removerUsuarioTeste(usuario.id)

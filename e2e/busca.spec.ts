@@ -11,7 +11,7 @@ test.describe('Busca pública', () => {
 
   test('filtro de modalidade reflete na URL e mantém outros filtros', async ({ page }) => {
     await page.goto('/buscar?categoria=alimentacao')
-    await page.getByRole('link', { name: 'Serviço digital' }).click()
+    await page.getByRole('link', { name: 'Digital', exact: true }).click()
     await expect(page).toHaveURL(/categoria=alimentacao/)
     await expect(page).toHaveURL(/modalidade=servico_digital/)
   })

@@ -23,6 +23,19 @@ npm run test:e2e:ui        # modo interativo
 Requer `.env` com `NEXT_PUBLIC_SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` (mesmos usados pelo
 app) — são lidos via `dotenv` em `playwright.config.ts`.
 
+Pra rodar contra o build local sem trombar com os limites de tentativa de login/cadastro
+(pensados pra bloquear abuso de verdade, não uso intenso de teste automatizado), suba o servidor
+com `E2E_RATE_LIMIT_BYPASS=1` — ver comentário em `lib/seguranca/rate-limit.ts`. **Isso nunca deve
+ser setado nas Environment Variables da Vercel.**
+
+⚠️ Os testes de `auth.spec.ts` que chamam `supabase.auth.signUp()` de verdade (cadastro pela UI)
+dependem do envio de e-mail de confirmação da própria Supabase, que tem um limite baixo (poucas
+mensagens por hora no plano gratuito) **separado** do rate limit do nosso app. Rodar a suíte
+completa várias vezes seguidas esgota essa cota e esses 2 testes especificamente passam a falhar
+com "email rate limit exceeded" — isso é uma limitação da infraestrutura de teste, não um bug do
+app (a mensagem de erro aparece corretamente na tela, provando que o fluxo funciona). Espere a
+janela resetar (~1h) antes de rodar esses testes específicos de novo.
+
 ## Organização
 
 - `helpers/supabase-admin.ts` — cliente service-role só pra uso em Node (nunca no browser).
