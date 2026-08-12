@@ -3,6 +3,8 @@ import { buscarCategorias } from '@/lib/queries/negocios'
 import { FormularioEditarNegocio } from '@/components/painel/formulario-editar-negocio'
 import { FormularioCriarPost } from '@/components/painel/formulario-criar-post'
 import { FormularioCriarVagaPropria } from '@/components/painel/formulario-criar-vaga-propria'
+import { FormularioCriarProduto } from '@/components/painel/formulario-criar-produto'
+import { ListaProdutos } from '@/components/painel/lista-produtos'
 import { BotaoEncerrarVaga } from '@/components/painel/botao-encerrar-vaga'
 import { AlternadorAbertoAgora } from '@/components/painel/alternador-aberto-agora'
 import { CartaoDivulgacao } from '@/components/painel/cartao-divulgacao'
@@ -98,12 +100,13 @@ export default async function PainelNegocio() {
     )
   }
 
-  const [{ data: posts }, { data: vagasProprias }, { count: totalAvaliacoes }, { data: mediaAvaliacoes }] =
+  const [{ data: posts }, { data: vagasProprias }, { count: totalAvaliacoes }, { data: mediaAvaliacoes }, { data: produtos }] =
     await Promise.all([
       supabase.from('posts_negocio').select('*').eq('negocio_id', negocio.id).order('criado_em', { ascending: false }),
       supabase.from('vagas').select('*').eq('negocio_id', negocio.id).order('criado_em', { ascending: false }),
       supabase.from('avaliacoes').select('*', { count: 'exact', head: true }).eq('negocio_id', negocio.id),
       supabase.from('avaliacoes').select('nota').eq('negocio_id', negocio.id),
+      supabase.from('produtos_servicos').select('*').eq('negocio_id', negocio.id).order('ordem').order('criado_em'),
     ])
 
   const totalVisualizacoes = posts?.reduce((acc, p) => acc + (p.visualizacoes ?? 0), 0) ?? 0
@@ -161,6 +164,17 @@ export default async function PainelNegocio() {
         <h2 className="font-display text-lg font-semibold text-barro-900">Informações do negócio</h2>
         <div className="mt-4">
           <FormularioEditarNegocio negocio={negocio as any} categorias={categorias as any} />
+        </div>
+      </div>
+
+      <div className="mt-8 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+        <h2 className="font-display text-lg font-semibold text-barro-900">Catálogo de produtos e serviços</h2>
+        <p className="text-sm text-barro-500">Quem já vê o preço chega mais decidido a fechar.</p>
+        <div className="mt-4">
+          <ListaProdutos produtos={(produtos as any) ?? []} negocioId={negocio.id} />
+        </div>
+        <div className="mt-4 border-t border-barro-100 pt-4">
+          <FormularioCriarProduto negocioId={negocio.id} />
         </div>
       </div>
 

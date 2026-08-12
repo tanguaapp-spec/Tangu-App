@@ -95,3 +95,45 @@
       corrige qualificando `public.user_role` e fixa `search_path = public` em todas as
       funções `SECURITY DEFINER` do projeto (blindagem contra essa classe de bug voltar).
       **Depende da 0002 já ter rodado** (referencia colunas que ela cria).
+- [x] Bug irmão corrigido também: embed ambíguo `perfis` em `negocios` (via `reivindicado_por`
+      E via `favoritos`) e em `solicitacoes_reivindicacao` (via `solicitante_id` E `revisado_por`)
+      — PostgREST recusava o embed (PGRST201) e o erro nunca aparecia na tela porque as queries
+      não checavam `error`. Corrigido qualificando a FK explicitamente
+      (`perfis!negocios_reivindicado_por_fkey` etc.) em `negocios-pendentes` e `reivindicacoes`.
+
+## Etapa 7 — Rodada grande: navegação, design, Web Push, catálogo
+- [x] **Auditoria de navegação** — dois becos sem saída reais:
+  - Sidebar do painel (`/painel/*`) ficava `hidden` sem nenhum jeito de abrir no celular —
+    quem entrasse pelo celular ficava travado, sem voltar nem sair. Novo
+    `components/painel/nav-painel.tsx` com header mobile + hambúrguer.
+  - `/perfil` estava fora de `app/(public)/`, renderizava sem Cabecalho/Rodapé. Movido pra
+    `app/(public)/perfil/` e reescrito como Server Component (o antigo usava `redirect()` do
+    `next/navigation` dentro de `useEffect`, que não é o uso suportado).
+  - Links "voltar" adicionados em `/negocio/[id]` e `/painel/negocio/cadastrar`; cards da
+    visão geral do admin agora são clicáveis; atalhos em `/cadastrar/confirme-seu-email`.
+- [x] **Tipografia/design**: H1 de página em 11 arquivos passou de `font-medium` pra
+      `font-semibold tracking-tight text-balance`; título do hero da home foi pra `font-bold`
+      (o H1 mais "de marca" do app); link ativo destacado no Cabecalho (desktop e mobile).
+- [x] **Notificações Web Push** (não é SDK nativo de loja de app — Web Push API padrão,
+      funciona em qualquer navegador/aparelho com o PWA instalado):
+  - Migration 0004: tabela `push_subscriptions` (endpoint/p256dh/auth por dispositivo).
+  - `worker/index.js`: handlers de `push`/`notificationclick`, importado automaticamente
+    pelo next-pwa (`customWorkerDir`) pro `sw.js` gerado.
+  - `lib/push/enviar-notificacao.ts`: envio via `web-push` com VAPID, service role (só esse
+    caso precisa ler inscrição de outra pessoa). Limpa inscrições expiradas (404/410) sozinho.
+  - Sino de notificação no Cabecalho (desktop + mobile) — pede permissão, assina, salva.
+  - Gatilhos: novidade de negócio favoritado → avisa quem favoritou; novo aviso no mural →
+    avisa todo mundo inscrito; cadastro/reivindicação pendente → avisa admins; aprovação →
+    avisa o profissional. Tudo fire-and-forget (não quebra a ação principal se falhar).
+  - **Pendente:** as chaves VAPID (geradas com `npx web-push generate-vapid-keys`, já estão
+    no `.env` local) precisam ser adicionadas nas Environment Variables da Vercel:
+    `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`.
+- [x] **Catálogo de produtos/serviços com preço** (migration 0005): dono do negócio cadastra
+      itens com preço (ou "a partir de") no painel; aparece na página pública do negócio antes
+      das novidades — quem já vê o preço chega mais decidido a fechar.
+- [x] **Mensagem de confiança/curadoria visível**: linha no rodapé e na página de busca
+      dizendo que todo negócio passa por checagem da equipe.
+- [ ] **Não implementado nesse ciclo** (precisam de conta/API paga externa que o projeto não
+      tem configurada hoje): resumo semanal automático por WhatsApp (precisaria de WhatsApp
+      Business API tipo Twilio/Meta) e geração automática de arte de divulgação dentro do app
+      (precisaria de API de geração de imagem com credenciais próprias no projeto).

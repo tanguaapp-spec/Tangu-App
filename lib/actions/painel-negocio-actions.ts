@@ -278,6 +278,50 @@ export async function criarPost(negocioId: string, formData: FormData) {
 }
 
 // ---------------------------------------------------------------------
+// Catálogo de produtos/serviços com preço
+// ---------------------------------------------------------------------
+export async function criarProduto(negocioId: string, formData: FormData) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Não autenticado.' }
+
+  const nome = (formData.get('nome') as string)?.trim()
+  if (!nome) return { erro: 'Informe o nome do produto/serviço.' }
+
+  const precoStr = (formData.get('preco') as string)?.replace(',', '.').trim()
+  const preco = precoStr ? Number(precoStr) : null
+  if (precoStr && Number.isNaN(preco)) return { erro: 'Preço inválido.' }
+
+  const { error } = await supabase.from('produtos_servicos').insert({
+    negocio_id: negocioId,
+    nome,
+    descricao: (formData.get('descricao') as string) || null,
+    preco,
+    preco_a_partir_de: formData.get('preco_a_partir_de') === 'on',
+  })
+
+  if (error) return { erro: error.message }
+
+  revalidatePath('/painel/negocio')
+  revalidatePath(`/negocio/${negocioId}`)
+  return { erro: null }
+}
+
+export async function removerProduto(produtoId: string, negocioId: string) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Não autenticado.' }
+
+  const { error } = await supabase.from('produtos_servicos').delete().eq('id', produtoId)
+
+  if (error) return { erro: error.message }
+
+  revalidatePath('/painel/negocio')
+  revalidatePath(`/negocio/${negocioId}`)
+  return { erro: null }
+}
+
+// ---------------------------------------------------------------------
 // Vagas publicadas pelo próprio profissional
 // ---------------------------------------------------------------------
 export async function criarVagaProfissional(negocioId: string, formData: FormData) {

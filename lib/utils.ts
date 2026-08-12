@@ -19,3 +19,8 @@ export function formatarDistancia(km: number) {
   if (km < 1) return `${Math.round(km * 1000)} m`
   return `${km.toFixed(1)} km`
 }
+
+export function formatarPrecoBRL(preco: number, aPartirDe = false) {
+  const valor = preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+  return aPartirDe ? `a partir de ${valor}` : valor
+}

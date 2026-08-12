@@ -134,6 +134,19 @@ export type AvisoCidade = {
   criado_em: string
 }
 
+export type ProdutoServico = {
+  id: string
+  negocio_id: string
+  nome: string
+  descricao: string | null
+  preco: number | null
+  preco_a_partir_de: boolean
+  imagem_url: string | null
+  ordem: number
+  ativo: boolean
+  criado_em: string
+}
+
 export type PushSubscriptionSalva = {
   id: string
   perfil_id: string
@@ -164,6 +177,7 @@ export type Database = {
       avisos_cidade: TabelaGenerica<AvisoCidade>
       favoritos: TabelaGenerica<{ perfil_id: string; negocio_id: string; criado_em: string }>
       push_subscriptions: TabelaGenerica<PushSubscriptionSalva>
+      produtos_servicos: TabelaGenerica<ProdutoServico>
     }
     Views: Record<string, never>
     Functions: Record<string, never>

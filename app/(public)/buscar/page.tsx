@@ -2,7 +2,7 @@ import { buscarNegocios, buscarCategorias, buscarBairros } from '@/lib/queries/n
 import { CardNegocio } from '@/components/negocio/card-negocio'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { SlidersHorizontal, MapPin } from 'lucide-react'
+import { SlidersHorizontal, MapPin, ShieldCheck } from 'lucide-react'
 import { BuscaRapida } from '@/components/busca-rapida'
 
 export const dynamic = 'force-dynamic'
@@ -23,8 +23,11 @@ export default async function PaginaBuscar({
       <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">
         Profissionais e comércios de Tanguá
       </h1>
-      <p className="mt-1 text-barro-600">
-        {negocios.length} {negocios.length === 1 ? 'resultado encontrado' : 'resultados encontrados'}
+      <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-barro-600">
+        <span>{negocios.length} {negocios.length === 1 ? 'resultado encontrado' : 'resultados encontrados'}</span>
+        <span className="flex items-center gap-1 text-sm text-mata-700">
+          <ShieldCheck className="h-3.5 w-3.5" /> todos checados pela nossa equipe
+        </span>
       </p>
 
       <div className="mt-6">

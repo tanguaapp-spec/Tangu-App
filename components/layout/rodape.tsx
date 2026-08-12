@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { MapPin, Instagram, Mail } from 'lucide-react'
+import { MapPin, Mail, ShieldCheck } from 'lucide-react'
 
 export function Rodape() {
   return (
@@ -15,6 +15,11 @@ export function Rodape() {
             </div>
             <p className="mt-3 text-sm text-barro-300">
               A cidade da laranja, conectada. Encontre quem faz Tanguá funcionar.
+            </p>
+            <p className="mt-4 flex items-start gap-2 text-sm text-mata-300">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-mata-400" />
+              Todo negócio passa por checagem da nossa equipe antes de aparecer aqui —
+              nada de perfil fake.
             </p>
           </div>
 

@@ -14,7 +14,7 @@ import {
   ArrowLeft,
 } from 'lucide-react'
 import { SeloVerificado, Selo } from '@/components/ui/selo'
-import { linkWhatsapp } from '@/lib/utils'
+import { linkWhatsapp, formatarPrecoBRL } from '@/lib/utils'
 import { BotaoReivindicar } from '@/components/negocio/botao-reivindicar'
 import { BotaoFavoritar } from '@/components/negocio/botao-favoritar'
 import { FormularioAvaliacao } from '@/components/negocio/formulario-avaliacao'
@@ -51,6 +51,14 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
     .eq('negocio_id', params.id)
     .eq('ativo', true)
     .order('criado_em', { ascending: false })
+
+  const { data: produtos } = await supabase
+    .from('produtos_servicos')
+    .select('*')
+    .eq('negocio_id', params.id)
+    .eq('ativo', true)
+    .order('ordem')
+    .order('criado_em')
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
@@ -144,6 +152,27 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
                 {negocio.galeria.map((url) => (
                   <div key={url} className="relative h-32 overflow-hidden rounded-xl bg-barro-100">
                     <Image src={url} alt={`Foto de ${negocio.nome}`} fill className="object-cover" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {produtos && produtos.length > 0 && (
+            <div className="mt-8">
+              <h3 className="font-display text-xl font-semibold text-barro-900">Catálogo</h3>
+              <div className="mt-3 divide-y divide-barro-100 rounded-xl border border-barro-100 bg-white">
+                {produtos.map((produto) => (
+                  <div key={produto.id} className="flex items-start justify-between gap-3 p-4">
+                    <div>
+                      <p className="font-medium text-barro-900">{produto.nome}</p>
+                      {produto.descricao && <p className="mt-0.5 text-sm text-barro-500">{produto.descricao}</p>}
+                    </div>
+                    {produto.preco != null && (
+                      <span className="shrink-0 font-semibold text-mata-700">
+                        {formatarPrecoBRL(produto.preco, produto.preco_a_partir_de)}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
