@@ -3,21 +3,47 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, LogOut, type LucideIcon } from 'lucide-react'
+import {
+  Menu,
+  X,
+  LogOut,
+  LayoutDashboard,
+  Store,
+  ShieldCheck,
+  Briefcase,
+  Megaphone,
+  type LucideIcon,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { LogoTangua } from '@/components/marca/logo-tangua'
+import type { PapelUsuario } from '@/lib/types/database'
 
 type LinkPainel = { href: string; rotulo: string; icone: LucideIcon }
 
+// Definidos aqui dentro (componente client) de propósito: os ícones do
+// lucide-react são componentes (forwardRef), e um Server Component não
+// pode passar componentes como prop pra um Client Component — só dados
+// serializáveis. Por isso o layout (server) manda só o `papel`, uma
+// string, e a gente decide a lista aqui.
+const LINKS_PROFISSIONAL: LinkPainel[] = [{ href: '/painel/negocio', rotulo: 'Meu negócio', icone: Store }]
+const LINKS_ADMIN: LinkPainel[] = [
+  { href: '/painel/admin', rotulo: 'Visão geral', icone: LayoutDashboard },
+  { href: '/painel/admin/negocios-pendentes', rotulo: 'Cadastros pendentes', icone: Store },
+  { href: '/painel/admin/reivindicacoes', rotulo: 'Reivindicações', icone: ShieldCheck },
+  { href: '/painel/admin/vagas', rotulo: 'Vagas', icone: Briefcase },
+  { href: '/painel/admin/avisos', rotulo: 'Avisos da cidade', icone: Megaphone },
+]
+
 export function NavPainel({
-  links,
+  papel,
   acaoSair,
 }: {
-  links: LinkPainel[]
+  papel: PapelUsuario | null | undefined
   acaoSair: () => void
 }) {
   const [aberto, setAberto] = useState(false)
   const pathname = usePathname()
+  const links = papel === 'admin' ? LINKS_ADMIN : LINKS_PROFISSIONAL
 
   const itemNav = (link: LinkPainel, aoClicar?: () => void) => {
     const ativo = pathname === link.href
