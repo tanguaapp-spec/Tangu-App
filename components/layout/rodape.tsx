@@ -1,6 +1,9 @@
 import Link from 'next/link'
-import { MapPin, Mail, ShieldCheck } from 'lucide-react'
+import { MapPin, MessageCircle, ShieldCheck } from 'lucide-react'
 import { LogoTangua } from '@/components/marca/logo-tangua'
+import { linkWhatsapp } from '@/lib/utils'
+
+const WHATSAPP_CONTATO = '21972652314'
 
 export function Rodape() {
   return (
@@ -43,9 +46,16 @@ export function Rodape() {
                 <MapPin className="h-4 w-4 text-casca-400" />
                 Região Metropolitana do Rio
               </li>
-              <li className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-casca-400" />
-                contato@tangua.app
+              <li>
+                <a
+                  href={linkWhatsapp(WHATSAPP_CONTATO, 'Olá! Tenho uma dúvida sobre o Tanguá App.')}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 hover:text-white"
+                >
+                  <MessageCircle className="h-4 w-4 text-casca-400" />
+                  Fale com a gente no WhatsApp
+                </a>
               </li>
             </ul>
           </div>

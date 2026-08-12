@@ -2,7 +2,7 @@ import { buscarAvisosCidade } from '@/lib/queries/cidade'
 import { CardAviso } from '@/components/negocio/card-aviso'
 import { Megaphone } from 'lucide-react'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 export default async function PaginaMural() {
   const avisos = await buscarAvisosCidade()

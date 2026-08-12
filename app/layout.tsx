@@ -22,6 +22,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://tangua-app.vercel.app'),
   title: {
     template: '%s | Tanguá App',
     default: 'Tanguá App — A cidade em um só lugar',
@@ -40,7 +41,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
-    url: 'https://tangua.app',
+    url: 'https://tangua-app.vercel.app',
     siteName: 'Tanguá App',
     title: 'Tanguá App — A cidade em um só lugar',
     description:

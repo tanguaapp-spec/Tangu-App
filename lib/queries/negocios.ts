@@ -5,14 +5,24 @@ interface FiltrosBusca {
   termo?: string
   categoriaSlug?: string
   bairro?: string
+  /** limite fixo, sem paginação — usado em vitrines pequenas (ex: destaques na home) */
   limite?: number
+  /** paginação de verdade — página 1-based */
+  pagina?: number
+  porPagina?: number
 }
 
-export async function buscarNegocios(filtros: FiltrosBusca = {}): Promise<Negocio[]> {
+const POR_PAGINA_PADRAO = 24
+
+export async function buscarNegocios(
+  filtros: FiltrosBusca = {}
+): Promise<{ negocios: Negocio[]; total: number; porPagina: number }> {
   const supabase = createClient()
+  const porPagina = filtros.porPagina ?? POR_PAGINA_PADRAO
+
   let query = supabase
     .from('negocios')
-    .select('*, categoria:categorias(*)')
+    .select('*, categoria:categorias(*)', { count: 'exact' })
     .eq('ativo', true)
     .order('destaque_ativo', { ascending: false })
     .order('verificado', { ascending: false })
@@ -38,14 +48,18 @@ export async function buscarNegocios(filtros: FiltrosBusca = {}): Promise<Negoci
 
   if (filtros.limite) {
     query = query.limit(filtros.limite)
+  } else {
+    const pagina = Math.max(1, filtros.pagina ?? 1)
+    const inicio = (pagina - 1) * porPagina
+    query = query.range(inicio, inicio + porPagina - 1)
   }
 
-  const { data, error } = await query
+  const { data, error, count } = await query
   if (error) {
     console.error('Erro ao buscar negócios:', error.message)
-    return []
+    return { negocios: [], total: 0, porPagina }
   }
-  return data as unknown as Negocio[]
+  return { negocios: data as unknown as Negocio[], total: count ?? 0, porPagina }
 }
 
 export async function buscarNegocioPorId(id: string): Promise<Negocio | null> {

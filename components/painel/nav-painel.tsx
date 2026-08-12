@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Briefcase,
   Megaphone,
+  AlertTriangle,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -32,6 +33,7 @@ const LINKS_ADMIN: LinkPainel[] = [
   { href: '/painel/admin/reivindicacoes', rotulo: 'Reivindicações', icone: ShieldCheck },
   { href: '/painel/admin/vagas', rotulo: 'Vagas', icone: Briefcase },
   { href: '/painel/admin/avisos', rotulo: 'Avisos da cidade', icone: Megaphone },
+  { href: '/painel/admin/logs', rotulo: 'Logs de erro', icone: AlertTriangle },
 ]
 
 export function NavPainel({

@@ -5,7 +5,7 @@ import { MotivoGomo } from '@/components/motivo-gomo'
 import { Laranja3D } from '@/components/laranja-3d'
 import { Revelar } from '@/components/ui/revelar'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 const categoriasDestaque = [
   { nome: 'Alimentação', slug: 'alimentacao', emoji: '🍽️' },

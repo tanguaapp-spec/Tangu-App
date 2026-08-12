@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { RefreshCw, Home } from 'lucide-react'
 import Link from 'next/link'
 import { Botao } from '@/components/ui/botao'
+import { registrarErroCliente } from '@/lib/actions/observabilidade-actions'
 
 export default function Error({
   error,
@@ -14,6 +15,13 @@ export default function Error({
 }) {
   useEffect(() => {
     console.error('Erro global:', error)
+    registrarErroCliente(
+      error.message || 'Erro sem mensagem (digest: ' + (error.digest ?? 'nenhum') + ')',
+      error.stack,
+      typeof window !== 'undefined' ? window.location.href : undefined
+    ).catch(() => {
+      // se nem o registro funcionar, não tem mais o que fazer aqui
+    })
   }, [error])
 
   return (
