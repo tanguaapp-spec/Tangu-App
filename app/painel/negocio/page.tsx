@@ -9,7 +9,7 @@ import { BotaoEncerrarVaga } from '@/components/painel/botao-encerrar-vaga'
 import { AlternadorAbertoAgora } from '@/components/painel/alternador-aberto-agora'
 import { CartaoDivulgacao } from '@/components/painel/cartao-divulgacao'
 import { CartaoFerramentaParceira } from '@/components/painel/cartao-ferramenta-parceira'
-import { encerrarVagaPropria, reenviarCadastroNegocio } from '@/lib/actions/painel-negocio-actions'
+import { reenviarCadastroNegocio } from '@/lib/actions/painel-negocio-actions'
 import { Eye, MessageCircle, Star, Store, Clock3, ShieldAlert } from 'lucide-react'
 import Link from 'next/link'
 import { headers } from 'next/headers'
@@ -222,7 +222,7 @@ export default async function PainelNegocio() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Selo tom={v.status === 'aberta' ? 'verde' : 'neutro'}>{v.status}</Selo>
-                  {v.status === 'aberta' && <BotaoEncerrarVaga vagaId={v.id} acao={encerrarVagaPropria} />}
+                  {v.status === 'aberta' && <BotaoEncerrarVaga vagaId={v.id} origem="propria" />}
                 </div>
               </div>
             ))}

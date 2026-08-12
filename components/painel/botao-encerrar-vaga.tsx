@@ -3,13 +3,18 @@
 import { useState } from 'react'
 import { Botao } from '@/components/ui/botao'
 import { encerrarVaga } from '@/lib/actions/admin-actions'
+import { encerrarVagaPropria } from '@/lib/actions/painel-negocio-actions'
 
 export function BotaoEncerrarVaga({
   vagaId,
-  acao = encerrarVaga,
+  origem = 'admin',
 }: {
   vagaId: string
-  acao?: (vagaId: string) => Promise<{ erro?: string | null }>
+  /** de onde a vaga está sendo encerrada — decide qual Server Action chamar.
+   *  Propositalmente uma string (não a função em si): passar a Server Action
+   *  como prop entre Server e Client Component já causou erro de serialização
+   *  em produção; string é sempre serializável. */
+  origem?: 'admin' | 'propria'
 }) {
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -23,6 +28,7 @@ export function BotaoEncerrarVaga({
     setErro(null)
     setSucesso(null)
 
+    const acao = origem === 'propria' ? encerrarVagaPropria : encerrarVaga
     const resultado = await acao(vagaId)
     if (resultado.erro) {
       setErro(resultado.erro)
