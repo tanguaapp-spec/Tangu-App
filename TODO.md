@@ -51,3 +51,29 @@
   - Geração automática de artes de divulgação (Adobe Express) pro profissional baixar.
   - Gráfico de evolução de métricas ao longo do tempo (hoje são só números atuais).
   - Ativar de fato destaque pago / plano verificado pago (schema já suporta, ligado a "desligado").
+
+## Etapa 5 — Incidente: site fora do ar na Vercel (MIDDLEWARE_INVOCATION_FAILED)
+- **O que aconteceu:** depois do deploy inicial, todo o site (praticamente todas as rotas —
+  o matcher do middleware cobria quase tudo) começou a retornar 500 com
+  `MIDDLEWARE_INVOCATION_FAILED` / `ReferenceError: __dirname is not defined` (antes disso,
+  ainda mais cedo, `process is not defined`). Só acontecia no ambiente real da Vercel — nunca
+  reproduziu em build local nem em `next start` local (Windows).
+- **Tentativas que NÃO resolveram** (documentado pra não repetir o mesmo caminho):
+  1. Atualizar `@supabase/ssr`/`@supabase/supabase-js` e migrar pro padrão `getAll`/`setAll`.
+  2. Trocar o `import` estático de `@supabase/ssr` por `import()` dinâmico dentro de try/catch.
+  3. Redeploy sem build cache na Vercel (descartou cache corrompido como causa).
+- **Causa mais provável:** Edge Functions são empacotadas como arquivo único autocontido — o
+  código de qualquer módulo importado (estático ou dinâmico) parece ser avaliado já na carga
+  inicial do bundle, então nem try/catch em volta de um `import()` protege contra uma
+  incompatibilidade de uma dependência transitiva com o Edge Runtime. Não foi possível
+  confirmar a dependência exata culpada (não aparece em nenhum grep do bundle local).
+- **Correção aplicada:** removido `middleware.ts` por completo. O controle de acesso real
+  sempre esteve nas páginas/layouts (`app/painel/layout.tsx`, `lib/auth/require-admin.ts`),
+  que já chamam `getUser()` no servidor e redirecionam — então isso não abre brecha de
+  segurança. O que se perde é só o refresh proativo do cookie de sessão a cada navegação
+  (nice-to-have de UX, não controle de acesso); o token ainda renova via cliente no browser
+  e via `getUser()` nas páginas.
+- [ ] Também atualizado Next.js 14.2.18 → 14.2.35 (corrige CVE de DoS — GHSA-mwv6-3258-q52c/
+      CVE-2025-55184 — não relacionado ao crash do middleware, mas era vulnerabilidade real).
+- [ ] Se algum dia quiser reintroduzir refresh de sessão via middleware: testar antes num
+      preview deployment real da Vercel (não só local) antes de promover pra produção.
