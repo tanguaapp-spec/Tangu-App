@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { enviarNotificacaoParaPerfis, enviarNotificacaoParaAdmins } from '@/lib/push/enviar-notificacao'
+import { enviarImagem, extensaoDoArquivo } from '@/lib/storage/imagens'
 import { z } from 'zod'
 import type { ModalidadeAtendimento } from '@/lib/types/database'
 
@@ -35,6 +36,10 @@ const schemaPost = z.object({
   conteudo: z.string().max(2000).optional(),
 })
 
+const schemaRespostaAvaliacao = z.object({
+  resposta: z.string().trim().min(1, 'Escreva uma resposta.').max(1000, 'Resposta muito longa (máximo 1000 caracteres).'),
+})
+
 const schemaVaga = z.object({
   titulo: z.string().trim().min(2, 'Informe o título da vaga.').max(120),
   descricao: z.string().trim().min(10, 'Descreva a vaga com um pouco mais de detalhe.').max(3000),
@@ -46,32 +51,6 @@ const schemaVaga = z.object({
 })
 
 const DIAS_SEMANA = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'] as const
-const TAMANHO_MAX_IMAGEM = 5 * 1024 * 1024 // 5MB
-
-function extensaoDoArquivo(arquivo: File) {
-  const partes = arquivo.name.split('.')
-  const ext = partes.length > 1 ? partes.pop() : null
-  return (ext || arquivo.type.split('/')[1] || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '')
-}
-
-async function enviarImagem(
-  supabase: ReturnType<typeof createClient>,
-  arquivo: File,
-  caminho: string
-): Promise<{ url?: string; erro?: string }> {
-  if (!arquivo || arquivo.size === 0) return {}
-  if (!arquivo.type.startsWith('image/')) return { erro: 'Envie apenas arquivos de imagem.' }
-  if (arquivo.size > TAMANHO_MAX_IMAGEM) return { erro: 'Cada imagem deve ter no máximo 5MB.' }
-
-  const { error } = await supabase.storage.from('imagens').upload(caminho, arquivo, {
-    upsert: true,
-    contentType: arquivo.type,
-  })
-  if (error) return { erro: error.message }
-
-  const { data } = supabase.storage.from('imagens').getPublicUrl(caminho)
-  return { url: data.publicUrl }
-}
 
 // ---------------------------------------------------------------------
 // Autocadastro (profissional sem negócio ainda vindo do Google Places)
@@ -455,5 +434,37 @@ export async function encerrarVagaPropria(vagaId: string) {
 
   revalidatePath('/painel/negocio')
   revalidatePath('/vagas')
+  return { erro: null }
+}
+
+// ---------------------------------------------------------------------
+// Resposta do dono a uma avaliação
+// ---------------------------------------------------------------------
+export async function responderAvaliacao(avaliacaoId: string, resposta: string) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Não autenticado.' }
+
+  const validado = schemaRespostaAvaliacao.safeParse({ resposta })
+  if (!validado.success) return { erro: validado.error.issues[0].message }
+
+  const { data: avaliacao } = await supabase
+    .from('avaliacoes')
+    .select('negocio_id, negocio:negocios(reivindicado_por)')
+    .eq('id', avaliacaoId)
+    .single()
+
+  const dono = (avaliacao?.negocio as unknown as { reivindicado_por: string } | null)?.reivindicado_por
+  if (!avaliacao || dono !== user.id) return { erro: 'Você não pode responder essa avaliação.' }
+
+  const { error } = await supabase
+    .from('avaliacoes')
+    .update({ resposta_profissional: validado.data.resposta, respondido_em: new Date().toISOString() })
+    .eq('id', avaliacaoId)
+
+  if (error) return { erro: error.message }
+
+  revalidatePath('/painel/negocio')
+  revalidatePath(`/negocio/${avaliacao.negocio_id}`)
   return { erro: null }
 }

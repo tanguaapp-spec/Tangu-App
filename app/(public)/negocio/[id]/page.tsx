@@ -12,6 +12,7 @@ import {
   Clock,
   Store,
   ArrowLeft,
+  Heart,
 } from 'lucide-react'
 import { SeloVerificado, Selo } from '@/components/ui/selo'
 import { SelosModalidade } from '@/components/negocio/selos-modalidade'
@@ -60,6 +61,11 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
     .eq('ativo', true)
     .order('ordem')
     .order('criado_em')
+
+  const { count: totalFavoritos } = await supabase
+    .from('favoritos')
+    .select('*', { count: 'exact', head: true })
+    .eq('negocio_id', params.id)
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
@@ -123,6 +129,12 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
               <span className="flex items-center gap-2">
                 <Star className="h-4 w-4 fill-casca-400 text-casca-400" />
                 {negocio.nota_google.toFixed(1)} no Google ({negocio.total_avaliacoes_google} avaliações)
+              </span>
+            )}
+            {!!totalFavoritos && totalFavoritos > 0 && (
+              <span className="flex items-center gap-2 text-sm text-barro-600">
+                <Heart className="h-4 w-4 fill-casca-400 text-casca-400" />
+                {totalFavoritos} {totalFavoritos === 1 ? 'pessoa favoritou' : 'pessoas favoritaram'} este perfil
               </span>
             )}
           </div>
@@ -228,6 +240,11 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
                       </span>
                     </div>
                     {av.comentario && <p className="mt-1.5 text-sm text-barro-600">{av.comentario}</p>}
+                    {av.foto_url && (
+                      <div className="relative mt-2 h-40 w-full max-w-xs overflow-hidden rounded-lg bg-barro-100">
+                        <Image src={av.foto_url} alt="Foto enviada na avaliação" fill className="object-cover" />
+                      </div>
+                    )}
                     {av.resposta_profissional && (
                       <div className="mt-2 rounded-lg bg-barro-50 p-2.5 text-sm text-barro-700">
                         <span className="font-semibold">Resposta do profissional:</span> {av.resposta_profissional}

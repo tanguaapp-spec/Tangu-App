@@ -6,9 +6,9 @@ import { revalidatePath } from 'next/cache'
 export async function atualizarPerfil(data: {
   nome_completo?: string
   telefone?: string
-  bio?: string
+  bairro?: string
+  notificacoes_resumo_diario?: boolean
 }) {
-  console.log('[LOG] Atualizar perfil:', data)
   const supabase = createClient()
   const {
     data: { user },

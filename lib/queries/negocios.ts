@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createPublicClient } from '@/lib/supabase/server'
 import type { ModalidadeAtendimento, Negocio } from '@/lib/types/database'
 
 interface FiltrosBusca {
@@ -65,6 +65,44 @@ export async function buscarNegocios(
     return { negocios: [], total: 0, porPagina }
   }
   return { negocios: data as unknown as Negocio[], total: count ?? 0, porPagina }
+}
+
+/**
+ * Escolhe 1 negócio em destaque por dia, de forma determinística (mesmo
+ * resultado pra todo mundo no mesmo dia, sem precisar guardar nada) —
+ * gera o hábito de "abrir e ver o que rolou hoje", tipo Wordle.
+ */
+export async function buscarAchadoDoDia(): Promise<Negocio | null> {
+  // cliente público (não toca em cookies) pra não forçar a home a virar dynamic
+  const supabase = createPublicClient()
+
+  const { count } = await supabase
+    .from('negocios')
+    .select('*', { count: 'exact', head: true })
+    .eq('ativo', true)
+    .eq('status_cadastro', 'aprovado')
+
+  if (!count || count === 0) return null
+
+  const hoje = new Date().toISOString().slice(0, 10)
+  let hash = 0
+  for (const char of hoje) hash = (hash * 31 + char.charCodeAt(0)) % 1_000_000
+  const indice = hash % count
+
+  const { data, error } = await supabase
+    .from('negocios')
+    .select('*, categoria:categorias(*)')
+    .eq('ativo', true)
+    .eq('status_cadastro', 'aprovado')
+    .order('id')
+    .range(indice, indice)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Erro ao buscar achado do dia:', error.message)
+    return null
+  }
+  return data as unknown as Negocio | null
 }
 
 export async function buscarNegocioPorId(id: string): Promise<Negocio | null> {

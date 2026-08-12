@@ -5,6 +5,7 @@ import { FormularioCriarPost } from '@/components/painel/formulario-criar-post'
 import { FormularioCriarVagaPropria } from '@/components/painel/formulario-criar-vaga-propria'
 import { FormularioCriarProduto } from '@/components/painel/formulario-criar-produto'
 import { ListaProdutos } from '@/components/painel/lista-produtos'
+import { ListaAvaliacoes } from '@/components/painel/lista-avaliacoes'
 import { BotaoEncerrarVaga } from '@/components/painel/botao-encerrar-vaga'
 import { AlternadorAbertoAgora } from '@/components/painel/alternador-aberto-agora'
 import { CartaoDivulgacao } from '@/components/painel/cartao-divulgacao'
@@ -101,13 +102,18 @@ export default async function PainelNegocio() {
     )
   }
 
-  const [{ data: posts }, { data: vagasProprias }, { count: totalAvaliacoes }, { data: mediaAvaliacoes }, { data: produtos }] =
+  const [{ data: posts }, { data: vagasProprias }, { count: totalAvaliacoes }, { data: mediaAvaliacoes }, { data: produtos }, { data: avaliacoes }] =
     await Promise.all([
       supabase.from('posts_negocio').select('*').eq('negocio_id', negocio.id).order('criado_em', { ascending: false }),
       supabase.from('vagas').select('*').eq('negocio_id', negocio.id).order('criado_em', { ascending: false }),
       supabase.from('avaliacoes').select('*', { count: 'exact', head: true }).eq('negocio_id', negocio.id),
       supabase.from('avaliacoes').select('nota').eq('negocio_id', negocio.id),
       supabase.from('produtos_servicos').select('*').eq('negocio_id', negocio.id).order('ordem').order('criado_em'),
+      supabase
+        .from('avaliacoes')
+        .select('*, autor:perfis(nome_completo, avatar_url)')
+        .eq('negocio_id', negocio.id)
+        .order('criado_em', { ascending: false }),
     ])
 
   const totalVisualizacoes = posts?.reduce((acc, p) => acc + (p.visualizacoes ?? 0), 0) ?? 0
@@ -201,6 +207,14 @@ export default async function PainelNegocio() {
           </div>
         </div>
       )}
+
+      <div className="mt-8 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+        <h2 className="font-display text-lg font-semibold text-barro-900">Avaliações da comunidade</h2>
+        <p className="text-sm text-barro-500">Responder mostra que você se importa — 82% dos consumidores preferem negócios que respondem.</p>
+        <div className="mt-4">
+          <ListaAvaliacoes avaliacoes={(avaliacoes as any) ?? []} />
+        </div>
+      </div>
 
       <div className="mt-8 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
         <h2 className="font-display text-lg font-semibold text-barro-900">Publicar vaga do seu negócio</h2>

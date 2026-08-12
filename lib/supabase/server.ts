@@ -37,6 +37,22 @@ export function createClient() {
   })
 }
 
+// Cliente público (anon key, sem tocar em cookies) — pra consultas 100%
+// públicas e sem personalização (ex: achado do dia na home). Usar `cookies()`
+// via createClient() força a rota inteira a virar dynamic; esse aqui deixa a
+// página elegível pra cache estático/ISR (`revalidate`).
+export function createPublicClient() {
+  const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!SUPA_URL || !SUPA_KEY) {
+    console.warn('Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. Supabase client will not work properly.')
+    return createSupabaseClient('https://dummy-url.supabase.co', 'dummy-key')
+  }
+
+  return createSupabaseClient(SUPA_URL, SUPA_KEY, { auth: { persistSession: false } })
+}
+
 // Cliente com privilégios de serviço — uso restrito a route handlers/scripts
 // administrativos (ex: importação do Google Places). NUNCA expor ao browser.
 export function createServiceClient() {

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { enviarNotificacaoParaAdmins } from '@/lib/push/enviar-notificacao'
 import { dentroDoLimite } from '@/lib/seguranca/rate-limit'
+import { enviarImagem, extensaoDoArquivo } from '@/lib/storage/imagens'
 import { z } from 'zod'
 
 export async function alternarFavorito(negocioId: string) {
@@ -48,11 +49,7 @@ const schemaAvaliacao = z.object({
   comentario: z.string().max(1000, 'Comentário muito longo (máximo 1000 caracteres).').optional(),
 })
 
-export async function enviarAvaliacao(
-  negocioId: string,
-  nota: number,
-  comentario: string
-) {
+export async function enviarAvaliacao(negocioId: string, formData: FormData) {
   const supabase = createClient()
   const {
     data: { user },
@@ -61,6 +58,10 @@ export async function enviarAvaliacao(
   if (!user) {
     return { erro: 'Você precisa entrar para avaliar.' }
   }
+
+  const nota = Number(formData.get('nota'))
+  const comentario = (formData.get('comentario') as string) || ''
+  const foto = formData.get('foto') as File | null
 
   const validado = schemaAvaliacao.safeParse({ nota, comentario })
   if (!validado.success) {
@@ -72,12 +73,24 @@ export async function enviarAvaliacao(
     return { erro: 'Muitas avaliações enviadas. Aguarde um pouco e tente de novo.' }
   }
 
-  const { error } = await supabase.from('avaliacoes').upsert({
+  const dados: Record<string, unknown> = {
     negocio_id: negocioId,
     autor_id: user.id,
     nota: validado.data.nota,
     comentario: validado.data.comentario || null,
-  })
+  }
+
+  if (foto && foto.size > 0) {
+    const { url, erro } = await enviarImagem(
+      supabase,
+      foto,
+      `avaliacoes/${negocioId}/${user.id}-${Date.now()}.${extensaoDoArquivo(foto)}`
+    )
+    if (erro) return { erro }
+    if (url) dados.foto_url = url
+  }
+
+  const { error } = await supabase.from('avaliacoes').upsert(dados)
 
   if (error) return { erro: error.message }
 

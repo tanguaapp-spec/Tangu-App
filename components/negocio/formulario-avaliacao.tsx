@@ -15,17 +15,32 @@ export function FormularioAvaliacao({ negocioId }: Props) {
   const router = useRouter()
   const [nota, setNota] = useState(0)
   const [comentario, setComentario] = useState('')
+  const [foto, setFoto] = useState<File | null>(null)
   const [enviando, setEnviando] = useState(false)
+  const [erro, setErro] = useState<string | null>(null)
 
   const handleEnviar = async (e: React.FormEvent) => {
     e.preventDefault()
     if (nota === 0) return
     setEnviando(true)
-    const result = await enviarAvaliacao(negocioId, nota, comentario)
-    if (!result.erro) {
-      router.refresh()
+    setErro(null)
+    try {
+      const formData = new FormData()
+      formData.set('nota', String(nota))
+      formData.set('comentario', comentario)
+      if (foto) formData.set('foto', foto)
+      const result = await enviarAvaliacao(negocioId, formData)
+      if (!result.erro) {
+        setFoto(null)
+        router.refresh()
+      } else {
+        setErro(result.erro)
+      }
+    } catch {
+      setErro('Não foi possível enviar sua avaliação. Tente novamente.')
+    } finally {
+      setEnviando(false)
     }
-    setEnviando(false)
   }
 
   return (
@@ -57,6 +72,20 @@ export function FormularioAvaliacao({ negocioId }: Props) {
         rows={3}
       />
 
+      <div className="mt-3">
+        <label htmlFor="foto-avaliacao" className="text-sm font-medium text-barro-800">
+          Foto (opcional)
+        </label>
+        <input
+          type="file"
+          id="foto-avaliacao"
+          accept="image/*"
+          onChange={(e) => setFoto(e.target.files?.[0] ?? null)}
+          className="mt-1.5 block w-full text-sm text-barro-600 file:mr-3 file:rounded-lg file:border-0 file:bg-barro-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-barro-700 hover:file:bg-barro-200"
+        />
+      </div>
+
+      {erro && <p className="mt-2 text-sm text-red-600">{erro}</p>}
 
       <Botao type="submit" className="mt-4" disabled={enviando || nota === 0}>
         {enviando ? 'Enviando...' : 'Enviar avaliação'}

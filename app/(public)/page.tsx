@@ -1,9 +1,11 @@
 import Link from 'next/link'
-import { ArrowRight, Briefcase, Megaphone, Store, Users } from 'lucide-react'
+import { ArrowRight, Briefcase, Megaphone, Sparkles, Store, Users } from 'lucide-react'
 import { BuscaRapida } from '@/components/busca-rapida'
 import { MotivoGomo } from '@/components/motivo-gomo'
 import { Laranja3D } from '@/components/laranja-3d'
 import { Revelar } from '@/components/ui/revelar'
+import { CardNegocio } from '@/components/negocio/card-negocio'
+import { buscarAchadoDoDia } from '@/lib/queries/negocios'
 
 export const revalidate = 60
 
@@ -49,7 +51,9 @@ const coresPilar = {
   barro: { bg: 'bg-barro-100', texto: 'text-barro-700', link: 'text-barro-700' },
 }
 
-export default function PaginaInicial() {
+export default async function PaginaInicial() {
+  const achadoDoDia = await buscarAchadoDoDia()
+
   return (
     <>
       {/* HERO */}
@@ -106,6 +110,20 @@ export default function PaginaInicial() {
           </div>
         </div>
       </section>
+
+      {/* ACHADO DO DIA */}
+      {achadoDoDia && (
+        <section className="mx-auto max-w-6xl px-4 pt-4 sm:px-6">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-casca-500" />
+            <h2 className="font-display text-xl font-semibold text-barro-900">Achado do dia</h2>
+          </div>
+          <p className="mt-1 text-sm text-barro-600">Um negócio novo em destaque todo dia — hoje é a vez desse aqui.</p>
+          <div className="mt-4 max-w-sm">
+            <CardNegocio negocio={achadoDoDia} />
+          </div>
+        </section>
+      )}
 
       {/* TRÊS PILARES */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">

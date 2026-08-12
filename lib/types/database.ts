@@ -13,6 +13,7 @@ export type Perfil = {
   avatar_url: string | null
   papel: PapelUsuario
   bairro: string | null
+  notificacoes_resumo_diario: boolean
   criado_em: string
   atualizado_em: string
 }
@@ -96,6 +97,7 @@ export type Avaliacao = {
   autor_id: string
   nota: number
   comentario: string | null
+  foto_url: string | null
   resposta_profissional: string | null
   respondido_em: string | null
   criado_em: string
