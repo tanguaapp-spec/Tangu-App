@@ -3,17 +3,19 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { Menu, X, MapPin, Briefcase, Megaphone, Search, User, LogOut, Store, Settings, Heart } from 'lucide-react'
+import { Menu, X, MapPin, Briefcase, Megaphone, Search, User, LogOut, Store, Settings, Heart, Wrench } from 'lucide-react'
 import { Botao } from '@/components/ui/botao'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { SinoNotificacoes } from '@/components/notificacoes/sino-notificacoes'
+import { LogoTangua } from '@/components/marca/logo-tangua'
 import type { Perfil } from '@/lib/types/database'
 
 const linksNav = [
   { href: '/buscar', rotulo: 'Profissionais', icone: Search },
   { href: '/vagas', rotulo: 'Vagas', icone: Briefcase },
   { href: '/mural', rotulo: 'Mural da cidade', icone: Megaphone },
+  { href: '/ferramentas', rotulo: 'Ferramentas', icone: Wrench },
   { href: '/favoritos', rotulo: 'Favoritos', icone: Heart },
 ]
 
@@ -60,9 +62,7 @@ export function Cabecalho() {
     <header className="casca-divisor sticky top-0 z-50 border-b border-barro-100 bg-feira/95 backdrop-blur-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
         <Link href="/" className="flex items-center gap-2 group">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-casca-500 text-white font-display font-bold text-lg transition-transform group-hover:rotate-12">
-            T
-          </span>
+          <LogoTangua className="h-9 w-9 transition-transform group-hover:rotate-12" />
           <span className="font-display text-xl font-semibold text-barro-900">
             Tanguá <span className="text-casca-500">App</span>
           </span>

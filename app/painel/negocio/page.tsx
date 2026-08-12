@@ -8,6 +8,7 @@ import { ListaProdutos } from '@/components/painel/lista-produtos'
 import { BotaoEncerrarVaga } from '@/components/painel/botao-encerrar-vaga'
 import { AlternadorAbertoAgora } from '@/components/painel/alternador-aberto-agora'
 import { CartaoDivulgacao } from '@/components/painel/cartao-divulgacao'
+import { CartaoFerramentaParceira } from '@/components/painel/cartao-ferramenta-parceira'
 import { encerrarVagaPropria, reenviarCadastroNegocio } from '@/lib/actions/painel-negocio-actions'
 import { Eye, MessageCircle, Star, Store, Clock3, ShieldAlert } from 'lucide-react'
 import Link from 'next/link'
@@ -228,6 +229,8 @@ export default async function PainelNegocio() {
           </div>
         </div>
       )}
+
+      <CartaoFerramentaParceira categoriaSlug={negocio.categoria?.slug} />
     </div>
   )
 }

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X, LogOut, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LogoTangua } from '@/components/marca/logo-tangua'
 
 type LinkPainel = { href: string; rotulo: string; icone: LucideIcon }
 
@@ -41,9 +42,7 @@ export function NavPainel({
       {/* barra mobile — some no desktop */}
       <header className="flex items-center justify-between border-b border-barro-100 bg-white px-4 py-3 sm:hidden">
         <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-casca-500 text-white font-display font-bold">
-            T
-          </span>
+          <LogoTangua className="h-8 w-8" />
           <span className="font-display text-lg font-semibold text-barro-900">Painel</span>
         </Link>
         <button
@@ -70,9 +69,7 @@ export function NavPainel({
       {/* barra lateral — só no desktop */}
       <aside className="relative hidden w-64 shrink-0 border-r border-barro-100 bg-white p-5 sm:block">
         <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-casca-500 text-white font-display font-bold">
-            T
-          </span>
+          <LogoTangua className="h-8 w-8" />
           <span className="font-display text-lg font-semibold text-barro-900">Painel</span>
         </Link>
 

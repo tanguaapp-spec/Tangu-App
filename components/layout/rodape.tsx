@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { MapPin, Mail, ShieldCheck } from 'lucide-react'
+import { LogoTangua } from '@/components/marca/logo-tangua'
 
 export function Rodape() {
   return (
@@ -8,9 +9,7 @@ export function Rodape() {
         <div className="grid gap-10 sm:grid-cols-3">
           <div>
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-casca-500 text-white font-display font-bold">
-                T
-              </span>
+              <LogoTangua className="h-8 w-8" />
               <span className="font-display text-lg font-semibold text-white">Tanguá App</span>
             </div>
             <p className="mt-3 text-sm text-barro-300">
