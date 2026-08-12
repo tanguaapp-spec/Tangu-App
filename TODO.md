@@ -77,3 +77,21 @@
       CVE-2025-55184 — não relacionado ao crash do middleware, mas era vulnerabilidade real).
 - [ ] Se algum dia quiser reintroduzir refresh de sessão via middleware: testar antes num
       preview deployment real da Vercel (não só local) antes de promover pra produção.
+- [x] **Causa raiz real, achada depois**: em Project Settings → Build and Deployment na Vercel,
+      o **Framework Preset estava em "Other"**, não "Next.js". Sem o preset certo, a Vercel não
+      usa o runtime dela pra Next.js (Edge Middleware, rotas dinâmicas, etc.) — isso explica tanto
+      o crash do middleware quanto o 404 generalizado que apareceu depois de eu removê-lo. Nenhuma
+      mudança de código teria resolvido isso. Corrigido trocando o preset pra "Next.js" + redeploy.
+      O `middleware.ts` continua removido (não tinha função de segurança, só nice-to-have de UX) —
+      pode ser reavaliado depois com o preset certo, mas não é urgente.
+
+## Etapa 6 — Bug: "Database error saving new user" no cadastro
+- **Causa (confirmada no Postgres Logs do Supabase):** `type "user_role" does not exist`
+  (código 42704). A trigger `handle_novo_usuario()` (migration 0001) faz `(...)::user_role`
+  sem qualificar o schema; funções `SECURITY DEFINER` rodam com `search_path` restrito por
+  padrão de segurança do Postgres/Supabase, então não acha o tipo (que vive em `public`).
+  Bug pré-existente da migration 0001, só nunca tinha sido testado nesse projeto novo.
+- [x] **Migration 0003** (`supabase/migrations/0003_fix_search_path_trigger_cadastro.sql`) —
+      corrige qualificando `public.user_role` e fixa `search_path = public` em todas as
+      funções `SECURITY DEFINER` do projeto (blindagem contra essa classe de bug voltar).
+      **Depende da 0002 já ter rodado** (referencia colunas que ela cria).
