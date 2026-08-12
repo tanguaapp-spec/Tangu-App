@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
-import type { Negocio } from '@/lib/types/database'
+import type { ModalidadeAtendimento, Negocio } from '@/lib/types/database'
 
 interface FiltrosBusca {
   termo?: string
   categoriaSlug?: string
   bairro?: string
+  modalidade?: ModalidadeAtendimento
   /** limite fixo, sem paginação — usado em vitrines pequenas (ex: destaques na home) */
   limite?: number
   /** paginação de verdade — página 1-based */
@@ -44,6 +45,10 @@ export async function buscarNegocios(
 
   if (filtros.bairro) {
     query = query.eq('bairro', filtros.bairro)
+  }
+
+  if (filtros.modalidade) {
+    query = query.contains('modalidades_atendimento', [filtros.modalidade])
   }
 
   if (filtros.limite) {

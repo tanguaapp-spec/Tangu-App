@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { MapPin, MessageCircle, Star, Store } from 'lucide-react'
 import type { Negocio } from '@/lib/types/database'
 import { Selo, SeloVerificado } from '@/components/ui/selo'
+import { SelosModalidade } from '@/components/negocio/selos-modalidade'
 import { linkWhatsapp } from '@/lib/utils'
 
 export function CardNegocio({ negocio, indice = 0 }: { negocio: Negocio; indice?: number }) {
@@ -49,6 +50,8 @@ export function CardNegocio({ negocio, indice = 0 }: { negocio: Negocio; indice?
             {negocio.categoria.nome}
           </Selo>
         )}
+
+        <SelosModalidade modalidades={negocio.modalidades_atendimento} className="mt-2" />
 
         <div className="mt-3 flex flex-col gap-1.5 text-sm text-barro-600">
           {negocio.bairro && (

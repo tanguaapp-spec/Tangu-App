@@ -4,6 +4,9 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { enviarNotificacaoParaPerfis, enviarNotificacaoParaAdmins } from '@/lib/push/enviar-notificacao'
 import { z } from 'zod'
+import type { ModalidadeAtendimento } from '@/lib/types/database'
+
+const MODALIDADES_VALIDAS = ['loja_fisica', 'atende_em_casa', 'atende_domicilio', 'servico_digital'] as const
 
 const schemaCadastroNegocio = z.object({
   nome: z.string().trim().min(2, 'Nome muito curto.').max(120, 'Nome muito longo.'),
@@ -15,6 +18,9 @@ const schemaCadastroNegocio = z.object({
   whatsapp: z.string().trim().min(8, 'Informe um WhatsApp válido.').max(30),
   instagram: z.string().max(60).optional(),
   site: z.string().max(200).optional(),
+  modalidadesAtendimento: z
+    .array(z.enum(MODALIDADES_VALIDAS))
+    .min(1, 'Escolha ao menos uma forma de atendimento.'),
 })
 
 const schemaProduto = z.object({
@@ -85,6 +91,7 @@ export async function cadastrarNegocio(formData: FormData) {
     whatsapp: formData.get('whatsapp') as string,
     instagram: (formData.get('instagram') as string) || undefined,
     site: (formData.get('site') as string) || undefined,
+    modalidadesAtendimento: formData.getAll('modalidades_atendimento').map(String),
   })
   if (!validado.success) return { erro: validado.error.issues[0].message }
   const dados = validado.data
@@ -111,6 +118,7 @@ export async function cadastrarNegocio(formData: FormData) {
       whatsapp: dados.whatsapp,
       instagram: dados.instagram || null,
       site: dados.site || null,
+      modalidades_atendimento: dados.modalidadesAtendimento,
       origem: 'cadastro_manual',
       status_cadastro: 'pendente',
       reivindicado_por: user.id,
@@ -151,6 +159,14 @@ export async function atualizarNegocio(negocioId: string, formData: FormData) {
 
   const formasPagamento = formData.getAll('formas_pagamento').map(String).filter(Boolean)
 
+  const modalidadesEnviadas = formData.getAll('modalidades_atendimento').map(String)
+  const modalidadesValidas = modalidadesEnviadas.filter((m): m is ModalidadeAtendimento =>
+    (MODALIDADES_VALIDAS as readonly string[]).includes(m)
+  )
+  if (modalidadesValidas.length === 0) {
+    return { erro: 'Escolha ao menos uma forma de atendimento.' }
+  }
+
   const atualizacoes: Record<string, unknown> = {
     nome: (formData.get('nome') as string)?.trim() || undefined,
     categoria_id: (formData.get('categoria_id') as string) || null,
@@ -163,6 +179,7 @@ export async function atualizarNegocio(negocioId: string, formData: FormData) {
     bairro: (formData.get('bairro') as string) || null,
     horario_funcionamento: Object.keys(horarioFuncionamento).length ? horarioFuncionamento : null,
     formas_pagamento: formasPagamento.length ? formasPagamento : null,
+    modalidades_atendimento: modalidadesValidas,
   }
 
   const capa = formData.get('foto_capa') as File | null

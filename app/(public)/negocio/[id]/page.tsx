@@ -14,6 +14,7 @@ import {
   ArrowLeft,
 } from 'lucide-react'
 import { SeloVerificado, Selo } from '@/components/ui/selo'
+import { SelosModalidade } from '@/components/negocio/selos-modalidade'
 import { linkWhatsapp, formatarPrecoBRL } from '@/lib/utils'
 import { BotaoReivindicar } from '@/components/negocio/botao-reivindicar'
 import { BotaoFavoritar } from '@/components/negocio/botao-favoritar'
@@ -101,6 +102,8 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
             {negocio.bairro && <Selo tom="neutro">{negocio.bairro}</Selo>}
           </div>
 
+          <SelosModalidade modalidades={negocio.modalidades_atendimento} className="mt-2" />
+
           {negocio.descricao && <p className="mt-4 text-barro-700">{negocio.descricao}</p>}
 
           <div className="mt-5 flex flex-col gap-2 text-barro-700">
@@ -109,6 +112,13 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
                 <MapPin className="h-4 w-4 text-barro-400" /> {negocio.endereco}
               </span>
             )}
+            {!negocio.endereco &&
+              negocio.modalidades_atendimento?.length > 0 &&
+              !negocio.modalidades_atendimento.some((m) => m === 'loja_fisica' || m === 'atende_em_casa') && (
+                <span className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-barro-400" /> Atendimento sem endereço fixo
+                </span>
+              )}
             {negocio.nota_google && (
               <span className="flex items-center gap-2">
                 <Star className="h-4 w-4 fill-casca-400 text-casca-400" />

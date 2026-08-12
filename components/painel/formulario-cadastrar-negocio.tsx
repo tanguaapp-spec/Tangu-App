@@ -5,12 +5,15 @@ import { useRouter } from 'next/navigation'
 import { Campo, AreaTexto } from '@/components/ui/campo'
 import { Botao } from '@/components/ui/botao'
 import { cadastrarNegocio } from '@/lib/actions/painel-negocio-actions'
-import type { Categoria } from '@/lib/types/database'
+import { CampoModalidadeAtendimento } from '@/components/painel/campo-modalidade-atendimento'
+import { precisaDeEndereco } from '@/lib/modalidades'
+import type { Categoria, ModalidadeAtendimento } from '@/lib/types/database'
 
 export function FormularioCadastrarNegocio({ categorias }: { categorias: Categoria[] }) {
   const router = useRouter()
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
+  const [modalidades, setModalidades] = useState<ModalidadeAtendimento[]>([])
 
   async function handleSubmit(formData: FormData) {
     setCarregando(true)
@@ -64,7 +67,16 @@ export function FormularioCadastrarNegocio({ categorias }: { categorias: Categor
         />
       </div>
 
-      <Campo name="endereco" id="endereco" rotulo="Endereço (opcional)" placeholder="Rua, número..." />
+      <div className="sm:col-span-2">
+        <CampoModalidadeAtendimento selecionadas={modalidades} onChange={setModalidades} />
+      </div>
+
+      <Campo
+        name="endereco"
+        id="endereco"
+        rotulo={precisaDeEndereco(modalidades) ? 'Endereço' : 'Endereço (opcional)'}
+        placeholder={precisaDeEndereco(modalidades) ? 'Rua, número...' : 'Não precisa se for só atendimento digital'}
+      />
       <Campo name="whatsapp" id="whatsapp" rotulo="WhatsApp" placeholder="(21) 99999-9999" required />
       <Campo name="telefone" id="telefone" rotulo="Telefone fixo (opcional)" placeholder="(21) 2665-0000" />
       <Campo name="instagram" id="instagram" rotulo="Instagram (opcional)" placeholder="@seuusuario" />

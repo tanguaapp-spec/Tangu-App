@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Campo, AreaTexto } from '@/components/ui/campo'
 import { Botao } from '@/components/ui/botao'
 import { atualizarNegocio, removerFotoGaleria } from '@/lib/actions/painel-negocio-actions'
-import type { Negocio, Categoria } from '@/lib/types/database'
+import { CampoModalidadeAtendimento } from '@/components/painel/campo-modalidade-atendimento'
+import type { Negocio, Categoria, ModalidadeAtendimento } from '@/lib/types/database'
 import Image from 'next/image'
 import { X } from 'lucide-react'
 
@@ -28,6 +29,7 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
   const [salvo, setSalvo] = useState(false)
   const [galeria, setGaleria] = useState<string[]>(negocio.galeria ?? [])
   const [formasPagamento, setFormasPagamento] = useState<string[]>(negocio.formas_pagamento ?? [])
+  const [modalidades, setModalidades] = useState<ModalidadeAtendimento[]>(negocio.modalidades_atendimento ?? [])
 
   async function handleSubmit(formData: FormData) {
     setCarregando(true)
@@ -89,6 +91,8 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
         defaultValue={negocio.descricao ?? ''}
         placeholder="Conte pra cidade o que você faz, seus diferenciais..."
       />
+
+      <CampoModalidadeAtendimento selecionadas={modalidades} onChange={setModalidades} />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Campo name="whatsapp" id="whatsapp" rotulo="WhatsApp" defaultValue={negocio.whatsapp ?? ''} placeholder="(21) 99999-9999" />

@@ -36,3 +36,9 @@ next-env.d.ts
 
 # Recovery codes
 recovery-codes.txt
+
+# Playwright E2E
+/e2e-report/
+/test-results/
+/playwright-report/
+/playwright/.cache/

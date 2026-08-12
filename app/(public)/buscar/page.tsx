@@ -2,22 +2,36 @@ import { buscarNegocios, buscarCategorias, buscarBairros } from '@/lib/queries/n
 import { CardNegocio } from '@/components/negocio/card-negocio'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { SlidersHorizontal, MapPin, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react'
+import { SlidersHorizontal, MapPin, ShieldCheck, ChevronLeft, ChevronRight, Store, House, Car, Laptop } from 'lucide-react'
 import { BuscaRapida } from '@/components/busca-rapida'
+import { MODALIDADES } from '@/lib/modalidades'
+import type { ModalidadeAtendimento } from '@/lib/types/database'
 
 export const revalidate = 60
 
-type ParamsBusca = { q?: string; categoria?: string; bairro?: string; pagina?: string }
+const ICONES_MODALIDADE: Record<ModalidadeAtendimento, typeof Store> = {
+  loja_fisica: Store,
+  atende_em_casa: House,
+  atende_domicilio: Car,
+  servico_digital: Laptop,
+}
 
-function linkFiltro(searchParams: ParamsBusca, sobrescreve: { categoria?: string | null; bairro?: string | null }) {
+type ParamsBusca = { q?: string; categoria?: string; bairro?: string; modalidade?: string; pagina?: string }
+
+function linkFiltro(
+  searchParams: ParamsBusca,
+  sobrescreve: { categoria?: string | null; bairro?: string | null; modalidade?: string | null }
+) {
   const params = new URLSearchParams()
   if (searchParams.q) params.set('q', searchParams.q)
 
   const categoria = 'categoria' in sobrescreve ? sobrescreve.categoria : searchParams.categoria
   const bairro = 'bairro' in sobrescreve ? sobrescreve.bairro : searchParams.bairro
+  const modalidade = 'modalidade' in sobrescreve ? sobrescreve.modalidade : searchParams.modalidade
 
   if (categoria) params.set('categoria', categoria)
   if (bairro) params.set('bairro', bairro)
+  if (modalidade) params.set('modalidade', modalidade)
   // trocar de filtro sempre volta pra página 1
 
   const query = params.toString()
@@ -29,6 +43,7 @@ function linkPagina(searchParams: ParamsBusca, pagina: number) {
   if (searchParams.q) params.set('q', searchParams.q)
   if (searchParams.categoria) params.set('categoria', searchParams.categoria)
   if (searchParams.bairro) params.set('bairro', searchParams.bairro)
+  if (searchParams.modalidade) params.set('modalidade', searchParams.modalidade)
   if (pagina > 1) params.set('pagina', String(pagina))
 
   const query = params.toString()
@@ -37,12 +52,16 @@ function linkPagina(searchParams: ParamsBusca, pagina: number) {
 
 export default async function PaginaBuscar({ searchParams }: { searchParams: ParamsBusca }) {
   const paginaAtual = Math.max(1, Number(searchParams.pagina) || 1)
+  const modalidadeValida = MODALIDADES.some((m) => m.valor === searchParams.modalidade)
+    ? (searchParams.modalidade as ModalidadeAtendimento)
+    : undefined
 
   const [{ negocios, total, porPagina }, categorias, bairros] = await Promise.all([
     buscarNegocios({
       termo: searchParams.q,
       categoriaSlug: searchParams.categoria,
       bairro: searchParams.bairro,
+      modalidade: modalidadeValida,
       pagina: paginaAtual,
     }),
     buscarCategorias(),
@@ -126,6 +145,38 @@ export default async function PaginaBuscar({ searchParams }: { searchParams: Par
           ))}
         </div>
       )}
+
+      <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2">
+        <span className="flex shrink-0 items-center gap-1 text-sm text-barro-500">
+          <SlidersHorizontal className="h-4 w-4" /> Atendimento:
+        </span>
+        <Link
+          href={linkFiltro(searchParams, { modalidade: null })}
+          className={cn(
+            'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
+            !searchParams.modalidade ? 'bg-barro-800 text-white' : 'bg-white text-barro-700 hover:bg-barro-100'
+          )}
+        >
+          Todas
+        </Link>
+        {MODALIDADES.map((m) => {
+          const Icone = ICONES_MODALIDADE[m.valor]
+          return (
+            <Link
+              key={m.valor}
+              href={linkFiltro(searchParams, { modalidade: m.valor })}
+              className={cn(
+                'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
+                searchParams.modalidade === m.valor
+                  ? 'bg-barro-800 text-white'
+                  : 'bg-white text-barro-700 hover:bg-barro-100'
+              )}
+            >
+              <Icone className="h-3.5 w-3.5" /> {m.rotuloCurto}
+            </Link>
+          )
+        })}
+      </div>
 
       {negocios.length === 0 ? (
         <div className="mt-16 text-center">

@@ -3,6 +3,7 @@ export type StatusReivindicacao = 'pendente' | 'aprovado' | 'rejeitado'
 export type StatusVaga = 'aberta' | 'pausada' | 'encerrada'
 export type TipoPost = 'novidade' | 'promocao' | 'vaga_propria'
 export type TipoAviso = 'aviso' | 'evento' | 'utilidade_publica' | 'achados_perdidos'
+export type ModalidadeAtendimento = 'loja_fisica' | 'atende_em_casa' | 'atende_domicilio' | 'servico_digital'
 
 export type Perfil = {
   id: string
@@ -51,6 +52,7 @@ export type Negocio = {
   destaque_ativo: boolean
   destaque_expira_em: string | null
   formas_pagamento: string[] | null
+  modalidades_atendimento: ModalidadeAtendimento[]
   aberto_agora: boolean | null
   status_cadastro: StatusReivindicacao
   motivo_rejeicao: string | null
@@ -187,6 +189,7 @@ export type Database = {
       vaga_status: StatusVaga
       post_tipo: TipoPost
       aviso_tipo: TipoAviso
+      modalidade_atendimento: ModalidadeAtendimento
     }
     CompositeTypes: Record<string, never>
   }
