@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { enviarNotificacaoParaPerfis, enviarNotificacaoParaAdmins } from '@/lib/push/enviar-notificacao'
 
 const DIAS_SEMANA = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'] as const
 const TAMANHO_MAX_IMAGEM = 5 * 1024 * 1024 // 5MB
@@ -78,6 +79,13 @@ export async function cadastrarNegocio(formData: FormData) {
 
   // Quem cadastra um negócio passa a ser profissional (se ainda não for).
   await supabase.from('perfis').update({ papel: 'profissional' }).eq('id', user.id).neq('papel', 'admin')
+
+  enviarNotificacaoParaAdmins({
+    title: 'Novo cadastro pra revisar',
+    body: `${nome} acabou de se cadastrar e está esperando aprovação.`,
+    url: '/painel/admin/negocios-pendentes',
+    tag: 'cadastro-pendente',
+  }).catch((err) => console.error('Falha ao notificar admins:', err))
 
   revalidatePath('/painel/negocio')
   return { erro: null, negocioId: negocio.id }
@@ -234,15 +242,35 @@ export async function criarPost(negocioId: string, formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { erro: 'Não autenticado.' }
 
+  const titulo = formData.get('titulo') as string
+  const tipo = formData.get('tipo') as string
+
   const { error } = await supabase.from('posts_negocio').insert({
     negocio_id: negocioId,
     autor_id: user.id,
-    tipo: formData.get('tipo') as string,
-    titulo: formData.get('titulo') as string,
+    tipo,
+    titulo,
     conteudo: formData.get('conteudo') as string,
   })
 
   if (error) return { erro: error.message }
+
+  // avisa quem favoritou o negócio
+  const [{ data: negocio }, { data: favoritos }] = await Promise.all([
+    supabase.from('negocios').select('nome').eq('id', negocioId).single(),
+    supabase.from('favoritos').select('perfil_id').eq('negocio_id', negocioId),
+  ])
+  if (negocio && favoritos && favoritos.length > 0) {
+    enviarNotificacaoParaPerfis(
+      favoritos.map((f) => f.perfil_id),
+      {
+        title: negocio.nome,
+        body: `${tipo === 'promocao' ? 'Nova promoção' : 'Novidade'}: ${titulo}`,
+        url: `/negocio/${negocioId}`,
+        tag: `post-${negocioId}`,
+      }
+    ).catch((err) => console.error('Falha ao notificar favoritos:', err))
+  }
 
   revalidatePath('/painel/negocio')
   revalidatePath(`/negocio/${negocioId}`)

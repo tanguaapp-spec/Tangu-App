@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { enviarNotificacaoParaAdmins } from '@/lib/push/enviar-notificacao'
 
 export async function alternarFavorito(negocioId: string) {
   const supabase = createClient()
@@ -87,7 +88,7 @@ export async function solicitarReivindicacao(
   // Evita solicitação duplicada quando o negócio já está reivindicado
   const { data: negocio } = await supabase
     .from('negocios')
-    .select('reivindicado_por')
+    .select('nome, reivindicado_por')
     .eq('id', negocioId)
     .single()
 
@@ -121,6 +122,13 @@ export async function solicitarReivindicacao(
     })
 
   if (error) return { erro: error.message }
+
+  enviarNotificacaoParaAdmins({
+    title: 'Nova reivindicação de perfil',
+    body: `Alguém pediu pra assumir o perfil de ${negocio.nome}.`,
+    url: '/painel/admin/reivindicacoes',
+    tag: 'reivindicacao-pendente',
+  }).catch((err) => console.error('Falha ao notificar admins:', err))
 
   return { erro: null }
 }

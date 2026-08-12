@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { enviarNotificacaoParaPerfis, enviarNotificacaoParaTodosInscritos } from '@/lib/push/enviar-notificacao'
 
 async function requireAdmin() {
   const supabase = createClient()
@@ -34,7 +35,7 @@ export async function aprovarReivindicacao(
 
   const { supabase, user } = auth
 
-  const { error: errorNegocio } = await supabase
+  const { data: negocio, error: errorNegocio } = await supabase
     .from('negocios')
     .update({
       reivindicado_por: solicitanteId,
@@ -42,6 +43,8 @@ export async function aprovarReivindicacao(
       verificado: true,
     })
     .eq('id', negocioId)
+    .select('nome')
+    .single()
 
   if (errorNegocio) return { erro: errorNegocio.message }
 
@@ -56,6 +59,13 @@ export async function aprovarReivindicacao(
     .eq('status', 'pendente')
 
   if (errorSolic) return { erro: errorSolic.message }
+
+  enviarNotificacaoParaPerfis([solicitanteId], {
+    title: 'Reivindicação aprovada! 🎉',
+    body: `Agora você já pode gerenciar o perfil de ${negocio?.nome} no Tanguá App.`,
+    url: '/painel/negocio',
+    tag: 'reivindicacao-aprovada',
+  }).catch((err) => console.error('Falha ao notificar solicitante:', err))
 
   revalidatePath('/painel/admin/reivindicacoes')
   return { erro: null }
@@ -88,13 +98,24 @@ export async function aprovarNegocioPendente(negocioId: string) {
 
   const { supabase } = auth
 
-  const { error } = await supabase
+  const { data: negocio, error } = await supabase
     .from('negocios')
     .update({ status_cadastro: 'aprovado', ativo: true, verificado: true })
     .eq('id', negocioId)
     .eq('status_cadastro', 'pendente')
+    .select('nome, reivindicado_por')
+    .single()
 
   if (error) return { erro: error.message }
+
+  if (negocio?.reivindicado_por) {
+    enviarNotificacaoParaPerfis([negocio.reivindicado_por], {
+      title: 'Seu negócio foi aprovado! 🎉',
+      body: `${negocio.nome} já está visível no diretório do Tanguá App.`,
+      url: '/painel/negocio',
+      tag: 'cadastro-aprovado',
+    }).catch((err) => console.error('Falha ao notificar profissional:', err))
+  }
 
   revalidatePath('/painel/admin/negocios-pendentes')
   revalidatePath('/buscar')
@@ -170,10 +191,12 @@ export async function criarAviso(formData: FormData) {
   const { supabase, user } = auth
 
   const dataEvento = formData.get('data_evento') as string
+  const tipo = formData.get('tipo') as string
+  const titulo = formData.get('titulo') as string
 
   const { error } = await supabase.from('avisos_cidade').insert({
-    tipo: formData.get('tipo') as string,
-    titulo: formData.get('titulo') as string,
+    tipo,
+    titulo,
     conteudo: formData.get('conteudo') as string,
     local_evento: formData.get('local_evento') as string,
     data_evento: dataEvento || null,
@@ -182,6 +205,19 @@ export async function criarAviso(formData: FormData) {
   })
 
   if (error) return { erro: error.message }
+
+  const rotulosTipo: Record<string, string> = {
+    aviso: 'Novo aviso',
+    evento: 'Novo evento',
+    utilidade_publica: 'Utilidade pública',
+    achados_perdidos: 'Achados e perdidos',
+  }
+  enviarNotificacaoParaTodosInscritos({
+    title: `${rotulosTipo[tipo] || 'Novidade'} no mural de Tanguá`,
+    body: titulo,
+    url: '/mural',
+    tag: 'mural',
+  }).catch((err) => console.error('Falha ao notificar mural:', err))
 
   revalidatePath('/painel/admin/avisos')
   revalidatePath('/mural')

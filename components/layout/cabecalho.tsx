@@ -7,6 +7,7 @@ import { Menu, X, MapPin, Briefcase, Megaphone, Search, User, LogOut, Store, Set
 import { Botao } from '@/components/ui/botao'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { SinoNotificacoes } from '@/components/notificacoes/sino-notificacoes'
 import type { Perfil } from '@/lib/types/database'
 
 const linksNav = [
@@ -89,6 +90,7 @@ export function Cabecalho() {
         <div className="hidden items-center gap-2 md:flex">
           {user ? (
             <>
+              <SinoNotificacoes logado={!!user} />
               <Link href="/perfil">
                 <Botao variante="fantasma" tamanho="sm">
                   <User className="h-4 w-4" />
@@ -174,6 +176,7 @@ export function Cabecalho() {
                 <Store className="h-5 w-5" />
                 Meu painel
               </Link>
+              <SinoNotificacoes logado={!!user} comRotulo />
               <button
                 onClick={() => {
                   handleLogout()

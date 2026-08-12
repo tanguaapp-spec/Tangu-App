@@ -134,6 +134,16 @@ export type AvisoCidade = {
   criado_em: string
 }
 
+export type PushSubscriptionSalva = {
+  id: string
+  perfil_id: string
+  endpoint: string
+  p256dh: string
+  auth: string
+  user_agent: string | null
+  criado_em: string
+}
+
 type TabelaGenerica<T> = {
   Row: T
   Insert: Partial<T>
@@ -153,6 +163,7 @@ export type Database = {
       vagas: TabelaGenerica<Vaga>
       avisos_cidade: TabelaGenerica<AvisoCidade>
       favoritos: TabelaGenerica<{ perfil_id: string; negocio_id: string; criado_em: string }>
+      push_subscriptions: TabelaGenerica<PushSubscriptionSalva>
     }
     Views: Record<string, never>
     Functions: Record<string, never>
