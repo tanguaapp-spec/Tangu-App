@@ -1,4 +1,3 @@
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
@@ -17,21 +16,30 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  const supabase = createServerClient(SUPA_URL, SUPA_KEY, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll()
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-        response = NextResponse.next({ request: { headers: request.headers } })
-        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
-      },
-    },
-  })
-
-  // Atualiza a sessão se o token tiver expirado — necessário para Server Components
+  // Import dinâmico e dentro do try/catch de propósito: um import estático no
+  // topo do arquivo falha na resolução do módulo (Edge Runtime) ANTES de
+  // qualquer código nosso rodar, o que não é capturável por try/catch nenhum
+  // e derruba toda a rota. Um import() dinâmico rejeita a Promise em vez de
+  // quebrar o carregamento do middleware, então conseguimos degradar sem
+  // crashar o site inteiro caso essa dependência tenha algum problema de
+  // compatibilidade com Edge Runtime.
   try {
+    const { createServerClient } = await import('@supabase/ssr')
+
+    const supabase = createServerClient(SUPA_URL, SUPA_KEY, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          response = NextResponse.next({ request: { headers: request.headers } })
+          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
+        },
+      },
+    })
+
+    // Atualiza a sessão se o token tiver expirado — necessário para Server Components
     await supabase.auth.getUser()
   } catch (err) {
     console.error('Erro ao atualizar sessão Supabase no middleware:', err)
