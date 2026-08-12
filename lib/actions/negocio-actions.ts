@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { enviarNotificacaoParaAdmins } from '@/lib/push/enviar-notificacao'
+import { dentroDoLimite } from '@/lib/seguranca/rate-limit'
+import { z } from 'zod'
 
 export async function alternarFavorito(negocioId: string) {
   const supabase = createClient()
@@ -41,6 +43,11 @@ export async function alternarFavorito(negocioId: string) {
   return { erro: null }
 }
 
+const schemaAvaliacao = z.object({
+  nota: z.number().int().min(1, 'Escolha uma nota de 1 a 5.').max(5, 'Escolha uma nota de 1 a 5.'),
+  comentario: z.string().max(1000, 'Comentário muito longo (máximo 1000 caracteres).').optional(),
+})
+
 export async function enviarAvaliacao(
   negocioId: string,
   nota: number,
@@ -55,15 +62,21 @@ export async function enviarAvaliacao(
     return { erro: 'Você precisa entrar para avaliar.' }
   }
 
-  if (!Number.isFinite(nota) || nota < 1 || nota > 5) {
-    return { erro: 'Nota inválida.' }
+  const validado = schemaAvaliacao.safeParse({ nota, comentario })
+  if (!validado.success) {
+    return { erro: validado.error.issues[0].message }
+  }
+
+  const podeAvaliar = await dentroDoLimite(`avaliacao:${user.id}`, 20, 60 * 60)
+  if (!podeAvaliar) {
+    return { erro: 'Muitas avaliações enviadas. Aguarde um pouco e tente de novo.' }
   }
 
   const { error } = await supabase.from('avaliacoes').upsert({
     negocio_id: negocioId,
     autor_id: user.id,
-    nota,
-    comentario,
+    nota: validado.data.nota,
+    comentario: validado.data.comentario || null,
   })
 
   if (error) return { erro: error.message }
@@ -71,6 +84,14 @@ export async function enviarAvaliacao(
   revalidatePath(`/negocio/${negocioId}`)
   return { erro: null }
 }
+
+const schemaReivindicacao = z.object({
+  mensagem: z
+    .string()
+    .trim()
+    .min(1, 'Conte pra gente como podemos confirmar que você é o responsável.')
+    .max(1000, 'Mensagem muito longa (máximo 1000 caracteres).'),
+})
 
 export async function solicitarReivindicacao(
   negocioId: string,
@@ -83,6 +104,16 @@ export async function solicitarReivindicacao(
 
   if (!user) {
     return { erro: 'Você precisa entrar para reivindicar este perfil.' }
+  }
+
+  const validado = schemaReivindicacao.safeParse({ mensagem })
+  if (!validado.success) {
+    return { erro: validado.error.issues[0].message }
+  }
+
+  const podeSolicitar = await dentroDoLimite(`reivindicacao:${user.id}`, 10, 60 * 60)
+  if (!podeSolicitar) {
+    return { erro: 'Muitas solicitações enviadas. Aguarde um pouco e tente de novo.' }
   }
 
   // Evita solicitação duplicada quando o negócio já está reivindicado
@@ -118,7 +149,7 @@ export async function solicitarReivindicacao(
     .insert({
       negocio_id: negocioId,
       solicitante_id: user.id,
-      mensagem,
+      mensagem: validado.data.mensagem,
     })
 
   if (error) return { erro: error.message }
@@ -132,4 +163,3 @@ export async function solicitarReivindicacao(
 
   return { erro: null }
 }
-

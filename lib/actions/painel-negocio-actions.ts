@@ -3,6 +3,41 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { enviarNotificacaoParaPerfis, enviarNotificacaoParaAdmins } from '@/lib/push/enviar-notificacao'
+import { z } from 'zod'
+
+const schemaCadastroNegocio = z.object({
+  nome: z.string().trim().min(2, 'Nome muito curto.').max(120, 'Nome muito longo.'),
+  categoriaId: z.string().uuid('Escolha uma categoria.'),
+  descricao: z.string().max(2000).optional(),
+  endereco: z.string().max(200).optional(),
+  bairro: z.string().max(100).optional(),
+  telefone: z.string().max(30).optional(),
+  whatsapp: z.string().trim().min(8, 'Informe um WhatsApp válido.').max(30),
+  instagram: z.string().max(60).optional(),
+  site: z.string().max(200).optional(),
+})
+
+const schemaProduto = z.object({
+  nome: z.string().trim().min(1, 'Informe o nome do produto/serviço.').max(120, 'Nome muito longo.'),
+  descricao: z.string().max(500).optional(),
+  preco: z.number().nonnegative('Preço não pode ser negativo.').max(999999, 'Preço muito alto.').nullable(),
+})
+
+const schemaPost = z.object({
+  titulo: z.string().trim().min(1, 'Informe um título.').max(120, 'Título muito longo.'),
+  tipo: z.enum(['novidade', 'promocao', 'vaga_propria']),
+  conteudo: z.string().max(2000).optional(),
+})
+
+const schemaVaga = z.object({
+  titulo: z.string().trim().min(2, 'Informe o título da vaga.').max(120),
+  descricao: z.string().trim().min(10, 'Descreva a vaga com um pouco mais de detalhe.').max(3000),
+  area: z.string().max(100).optional(),
+  tipoContrato: z.string().max(60).optional(),
+  salarioFaixa: z.string().max(60).optional(),
+  bairro: z.string().max(100).optional(),
+  contatoWhatsapp: z.string().max(30).optional(),
+})
 
 const DIAS_SEMANA = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'] as const
 const TAMANHO_MAX_IMAGEM = 5 * 1024 * 1024 // 5MB
@@ -40,10 +75,19 @@ export async function cadastrarNegocio(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { erro: 'Você precisa entrar para cadastrar um negócio.' }
 
-  const nome = (formData.get('nome') as string)?.trim()
-  const categoriaId = (formData.get('categoria_id') as string) || null
-  if (!nome) return { erro: 'Informe o nome do negócio.' }
-  if (!categoriaId) return { erro: 'Escolha uma categoria.' }
+  const validado = schemaCadastroNegocio.safeParse({
+    nome: formData.get('nome') as string,
+    categoriaId: formData.get('categoria_id') as string,
+    descricao: (formData.get('descricao') as string) || undefined,
+    endereco: (formData.get('endereco') as string) || undefined,
+    bairro: (formData.get('bairro') as string) || undefined,
+    telefone: (formData.get('telefone') as string) || undefined,
+    whatsapp: formData.get('whatsapp') as string,
+    instagram: (formData.get('instagram') as string) || undefined,
+    site: (formData.get('site') as string) || undefined,
+  })
+  if (!validado.success) return { erro: validado.error.issues[0].message }
+  const dados = validado.data
 
   const { data: existente } = await supabase
     .from('negocios')
@@ -58,15 +102,15 @@ export async function cadastrarNegocio(formData: FormData) {
   const { data: negocio, error } = await supabase
     .from('negocios')
     .insert({
-      nome,
-      categoria_id: categoriaId,
-      descricao: (formData.get('descricao') as string) || null,
-      endereco: (formData.get('endereco') as string) || null,
-      bairro: (formData.get('bairro') as string) || null,
-      telefone: (formData.get('telefone') as string) || null,
-      whatsapp: (formData.get('whatsapp') as string) || null,
-      instagram: (formData.get('instagram') as string) || null,
-      site: (formData.get('site') as string) || null,
+      nome: dados.nome,
+      categoria_id: dados.categoriaId,
+      descricao: dados.descricao || null,
+      endereco: dados.endereco || null,
+      bairro: dados.bairro || null,
+      telefone: dados.telefone || null,
+      whatsapp: dados.whatsapp,
+      instagram: dados.instagram || null,
+      site: dados.site || null,
       origem: 'cadastro_manual',
       status_cadastro: 'pendente',
       reivindicado_por: user.id,
@@ -82,7 +126,7 @@ export async function cadastrarNegocio(formData: FormData) {
 
   enviarNotificacaoParaAdmins({
     title: 'Novo cadastro pra revisar',
-    body: `${nome} acabou de se cadastrar e está esperando aprovação.`,
+    body: `${dados.nome} acabou de se cadastrar e está esperando aprovação.`,
     url: '/painel/admin/negocios-pendentes',
     tag: 'cadastro-pendente',
   }).catch((err) => console.error('Falha ao notificar admins:', err))
@@ -242,15 +286,20 @@ export async function criarPost(negocioId: string, formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { erro: 'Não autenticado.' }
 
-  const titulo = formData.get('titulo') as string
-  const tipo = formData.get('tipo') as string
+  const validado = schemaPost.safeParse({
+    titulo: formData.get('titulo') as string,
+    tipo: formData.get('tipo') as string,
+    conteudo: (formData.get('conteudo') as string) || undefined,
+  })
+  if (!validado.success) return { erro: validado.error.issues[0].message }
+  const { titulo, tipo, conteudo } = validado.data
 
   const { error } = await supabase.from('posts_negocio').insert({
     negocio_id: negocioId,
     autor_id: user.id,
     tipo,
     titulo,
-    conteudo: formData.get('conteudo') as string,
+    conteudo: conteudo || null,
   })
 
   if (error) return { erro: error.message }
@@ -285,18 +334,22 @@ export async function criarProduto(negocioId: string, formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { erro: 'Não autenticado.' }
 
-  const nome = (formData.get('nome') as string)?.trim()
-  if (!nome) return { erro: 'Informe o nome do produto/serviço.' }
-
   const precoStr = (formData.get('preco') as string)?.replace(',', '.').trim()
-  const preco = precoStr ? Number(precoStr) : null
-  if (precoStr && Number.isNaN(preco)) return { erro: 'Preço inválido.' }
+  const precoNumero = precoStr ? Number(precoStr) : null
+  if (precoStr && Number.isNaN(precoNumero)) return { erro: 'Preço inválido.' }
+
+  const validado = schemaProduto.safeParse({
+    nome: formData.get('nome') as string,
+    descricao: (formData.get('descricao') as string) || undefined,
+    preco: precoNumero,
+  })
+  if (!validado.success) return { erro: validado.error.issues[0].message }
 
   const { error } = await supabase.from('produtos_servicos').insert({
     negocio_id: negocioId,
-    nome,
-    descricao: (formData.get('descricao') as string) || null,
-    preco,
+    nome: validado.data.nome,
+    descricao: validado.data.descricao || null,
+    preco: validado.data.preco,
     preco_a_partir_de: formData.get('preco_a_partir_de') === 'on',
   })
 
@@ -338,16 +391,28 @@ export async function criarVagaProfissional(negocioId: string, formData: FormDat
 
   if (!negocio) return { erro: 'Negócio não encontrado.' }
 
-  const { error } = await supabase.from('vagas').insert({
+  const validado = schemaVaga.safeParse({
     titulo: formData.get('titulo') as string,
+    descricao: formData.get('descricao') as string,
+    area: (formData.get('area') as string) || undefined,
+    tipoContrato: (formData.get('tipo_contrato') as string) || undefined,
+    salarioFaixa: (formData.get('salario_faixa') as string) || undefined,
+    bairro: (formData.get('bairro') as string) || undefined,
+    contatoWhatsapp: (formData.get('contato_whatsapp') as string) || undefined,
+  })
+  if (!validado.success) return { erro: validado.error.issues[0].message }
+  const dadosVaga = validado.data
+
+  const { error } = await supabase.from('vagas').insert({
+    titulo: dadosVaga.titulo,
     empresa_nome: negocio.nome,
     negocio_id: negocioId,
-    descricao: formData.get('descricao') as string,
-    area: (formData.get('area') as string) || null,
-    tipo_contrato: (formData.get('tipo_contrato') as string) || null,
-    salario_faixa: (formData.get('salario_faixa') as string) || null,
-    bairro: (formData.get('bairro') as string) || negocio.bairro,
-    contato_whatsapp: (formData.get('contato_whatsapp') as string) || null,
+    descricao: dadosVaga.descricao,
+    area: dadosVaga.area || null,
+    tipo_contrato: dadosVaga.tipoContrato || null,
+    salario_faixa: dadosVaga.salarioFaixa || null,
+    bairro: dadosVaga.bairro || negocio.bairro,
+    contato_whatsapp: dadosVaga.contatoWhatsapp || null,
     publicado_por: user.id,
   })
 

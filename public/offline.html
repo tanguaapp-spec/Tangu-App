@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Você está offline — Tanguá App</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #FBF4E9;
+      color: #2E2219;
+      font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      text-align: center;
+      padding: 24px;
+    }
+    .cartao { max-width: 380px; }
+    .laranja {
+      width: 72px; height: 72px; margin: 0 auto 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 34% 30%, #FFE0B8 0%, #FB9233 42%, #EF7A1A 62%, #AC4E0C 100%);
+    }
+    h1 { font-size: 22px; margin: 0 0 10px; }
+    p { color: #6B5240; line-height: 1.5; margin: 0 0 20px; }
+    button {
+      background: #EF7A1A; color: #fff; border: none; border-radius: 12px;
+      padding: 12px 24px; font-size: 15px; font-weight: 600; cursor: pointer;
+    }
+    button:active { transform: scale(0.98); }
+  </style>
+</head>
+<body>
+  <div class="cartao">
+    <div class="laranja"></div>
+    <h1>Você está sem internet</h1>
+    <p>Essa página ainda não tinha sido carregada antes, então não dá pra abrir offline. Assim que a conexão voltar, é só tentar de novo.</p>
+    <button onclick="location.reload()">Tentar de novo</button>
+  </div>
+</body>
+</html>

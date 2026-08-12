@@ -12,7 +12,7 @@ export function CardNegocio({ negocio, indice = 0 }: { negocio: Negocio; indice?
       style={{ '--i': Math.min(indice, 8) } as React.CSSProperties}
     >
       {negocio.destaque_ativo && (
-        <span className="absolute left-3 top-3 z-10 rounded-full bg-casca-500 px-2.5 py-1 text-xs font-bold text-white">
+        <span className="absolute left-3 top-3 z-10 rounded-full bg-casca-700 px-2.5 py-1 text-xs font-bold text-white">
           Destaque
         </span>
       )}

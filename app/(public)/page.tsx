@@ -148,7 +148,7 @@ export default function PaginaInicial() {
             </p>
             <Link
               href="/cadastrar?papel=profissional"
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-casca-500 px-6 py-3 font-semibold text-white transition-all hover:gap-3 hover:bg-casca-600"
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-casca-700 px-6 py-3 font-semibold text-white transition-all hover:gap-3 hover:bg-casca-800"
             >
               Cadastrar meu negócio <ArrowRight className="h-4 w-4" />
             </Link>

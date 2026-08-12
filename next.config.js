@@ -4,6 +4,12 @@ const withPWA = require('next-pwa')({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
+  // fallback pra quando uma página não cacheada é aberta sem internet.
+  // '/_offline' é o padrão do next-pwa (convenção do Pages Router) — no App
+  // Router isso não vira rota, por isso apontamos direto pro HTML estático.
+  fallbacks: {
+    document: '/offline.html',
+  },
 })
 
 // CSP pensada pro que o app de fato usa: fontes self-hosted (next/font), imagens

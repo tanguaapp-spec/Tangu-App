@@ -28,7 +28,7 @@ export function BuscaRapida() {
       />
       <button
         type="submit"
-        className="shrink-0 rounded-xl bg-casca-500 px-5 py-2.5 font-semibold text-white transition-colors hover:bg-casca-600"
+        className="shrink-0 rounded-xl bg-casca-700 px-5 py-2.5 font-semibold text-white transition-colors hover:bg-casca-800"
       >
         Buscar
       </button>

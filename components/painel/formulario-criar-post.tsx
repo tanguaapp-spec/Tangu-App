@@ -38,7 +38,7 @@ export function FormularioCriarPost({ negocioId }: { negocioId: string }) {
               onClick={() => setTipo(t.valor)}
               className={cn(
                 'rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
-                tipo === t.valor ? 'bg-casca-500 text-white' : 'bg-barro-100 text-barro-700'
+                tipo === t.valor ? 'bg-casca-700 text-white' : 'bg-barro-100 text-barro-700'
               )}
             >
               {t.rotulo}

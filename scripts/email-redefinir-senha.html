@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <body style="margin:0; padding:0; background-color:#FBF4E9; font-family:Georgia, 'Times New Roman', serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#FBF4E9; padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" style="max-width:480px; background-color:#FFFFFF; border-radius:20px; overflow:hidden; box-shadow:0 4px 24px rgba(74,55,42,0.12);">
+
+            <tr>
+              <td align="center" style="background-color:#EF7A1A; padding:28px 24px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="width:36px; height:36px; background-color:#FFFFFF; border-radius:50%; text-align:center; vertical-align:middle; font-family:Georgia, serif; font-weight:bold; font-size:18px; color:#EF7A1A;">T</td>
+                    <td style="padding-left:10px; font-family:Georgia, serif; font-size:20px; font-weight:bold; color:#FFFFFF;">Tanguá App</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:32px 28px 8px 28px;">
+                <h1 style="margin:0 0 16px 0; font-family:Georgia, serif; font-size:22px; color:#2E2219;">
+                  Vamos trocar sua senha
+                </h1>
+                <p style="margin:0 0 24px 0; font-family:Arial, sans-serif; font-size:15px; line-height:1.6; color:#4A372A;">
+                  Recebemos um pedido pra redefinir a senha da sua conta no Tanguá App. Clique no
+                  botão abaixo pra escolher uma senha nova.
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" style="padding:0 28px 28px 28px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td align="center" style="background-color:#4F7A3D; border-radius:12px;">
+                      <a href="{{ .ConfirmationURL }}"
+                         target="_blank"
+                         style="display:inline-block; padding:14px 32px; font-family:Arial, sans-serif; font-size:16px; font-weight:bold; color:#FFFFFF; text-decoration:none;">
+                        Redefinir minha senha
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:24px 28px 8px 28px; border-top:1px solid #F1E7DC;">
+                <p style="margin:16px 0 8px 0; font-family:Arial, sans-serif; font-size:13px; line-height:1.6; color:#7A5A42;">
+                  Se o botão não funcionar, copie e cole este link no seu navegador:
+                </p>
+                <p style="margin:0 0 16px 0; font-family:Arial, sans-serif; font-size:13px; line-height:1.6; word-break:break-all;">
+                  <a href="{{ .ConfirmationURL }}" style="color:#D2640F;">{{ .ConfirmationURL }}</a>
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:0 28px 28px 28px;">
+                <p style="margin:0; font-family:Arial, sans-serif; font-size:12px; line-height:1.6; color:#7A5A42;">
+                  Se você não pediu essa troca, pode ignorar este e-mail — sua senha atual continua
+                  a mesma até alguém clicar no link acima.
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" style="background-color:#FAF6F1; padding:18px 24px;">
+                <p style="margin:0; font-family:Arial, sans-serif; font-size:12px; color:#7A5A42;">
+                  Tanguá App 🍊 — feito pra Tanguá-RJ
+                </p>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

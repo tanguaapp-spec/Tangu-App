@@ -75,7 +75,7 @@ export default async function PaginaBuscar({ searchParams }: { searchParams: Par
           href={linkFiltro(searchParams, { categoria: null })}
           className={cn(
             'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
-            !searchParams.categoria ? 'bg-casca-500 text-white' : 'bg-white text-barro-700 hover:bg-barro-100'
+            !searchParams.categoria ? 'bg-casca-700 text-white' : 'bg-white text-barro-700 hover:bg-barro-100'
           )}
         >
           Todas
@@ -87,7 +87,7 @@ export default async function PaginaBuscar({ searchParams }: { searchParams: Par
             className={cn(
               'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
               searchParams.categoria === cat.slug
-                ? 'bg-casca-500 text-white'
+                ? 'bg-casca-700 text-white'
                 : 'bg-white text-barro-700 hover:bg-barro-100'
             )}
           >

@@ -9,7 +9,9 @@ interface BotaoProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantes = {
-  primario: 'bg-casca-500 text-white hover:bg-casca-600 active:bg-casca-700 shadow-feira',
+  // casca-700 (não casca-500) por contraste: texto branco em casca-500 fica em 2.81:1,
+  // abaixo do mínimo AA (4.5:1) do WCAG. casca-700 passa com folga (5.46:1).
+  primario: 'bg-casca-700 text-white hover:bg-casca-800 active:bg-casca-900 shadow-feira',
   secundario: 'bg-mata-500 text-white hover:bg-mata-600 active:bg-mata-700',
   fantasma: 'bg-transparent text-barro-800 hover:bg-barro-100 border border-barro-300',
   perigo: 'bg-red-600 text-white hover:bg-red-700',
