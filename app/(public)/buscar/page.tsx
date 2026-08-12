@@ -7,6 +7,23 @@ import { BuscaRapida } from '@/components/busca-rapida'
 
 export const dynamic = 'force-dynamic'
 
+function linkFiltro(
+  searchParams: { q?: string; categoria?: string; bairro?: string },
+  sobrescreve: { categoria?: string | null; bairro?: string | null }
+) {
+  const params = new URLSearchParams()
+  if (searchParams.q) params.set('q', searchParams.q)
+
+  const categoria = 'categoria' in sobrescreve ? sobrescreve.categoria : searchParams.categoria
+  const bairro = 'bairro' in sobrescreve ? sobrescreve.bairro : searchParams.bairro
+
+  if (categoria) params.set('categoria', categoria)
+  if (bairro) params.set('bairro', bairro)
+
+  const query = params.toString()
+  return query ? `/buscar?${query}` : '/buscar'
+}
+
 export default async function PaginaBuscar({
   searchParams,
 }: {
@@ -39,7 +56,7 @@ export default async function PaginaBuscar({
           <SlidersHorizontal className="h-4 w-4" /> Filtrar:
         </span>
         <Link
-          href="/buscar"
+          href={linkFiltro(searchParams, { categoria: null })}
           className={cn(
             'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
             !searchParams.categoria ? 'bg-casca-500 text-white' : 'bg-white text-barro-700 hover:bg-barro-100'
@@ -50,7 +67,7 @@ export default async function PaginaBuscar({
         {categorias.map((cat) => (
           <Link
             key={cat.id}
-            href={`/buscar?categoria=${cat.slug}${searchParams.q ? `&q=${searchParams.q}` : ''}${searchParams.bairro ? `&bairro=${searchParams.bairro}` : ''}`}
+            href={linkFiltro(searchParams, { categoria: cat.slug })}
             className={cn(
               'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
               searchParams.categoria === cat.slug
@@ -69,7 +86,7 @@ export default async function PaginaBuscar({
             <MapPin className="h-4 w-4" /> Bairro:
           </span>
           <Link
-            href={`/buscar${searchParams.categoria ? `?categoria=${searchParams.categoria}` : ''}${searchParams.q ? (searchParams.categoria ? '&' : '?') + `q=${searchParams.q}` : ''}`}
+            href={linkFiltro(searchParams, { bairro: null })}
             className={cn(
               'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
               !searchParams.bairro ? 'bg-mata-500 text-white' : 'bg-white text-barro-700 hover:bg-barro-100'
@@ -80,7 +97,7 @@ export default async function PaginaBuscar({
           {bairros.map((bairro) => (
             <Link
               key={bairro}
-              href={`/buscar${searchParams.categoria || searchParams.q ? '?' : ''}${searchParams.categoria ? `categoria=${searchParams.categoria}${searchParams.q ? '&' : ''}` : ''}${searchParams.q ? `q=${searchParams.q}&` : ''}bairro=${bairro}`}
+              href={linkFiltro(searchParams, { bairro })}
               className={cn(
                 'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
                 searchParams.bairro === bairro
