@@ -6,12 +6,16 @@ import { requireAdminOrRedirect } from '@/lib/auth/require-admin'
 export default async function PainelNegociosPendentes() {
   await requireAdminOrRedirect()
   const supabase = createClient()
-  const { data: negocios } = await supabase
+  const { data: negocios, error } = await supabase
     .from('negocios')
-    .select('*, categoria:categorias(nome), dono:perfis(nome_completo, telefone)')
+    .select('*, categoria:categorias(nome), dono:perfis!negocios_reivindicado_por_fkey(nome_completo, telefone)')
     .eq('status_cadastro', 'pendente')
     .order('criado_em', { ascending: true })
     .limit(50)
+
+  if (error) {
+    console.error('Erro ao buscar cadastros pendentes:', error.message)
+  }
 
   return (
     <div>

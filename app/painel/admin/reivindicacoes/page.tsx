@@ -6,12 +6,18 @@ import { requireAdminOrRedirect } from '@/lib/auth/require-admin'
 export default async function PainelReivindicacoes() {
   await requireAdminOrRedirect()
   const supabase = createClient()
-  const { data: solicitacoes } = await supabase
+  const { data: solicitacoes, error } = await supabase
     .from('solicitacoes_reivindicacao')
-    .select('*, negocio:negocios(nome, endereco), solicitante:perfis(nome_completo, telefone)')
+    .select(
+      '*, negocio:negocios(nome, endereco), solicitante:perfis!solicitacoes_reivindicacao_solicitante_id_fkey(nome_completo, telefone)'
+    )
     .eq('status', 'pendente')
     .order('criado_em', { ascending: true })
     .limit(50)
+
+  if (error) {
+    console.error('Erro ao buscar reivindicações pendentes:', error.message)
+  }
 
   return (
     <div>
