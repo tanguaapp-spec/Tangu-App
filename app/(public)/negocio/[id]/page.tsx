@@ -1,6 +1,7 @@
 import { buscarNegocioPorId, isFavorito } from '@/lib/queries/negocios'
 import { createClient } from '@/lib/supabase/server'
 import Image from 'next/image'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import {
   MapPin,
@@ -10,6 +11,7 @@ import {
   Star,
   Clock,
   Store,
+  ArrowLeft,
 } from 'lucide-react'
 import { SeloVerificado, Selo } from '@/components/ui/selo'
 import { linkWhatsapp } from '@/lib/utils'
@@ -52,6 +54,13 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+      <Link
+        href="/buscar"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-barro-600 transition-colors hover:text-casca-600"
+      >
+        <ArrowLeft className="h-4 w-4" /> Voltar pro diretório
+      </Link>
+
       <div className="relative h-56 w-full overflow-hidden rounded-casca bg-barro-100 sm:h-72">
         {negocio.foto_capa_url ? (
           <Image src={negocio.foto_capa_url} alt={negocio.nome} fill className="object-cover" />

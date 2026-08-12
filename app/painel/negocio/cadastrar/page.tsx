@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { buscarCategorias } from '@/lib/queries/negocios'
 import { FormularioCadastrarNegocio } from '@/components/painel/formulario-cadastrar-negocio'
 import { redirect } from 'next/navigation'
-import { Store } from 'lucide-react'
+import Link from 'next/link'
+import { ArrowLeft, Store } from 'lucide-react'
 
 export default async function CadastrarNegocioPage() {
   const supabase = createClient()
@@ -21,6 +22,13 @@ export default async function CadastrarNegocioPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
+      <Link
+        href="/painel/negocio"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-barro-600 transition-colors hover:text-casca-600"
+      >
+        <ArrowLeft className="h-4 w-4" /> Voltar
+      </Link>
+
       <div className="flex items-center gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-casca-100 text-casca-600">
           <Store className="h-6 w-6" />

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { MailCheck } from 'lucide-react'
 
 export default function PaginaConfirmeEmail() {
@@ -8,6 +9,14 @@ export default function PaginaConfirmeEmail() {
       <p className="mt-2 text-barro-600">
         Enviamos um link de confirmação para o seu e-mail. Clique nele para ativar sua conta.
       </p>
+      <div className="mt-6 flex flex-col gap-2 text-sm">
+        <Link href="/entrar" className="font-semibold text-casca-600 hover:underline">
+          Já confirmei, quero entrar
+        </Link>
+        <Link href="/" className="text-barro-500 hover:text-barro-700">
+          Voltar pra página inicial
+        </Link>
+      </div>
     </div>
   )
 }
