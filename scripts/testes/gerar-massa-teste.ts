@@ -20,6 +20,7 @@
  * - SUPABASE_SERVICE_ROLE_KEY
  */
 
+import 'dotenv/config'
 import { createClient } from '@supabase/supabase-js'
 import { writeFileSync } from 'fs'
 import { join } from 'path'

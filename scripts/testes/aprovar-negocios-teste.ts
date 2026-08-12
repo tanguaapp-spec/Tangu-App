@@ -10,6 +10,7 @@
  * origem = 'cadastro_manual', nunca mexe em cadastro pendente de verdade.
  */
 
+import 'dotenv/config'
 import { createClient } from '@supabase/supabase-js'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
