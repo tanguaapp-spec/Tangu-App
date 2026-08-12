@@ -15,11 +15,19 @@ const withPWA = require('next-pwa')({
 // CSP pensada pro que o app de fato usa: fontes self-hosted (next/font), imagens
 // do Supabase Storage + Google Places, chamadas à API REST do Supabase.
 // 'unsafe-inline' em style-src é necessário porque várias animações usam
-// `style={{ '--i': ... }}` inline; script-src fica sem 'unsafe-inline' pra reduzir
-// o risco real de XSS (o Next injeta script via hash/next automaticamente).
+// `style={{ '--i': ... }}` inline.
+//
+// 'unsafe-inline' em script-src: o Next.js App Router injeta scripts inline pro
+// próprio bootstrap de hidratação (payload de streaming SSR, __next_f.push(...)).
+// Sem isso o React nunca hidrata e TODO formulário/botão client-side para de
+// funcionar (achado via teste E2E real em navegador — script-src 'self' sozinho
+// bloqueava silenciosamente esses scripts, sem gerar erro visível pro usuário).
+// O caminho mais seguro seria CSP por nonce via middleware, mas o middleware.ts
+// já foi removido antes por incompatibilidade com o Edge Runtime — 'unsafe-inline'
+// é o meio-termo até isso ser reavaliado com mais calma.
 const CSP = [
   "default-src 'self'",
-  "script-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://maps.googleapis.com",
   "font-src 'self' data:",
