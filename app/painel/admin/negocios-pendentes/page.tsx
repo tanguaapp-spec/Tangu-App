@@ -19,7 +19,7 @@ export default async function PainelNegociosPendentes() {
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-medium text-barro-900">Cadastros pendentes</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">Cadastros pendentes</h1>
       <p className="text-barro-600">Negócios cadastrados diretamente por profissionais, aguardando revisão.</p>
 
       {!negocios || negocios.length === 0 ? (

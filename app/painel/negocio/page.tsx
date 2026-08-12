@@ -124,7 +124,7 @@ export default async function PainelNegocio() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-display text-3xl font-medium text-barro-900">{negocio.nome}</h1>
+            <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">{negocio.nome}</h1>
             {negocio.verificado && <Selo tom="verde">Verificado</Selo>}
           </div>
           <p className="text-barro-600">Gerencie as informações e novidades do seu negócio.</p>

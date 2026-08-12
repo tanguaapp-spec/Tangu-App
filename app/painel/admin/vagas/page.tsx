@@ -15,7 +15,7 @@ export default async function PainelVagas() {
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-medium text-barro-900">Vagas de emprego</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">Vagas de emprego</h1>
       <p className="text-barro-600">Publique vagas solicitadas por empresas e comércios da cidade.</p>
 
       <div className="mt-6 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">

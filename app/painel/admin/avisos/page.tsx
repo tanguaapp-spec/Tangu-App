@@ -16,7 +16,7 @@ export default async function PainelAvisos() {
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-medium text-barro-900">Mural da cidade</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">Mural da cidade</h1>
       <p className="text-barro-600">Publique avisos, eventos e utilidade pública para Tanguá.</p>
 
       <div className="mt-6 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">

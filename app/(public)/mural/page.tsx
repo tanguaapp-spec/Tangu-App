@@ -14,7 +14,7 @@ export default async function PaginaMural() {
           <Megaphone className="h-6 w-6" />
         </span>
         <div>
-          <h1 className="font-display text-3xl font-medium text-barro-900">Mural da cidade</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">Mural da cidade</h1>
           <p className="text-barro-600">Avisos, eventos e utilidade pública de Tanguá</p>
         </div>
       </div>

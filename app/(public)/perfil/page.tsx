@@ -19,7 +19,7 @@ export default async function PaginaPerfil() {
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-mata-100 text-mata-600">
           <User className="h-6 w-6" />
         </div>
-        <h1 className="font-display text-3xl font-medium text-barro-900">Meu perfil</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">Meu perfil</h1>
       </div>
 
       <FormularioPerfil perfil={perfil} />

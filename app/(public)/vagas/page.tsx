@@ -14,7 +14,7 @@ export default async function PaginaVagas() {
           <Briefcase className="h-6 w-6" />
         </span>
         <div>
-          <h1 className="font-display text-3xl font-medium text-barro-900">Vagas de emprego</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">Vagas de emprego</h1>
           <p className="text-barro-600">{vagas.length} vagas abertas em Tanguá agora</p>
         </div>
       </div>

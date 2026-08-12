@@ -21,7 +21,7 @@ export default async function PainelReivindicacoes() {
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-medium text-barro-900">Reivindicações pendentes</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">Reivindicações pendentes</h1>
       <p className="text-barro-600">Confirme se quem solicitou é mesmo o responsável pelo negócio.</p>
 
       {!solicitacoes || solicitacoes.length === 0 ? (

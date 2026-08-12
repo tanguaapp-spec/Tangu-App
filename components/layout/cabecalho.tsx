@@ -1,10 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { Menu, X, MapPin, Briefcase, Megaphone, Search, User, LogOut, Store, Settings, Heart } from 'lucide-react'
 import { Botao } from '@/components/ui/botao'
 import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils'
 import type { Perfil } from '@/lib/types/database'
 
 const linksNav = [
@@ -19,6 +21,7 @@ export function Cabecalho() {
   const [user, setUser] = useState<any>(null)
   const [perfil, setPerfil] = useState<Perfil | null>(null)
   const supabase = createClient()
+  const pathname = usePathname()
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -65,16 +68,22 @@ export function Cabecalho() {
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
-          {linksNav.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-barro-700 hover:bg-barro-100 hover:text-barro-900 transition-colors"
-            >
-              <link.icone className="h-4 w-4" />
-              {link.rotulo}
-            </Link>
-          ))}
+          {linksNav.map((link) => {
+            const ativo = pathname === link.href
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                  ativo ? 'bg-casca-100 text-casca-700' : 'text-barro-700 hover:bg-barro-100 hover:text-barro-900'
+                )}
+              >
+                <link.icone className="h-4 w-4" />
+                {link.rotulo}
+              </Link>
+            )
+          })}
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
@@ -126,17 +135,23 @@ export function Cabecalho() {
       {menuAberto && (
         <div className="border-t border-barro-100 bg-feira px-4 py-3 md:hidden">
           <nav className="flex flex-col gap-1">
-            {linksNav.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMenuAberto(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-3 text-barro-800 hover:bg-barro-100"
-              >
-                <link.icone className="h-5 w-5" />
-                {link.rotulo}
-              </Link>
-            ))}
+            {linksNav.map((link) => {
+              const ativo = pathname === link.href
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMenuAberto(false)}
+                  className={cn(
+                    'flex items-center gap-2 rounded-lg px-3 py-3',
+                    ativo ? 'bg-casca-100 font-medium text-casca-700' : 'text-barro-800 hover:bg-barro-100'
+                  )}
+                >
+                  <link.icone className="h-5 w-5" />
+                  {link.rotulo}
+                </Link>
+              )
+            })}
             <hr className="my-2 border-barro-100" />
             {user ? (
             <>

@@ -65,11 +65,11 @@ export default function PaginaInicial() {
             </span>
 
             <h1
-              className="entrada-lista mt-5 max-w-2xl font-display text-4xl font-medium leading-[1.1] text-barro-900 sm:text-6xl"
+              className="entrada-lista mt-5 max-w-2xl text-balance font-display text-4xl font-bold leading-[1.05] tracking-tight text-barro-900 sm:text-6xl"
               style={{ '--i': 1 } as React.CSSProperties}
             >
               Tudo da nossa cidade,{' '}
-              <span className="italic text-casca-500">num só lugar.</span>
+              <span className="italic font-medium text-casca-500">num só lugar.</span>
             </h1>
 
             <p
@@ -139,7 +139,7 @@ export default function PaginaInicial() {
           <MotivoGomo className="pointer-events-none absolute -bottom-16 -right-16 h-64 w-64 text-white" />
           <div className="relative max-w-xl">
             <Users className="h-8 w-8 text-mata-200" />
-            <h2 className="mt-4 font-display text-3xl font-medium leading-tight sm:text-4xl">
+            <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-balance leading-tight sm:text-4xl">
               Tem um negócio em Tanguá? Apareça pra cidade toda.
             </h2>
             <p className="mt-3 text-mata-100">
