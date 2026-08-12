@@ -29,6 +29,13 @@ export const metadata: Metadata = {
   description:
     'Encontre profissionais e comércios de Tanguá, vagas de emprego e tudo o que acontece na cidade.',
   manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [{ url: '/icon-192.png', sizes: '192x192', type: 'image/png' }],
+  },
   openGraph: {
     type: 'website',
     locale: 'pt_BR',

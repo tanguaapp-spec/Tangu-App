@@ -62,3 +62,59 @@
     );
   }
 }
+
+/* ---------------------------------------------------------------------
+   Animações — só transform/opacity (GPU, sem reflow), leves em qualquer
+   aparelho. Tudo já respeita prefers-reduced-motion via o bloco global
+   acima (@media prefers-reduced-motion: reduce zera as durações).
+   --------------------------------------------------------------------- */
+@layer utilities {
+  @keyframes entra-de-baixo {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes flutua {
+    0%, 100% { transform: translateY(0) rotate(var(--flutua-rot, -4deg)); }
+    50% { transform: translateY(-10px) rotate(var(--flutua-rot-fim, -1deg)); }
+  }
+
+  @keyframes gira-suave {
+    from { background-position: 0% 50%; }
+    to { background-position: 200% 50%; }
+  }
+
+  /* usadas pela laranja animada do hero (components/laranja-3d.tsx) */
+  @keyframes flutua-sombra {
+    0%, 100% { transform: scale(1); opacity: 0.35; }
+    50% { transform: scale(0.82); opacity: 0.2; }
+  }
+  @keyframes gomo-brilho {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 0.85; }
+  }
+
+  /* elemento aparece com fade+subida ao entrar na viewport (via hook use-revelar) */
+  .revelar {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+  .revelar.revelar-visivel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* itens em lista/grid: dá pra escalonar o delay com --i (nth do item) */
+  .entrada-lista {
+    animation: entra-de-baixo 0.5s ease-out both;
+    animation-delay: calc(var(--i, 0) * 60ms);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .revelar {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

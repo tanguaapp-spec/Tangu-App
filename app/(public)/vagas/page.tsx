@@ -26,8 +26,8 @@ export default async function PaginaVagas() {
         </div>
       ) : (
         <div className="mt-8 grid gap-5 sm:grid-cols-2">
-          {vagas.map((vaga) => (
-            <CardVaga key={vaga.id} vaga={vaga} />
+          {vagas.map((vaga, i) => (
+            <CardVaga key={vaga.id} vaga={vaga} indice={i} />
           ))}
         </div>
       )}

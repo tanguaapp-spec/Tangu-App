@@ -25,8 +25,8 @@ export default async function PaginaMural() {
         </div>
       ) : (
         <div className="mt-8 grid gap-5 sm:grid-cols-2">
-          {avisos.map((aviso) => (
-            <CardAviso key={aviso.id} aviso={aviso} />
+          {avisos.map((aviso, i) => (
+            <CardAviso key={aviso.id} aviso={aviso} indice={i} />
           ))}
         </div>
       )}

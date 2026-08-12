@@ -37,8 +37,8 @@ export default async function PaginaFavoritos() {
         </div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {favoritos.map((negocio) => (
-            <CardNegocio key={negocio.id} negocio={negocio} />
+          {favoritos.map((negocio, i) => (
+            <CardNegocio key={negocio.id} negocio={negocio} indice={i} />
           ))}
         </div>
       )}

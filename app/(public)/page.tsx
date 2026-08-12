@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { ArrowRight, Briefcase, Megaphone, Store, Users } from 'lucide-react'
 import { BuscaRapida } from '@/components/busca-rapida'
 import { MotivoGomo } from '@/components/motivo-gomo'
+import { Laranja3D } from '@/components/laranja-3d'
+import { Revelar } from '@/components/ui/revelar'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,41 +16,93 @@ const categoriasDestaque = [
   { nome: 'Agro e Produção Rural', slug: 'agro-producao-rural', emoji: '🌱' },
 ]
 
+const pilares = [
+  {
+    href: '/buscar',
+    icone: Store,
+    cor: 'casca' as const,
+    titulo: 'Profissionais e comércios',
+    texto: 'Negócios locais, com contato direto por WhatsApp.',
+    rotulo: 'Explorar diretório',
+  },
+  {
+    href: '/vagas',
+    icone: Briefcase,
+    cor: 'mata' as const,
+    titulo: 'Vagas de emprego',
+    texto: 'Oportunidades reais de empresas e comércios da região.',
+    rotulo: 'Ver vagas abertas',
+  },
+  {
+    href: '/mural',
+    icone: Megaphone,
+    cor: 'barro' as const,
+    titulo: 'Mural da cidade',
+    texto: 'Eventos, avisos, utilidade pública e achados e perdidos.',
+    rotulo: 'Ver o mural',
+  },
+]
+
+const coresPilar = {
+  casca: { bg: 'bg-casca-100', texto: 'text-casca-600', link: 'text-casca-600' },
+  mata: { bg: 'bg-mata-100', texto: 'text-mata-600', link: 'text-mata-600' },
+  barro: { bg: 'bg-barro-100', texto: 'text-barro-700', link: 'text-barro-700' },
+}
+
 export default function PaginaInicial() {
   return (
     <>
       {/* HERO */}
       <section className="relative overflow-hidden textura-papel">
         <MotivoGomo className="pointer-events-none absolute -right-24 -top-24 h-[420px] w-[420px] text-casca-500 sm:-right-10" />
-        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-casca-100 px-3 py-1 text-sm font-semibold text-casca-700">
-            🍊 Feito por e para quem é de Tanguá
-          </span>
+        <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-6">
+          <div>
+            <span
+              className="entrada-lista inline-flex items-center gap-1.5 rounded-full bg-casca-100 px-3 py-1 text-sm font-semibold text-casca-700"
+              style={{ '--i': 0 } as React.CSSProperties}
+            >
+              🍊 Feito por e para quem é de Tanguá
+            </span>
 
-          <h1 className="mt-5 max-w-2xl font-display text-4xl font-medium leading-[1.1] text-barro-900 sm:text-6xl">
-            Tudo da nossa cidade,{' '}
-            <span className="italic text-casca-500">num só lugar.</span>
-          </h1>
+            <h1
+              className="entrada-lista mt-5 max-w-2xl font-display text-4xl font-medium leading-[1.1] text-barro-900 sm:text-6xl"
+              style={{ '--i': 1 } as React.CSSProperties}
+            >
+              Tudo da nossa cidade,{' '}
+              <span className="italic text-casca-500">num só lugar.</span>
+            </h1>
 
-          <p className="mt-5 max-w-xl text-lg text-barro-700">
-            Encontre profissionais e comércios locais, fique de olho nas vagas de emprego
-            e acompanhe os avisos da cidade — tudo conectado, tudo de Tanguá.
-          </p>
+            <p
+              className="entrada-lista mt-5 max-w-xl text-lg text-barro-700"
+              style={{ '--i': 2 } as React.CSSProperties}
+            >
+              Encontre profissionais e comércios locais, fique de olho nas vagas de emprego
+              e acompanhe os avisos da cidade — tudo conectado, tudo de Tanguá.
+            </p>
 
-          <div className="mt-8">
-            <BuscaRapida />
+            <div className="entrada-lista mt-8" style={{ '--i': 3 } as React.CSSProperties}>
+              <BuscaRapida />
+            </div>
+
+            <div className="entrada-lista mt-6 flex flex-wrap gap-2" style={{ '--i': 4 } as React.CSSProperties}>
+              {categoriasDestaque.map((cat) => (
+                <Link
+                  key={cat.slug}
+                  href={`/buscar?categoria=${cat.slug}`}
+                  className="rounded-full bg-white px-4 py-1.5 text-sm text-barro-700 shadow-sm transition-colors hover:bg-casca-50 hover:text-casca-700"
+                >
+                  {cat.emoji} {cat.nome}
+                </Link>
+              ))}
+            </div>
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-2">
-            {categoriasDestaque.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/buscar?categoria=${cat.slug}`}
-                className="rounded-full bg-white px-4 py-1.5 text-sm text-barro-700 shadow-sm transition-colors hover:bg-casca-50 hover:text-casca-700"
-              >
-                {cat.emoji} {cat.nome}
-              </Link>
-            ))}
+          {/* mascote: a laranja de Tanguá */}
+          <div
+            className="entrada-lista order-first lg:order-last"
+            style={{ '--i': 1 } as React.CSSProperties}
+          >
+            <Laranja3D className="mx-auto w-48 sm:w-64 lg:w-full" />
           </div>
         </div>
       </section>
@@ -56,65 +110,32 @@ export default function PaginaInicial() {
       {/* TRÊS PILARES */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <div className="grid gap-6 sm:grid-cols-3">
-          <Link
-            href="/buscar"
-            className="group rounded-casca border border-barro-100 bg-white p-6 shadow-feira transition-all hover:-translate-y-1 hover:shadow-feira-lg"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-casca-100 text-casca-600">
-              <Store className="h-6 w-6" />
-            </div>
-            <h3 className="mt-4 font-display text-xl font-semibold text-barro-900">
-              Profissionais e comércios
-            </h3>
-            <p className="mt-2 text-barro-600">
-              Mais de uma centena de negócios locais, com contato direto por WhatsApp.
-            </p>
-            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-casca-600 group-hover:gap-2 transition-all">
-              Explorar diretório <ArrowRight className="h-4 w-4" />
-            </span>
-          </Link>
-
-          <Link
-            href="/vagas"
-            className="group rounded-casca border border-barro-100 bg-white p-6 shadow-feira transition-all hover:-translate-y-1 hover:shadow-feira-lg"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-mata-100 text-mata-600">
-              <Briefcase className="h-6 w-6" />
-            </div>
-            <h3 className="mt-4 font-display text-xl font-semibold text-barro-900">
-              Vagas de emprego
-            </h3>
-            <p className="mt-2 text-barro-600">
-              Oportunidades reais de empresas e comércios da região, sempre atualizadas.
-            </p>
-            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-mata-600 group-hover:gap-2 transition-all">
-              Ver vagas abertas <ArrowRight className="h-4 w-4" />
-            </span>
-          </Link>
-
-          <Link
-            href="/mural"
-            className="group rounded-casca border border-barro-100 bg-white p-6 shadow-feira transition-all hover:-translate-y-1 hover:shadow-feira-lg"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-barro-100 text-barro-700">
-              <Megaphone className="h-6 w-6" />
-            </div>
-            <h3 className="mt-4 font-display text-xl font-semibold text-barro-900">
-              Mural da cidade
-            </h3>
-            <p className="mt-2 text-barro-600">
-              Eventos, avisos da prefeitura, utilidade pública e achados e perdidos.
-            </p>
-            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-barro-700 group-hover:gap-2 transition-all">
-              Ver o mural <ArrowRight className="h-4 w-4" />
-            </span>
-          </Link>
+          {pilares.map((p, i) => {
+            const cores = coresPilar[p.cor]
+            return (
+              <Link
+                key={p.href}
+                href={p.href}
+                className="entrada-lista group rounded-casca border border-barro-100 bg-white p-6 shadow-feira transition-all hover:-translate-y-1.5 hover:shadow-feira-lg"
+                style={{ '--i': i } as React.CSSProperties}
+              >
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${cores.bg} ${cores.texto} transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6`}>
+                  <p.icone className="h-6 w-6" />
+                </div>
+                <h3 className="mt-4 font-display text-xl font-semibold text-barro-900">{p.titulo}</h3>
+                <p className="mt-2 text-barro-600">{p.texto}</p>
+                <span className={`mt-4 inline-flex items-center gap-1 text-sm font-semibold ${cores.link} transition-all group-hover:gap-2`}>
+                  {p.rotulo} <ArrowRight className="h-4 w-4" />
+                </span>
+              </Link>
+            )
+          })}
         </div>
       </section>
 
       {/* CTA PROFISSIONAL */}
       <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
-        <div className="relative overflow-hidden rounded-casca bg-mata-700 px-8 py-12 text-white sm:px-14">
+        <Revelar className="relative overflow-hidden rounded-casca bg-mata-700 px-8 py-12 text-white sm:px-14">
           <MotivoGomo className="pointer-events-none absolute -bottom-16 -right-16 h-64 w-64 text-white" />
           <div className="relative max-w-xl">
             <Users className="h-8 w-8 text-mata-200" />
@@ -127,12 +148,12 @@ export default function PaginaInicial() {
             </p>
             <Link
               href="/cadastrar?papel=profissional"
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-casca-500 px-6 py-3 font-semibold text-white transition-colors hover:bg-casca-600"
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-casca-500 px-6 py-3 font-semibold text-white transition-all hover:gap-3 hover:bg-casca-600"
             >
               Cadastrar meu negócio <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-        </div>
+        </Revelar>
       </section>
     </>
   )

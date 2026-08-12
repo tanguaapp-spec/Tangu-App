@@ -98,8 +98,8 @@ export default async function PaginaBuscar({
         </div>
       ) : (
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {negocios.map((negocio) => (
-            <CardNegocio key={negocio.id} negocio={negocio} />
+          {negocios.map((negocio, i) => (
+            <CardNegocio key={negocio.id} negocio={negocio} indice={i} />
           ))}
         </div>
       )}

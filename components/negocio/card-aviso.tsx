@@ -18,11 +18,14 @@ const rotulosPorTipo = {
   achados_perdidos: 'Achados e perdidos',
 }
 
-export function CardAviso({ aviso }: { aviso: AvisoCidade }) {
+export function CardAviso({ aviso, indice = 0 }: { aviso: AvisoCidade; indice?: number }) {
   const Icone = iconesPorTipo[aviso.tipo]
 
   return (
-    <div className="rounded-casca border border-barro-100 bg-white p-5 shadow-feira">
+    <div
+      className="entrada-lista rounded-casca border border-barro-100 bg-white p-5 shadow-feira transition-all duration-300 hover:-translate-y-1 hover:shadow-feira-lg"
+      style={{ '--i': Math.min(indice, 8) } as React.CSSProperties}
+    >
       <div className="flex items-center justify-between">
         <Selo tom={aviso.tipo === 'evento' ? 'laranja' : 'neutro'}>
           <Icone className="h-3.5 w-3.5" />
