@@ -4,7 +4,7 @@
   "description": "Tudo da nossa cidade, num só lugar.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FBF4E9",
+  "background_color": "#2E2219",
   "theme_color": "#2E2219",
   "icons": [
     {
