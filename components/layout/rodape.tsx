@@ -9,7 +9,7 @@ export function Rodape() {
   return (
     <footer className="mt-20 border-t border-barro-100 bg-barro-900 text-barro-100">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <div className="grid gap-10 sm:grid-cols-3">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <div className="flex items-center gap-2">
               <LogoTangua className="h-8 w-8" />
@@ -34,6 +34,16 @@ export function Rodape() {
               <li><Link href="/vagas" className="hover:text-white">Vagas de emprego</Link></li>
               <li><Link href="/mural" className="hover:text-white">Mural da cidade</Link></li>
               <li><Link href="/cadastrar?papel=profissional" className="hover:text-white">Cadastre seu negócio</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-casca-400">
+              Legal
+            </h3>
+            <ul className="mt-3 space-y-2 text-sm text-barro-300">
+              <li><Link href="/privacidade" className="hover:text-white">Política de Privacidade</Link></li>
+              <li><Link href="/termos" className="hover:text-white">Termos de Uso</Link></li>
             </ul>
           </div>
 

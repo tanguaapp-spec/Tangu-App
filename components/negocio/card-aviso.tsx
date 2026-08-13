@@ -6,6 +6,7 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { ReacoesAviso } from '@/components/mural/reacoes-aviso'
 import { FormularioResponderPergunta } from '@/components/mural/formulario-responder-pergunta'
+import { BotaoDenunciar } from '@/components/moderacao/botao-denunciar'
 
 const iconesPorTipo = {
   aviso: Megaphone,
@@ -75,17 +76,24 @@ export function CardAviso({ aviso, indice = 0, contagensReacao = {}, minhaReacao
       {aviso.tipo === 'pergunta' && (
         <div className="mt-3 border-t border-barro-100 pt-3">
           {respostas.length > 0 && (
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2.5">
               {respostas.map(
                 (r) =>
                   r.negocio && (
-                    <Link
-                      key={r.id}
-                      href={`/negocio/${r.negocio.id}`}
-                      className="flex items-center gap-1.5 text-sm font-medium text-mata-700 hover:underline"
-                    >
-                      <Store className="h-3.5 w-3.5" /> {r.negocio.nome}
-                    </Link>
+                    <div key={r.id}>
+                      <Link
+                        href={`/negocio/${r.negocio.id}`}
+                        className="flex items-center gap-1.5 text-sm font-medium text-mata-700 hover:underline"
+                      >
+                        <Store className="h-3.5 w-3.5" /> {r.negocio.nome}
+                      </Link>
+                      <BotaoDenunciar
+                        tipoConteudo="resposta_pergunta"
+                        conteudoId={r.id}
+                        negocioId={r.negocio.id}
+                        logado={logado}
+                      />
+                    </div>
                   )
               )}
             </div>
@@ -95,6 +103,7 @@ export function CardAviso({ aviso, indice = 0, contagensReacao = {}, minhaReacao
       )}
 
       <ReacoesAviso avisoId={aviso.id} contagens={contagensReacao} minhaReacao={minhaReacao} logado={logado} />
+      <BotaoDenunciar tipoConteudo="aviso" conteudoId={aviso.id} logado={logado} />
     </div>
   )
 }

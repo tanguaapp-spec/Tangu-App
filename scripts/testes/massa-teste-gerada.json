@@ -2,8 +2,8 @@
   "profissionais": [
     {
       "email": "profissional01.mercearia.teste@tangua-app-teste.dev",
-      "userId": "1721d65b-3d4b-4753-8c9c-5699bab7917f",
-      "negocioId": "c3cc61c4-8285-447f-8af1-b915a5acc722",
+      "userId": "1417a752-c944-4a65-9d0c-d1d5b59136e6",
+      "negocioId": "3f3fe969-73fd-450e-9e14-c53c69f84416",
       "nome": "[TESTE] Mercearia da Praça",
       "modalidades": [
         "loja_fisica"
@@ -11,8 +11,8 @@
     },
     {
       "email": "profissional02.salao.teste@tangua-app-teste.dev",
-      "userId": "c163d049-9911-494b-9b46-a59db36a7e44",
-      "negocioId": "286a3030-7a5e-418a-92f3-ba64d1409027",
+      "userId": "140fbb82-4488-4c21-8e61-d6a6004cd47c",
+      "negocioId": "e20aae65-f116-4058-b6de-65aa4a02235f",
       "nome": "[TESTE] Salão da Ana",
       "modalidades": [
         "loja_fisica"
@@ -20,8 +20,8 @@
     },
     {
       "email": "profissional03.oficina.teste@tangua-app-teste.dev",
-      "userId": "82c04dd0-f03d-4c35-8d78-0a336e1e138b",
-      "negocioId": "a4c708cd-b6f7-471f-a184-ebbd1f6b7c06",
+      "userId": "8cff423b-9050-477c-93f5-df6c623aa343",
+      "negocioId": "d720f671-0470-4e0b-9011-6da816f79151",
       "nome": "[TESTE] Oficina do Zé",
       "modalidades": [
         "loja_fisica"
@@ -29,8 +29,8 @@
     },
     {
       "email": "profissional04.cabeleireira-domiciliar.teste@tangua-app-teste.dev",
-      "userId": "346468bb-c84f-4288-8482-8ab49725053e",
-      "negocioId": "d047560f-794b-4b12-a517-ef5e190eecdc",
+      "userId": "729293ae-2083-471d-bf14-1821a4d5db37",
+      "negocioId": "cbcf0b34-069f-4e24-9cda-f48b63b7a13c",
       "nome": "[TESTE] Cabeleireira Domiciliar Bia",
       "modalidades": [
         "atende_em_casa"
@@ -38,8 +38,8 @@
     },
     {
       "email": "profissional05.terapeuta.teste@tangua-app-teste.dev",
-      "userId": "16752e2d-8025-4254-968a-84cb18aa98f0",
-      "negocioId": "ce63fac7-e58b-48f2-84c8-b893792965d7",
+      "userId": "0d53f480-24f3-40e7-9177-b4b5a8799107",
+      "negocioId": "d7186643-ff41-42d2-9afd-f23a7d9b7ec5",
       "nome": "[TESTE] Terapeuta Holística Lu",
       "modalidades": [
         "atende_em_casa"
@@ -47,8 +47,8 @@
     },
     {
       "email": "profissional06.eletricista.teste@tangua-app-teste.dev",
-      "userId": "695ae069-6223-4724-a908-ba458e5a279b",
-      "negocioId": "5a510d09-80b1-45fa-97bc-cd78e7502c59",
+      "userId": "b5e18989-ad78-413c-91a1-1ebc5b5ebac3",
+      "negocioId": "70679d5a-16d0-4ee4-830d-9db829832b8f",
       "nome": "[TESTE] Eletricista Marcão",
       "modalidades": [
         "atende_domicilio"
@@ -56,8 +56,8 @@
     },
     {
       "email": "profissional07.encanador.teste@tangua-app-teste.dev",
-      "userId": "b5c4e4b2-ea05-42c6-b4f5-6b206e99413f",
-      "negocioId": "c7d3efe3-9f4d-4ab9-88b8-7a60eeb28175",
+      "userId": "865d8592-09e5-4c26-be5e-dafa1bd4f234",
+      "negocioId": "07461889-9ef8-42f3-88e3-82984012c8bf",
       "nome": "[TESTE] Encanador Pedro",
       "modalidades": [
         "atende_domicilio"
@@ -65,8 +65,8 @@
     },
     {
       "email": "profissional08.diarista.teste@tangua-app-teste.dev",
-      "userId": "e79876b9-a904-4012-81df-383fabbe4be7",
-      "negocioId": "0d86d68d-c5c4-45b2-851d-a7cd0f10432e",
+      "userId": "8ffa359d-1516-4e74-a146-887d483b94dc",
+      "negocioId": "441996fd-bca7-4da7-a23e-07871f9bbeca",
       "nome": "[TESTE] Diarista Conceição",
       "modalidades": [
         "atende_domicilio"
@@ -74,8 +74,8 @@
     },
     {
       "email": "profissional09.designer.teste@tangua-app-teste.dev",
-      "userId": "4ef93e9e-2977-46d5-82b5-fb05ca6805d3",
-      "negocioId": "1e785aaa-6837-41c4-a2e0-99b6afe10a61",
+      "userId": "42b3181c-2811-41c9-afa8-17f00ec4db9d",
+      "negocioId": "4b438363-4733-4841-ada5-6c86d9bbeb25",
       "nome": "[TESTE] Designer Freelancer Rafa",
       "modalidades": [
         "servico_digital"
@@ -83,8 +83,8 @@
     },
     {
       "email": "profissional10.professora.teste@tangua-app-teste.dev",
-      "userId": "de96a7f2-5b58-467e-9a0b-2c02e8101453",
-      "negocioId": "c15792cb-cfa7-436a-b93a-3f9f29ed0615",
+      "userId": "a831d814-4fff-426c-866d-82b4c805d9e1",
+      "negocioId": "c95bb247-81e4-4a35-b3e9-f9f4f082ed78",
       "nome": "[TESTE] Aulas Particulares Online — Prof. Carla",
       "modalidades": [
         "servico_digital"
@@ -92,8 +92,8 @@
     },
     {
       "email": "profissional11.salao-domicilio.teste@tangua-app-teste.dev",
-      "userId": "353a879e-4495-4a7d-9ecc-cd7eddeb1259",
-      "negocioId": "52240ed4-8d8c-4f25-9e2f-bc9333d47c21",
+      "userId": "e6c74ce6-f20e-4a51-a629-4f1a6f00d004",
+      "negocioId": "fdcd05fd-4ae6-4beb-b9db-0963be522bac",
       "nome": "[TESTE] Studio de Unhas Camila",
       "modalidades": [
         "loja_fisica",
@@ -104,22 +104,22 @@
   "moradores": [
     {
       "email": "morador-centro.teste@tangua-app-teste.dev",
-      "userId": "2b825245-9829-44f9-b6a9-06133f9f2050",
+      "userId": "2b9e0629-89cc-4e04-b50a-044a95ff53f3",
       "nome": "[TESTE] Morador Centro",
       "bairro": "Centro"
     },
     {
       "email": "morador-manilha.teste@tangua-app-teste.dev",
-      "userId": "5050f2e1-99f5-4e19-86b8-8a1f9e25ff59",
+      "userId": "7c85531a-92e9-4543-bbcb-b8f76ca127b5",
       "nome": "[TESTE] Morador Manilha",
       "bairro": "Manilha"
     },
     {
       "email": "morador-zona-rural.teste@tangua-app-teste.dev",
-      "userId": "9b5b80c0-8b55-484b-b4cc-2742cf7d24c7",
+      "userId": "b026b2a3-6b88-413c-b034-e1132cd7c301",
       "nome": "[TESTE] Morador Zona Rural",
       "bairro": "Zona Rural"
     }
   ],
-  "geradoEm": "2026-08-12T19:28:14.827Z"
+  "geradoEm": "2026-08-13T15:04:17.394Z"
 }

@@ -140,6 +140,32 @@ export async function rejeitarNegocioPendente(negocioId: string, motivo: string)
   return { erro: null }
 }
 
+/**
+ * Ativa/desativa o destaque de um negócio no diretório. Pagamento é
+ * combinado manualmente pelo admin fora do app (WhatsApp) — aqui só
+ * registra a ativação e, se informado, a data de expiração.
+ */
+export async function alternarDestaque(negocioId: string, ativo: boolean, dias?: number) {
+  const auth = await requireAdmin()
+  if ('erro' in auth) return { erro: auth.erro }
+
+  const { supabase } = auth
+
+  const destaqueExpiraEm =
+    ativo && dias ? new Date(Date.now() + dias * 24 * 60 * 60 * 1000).toISOString() : ativo ? null : null
+
+  const { error } = await supabase
+    .from('negocios')
+    .update({ destaque_ativo: ativo, destaque_expira_em: destaqueExpiraEm })
+    .eq('id', negocioId)
+
+  if (error) return { erro: error.message }
+
+  revalidatePath('/painel/admin/negocios')
+  revalidatePath('/buscar')
+  return { erro: null }
+}
+
 export async function criarVaga(formData: FormData) {
   const auth = await requireAdmin()
   if ('erro' in auth) return { erro: auth.erro }

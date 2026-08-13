@@ -32,6 +32,11 @@ export async function cadastrarComEmail(formData: FormData) {
   const nomeCompleto = formData.get('nomeCompleto') as string
   const papel = (formData.get('papel') as string) || 'morador'
   const codigoConvite = (formData.get('codigo_convite') as string) || undefined
+  const aceiteTermos = formData.get('aceiteTermos')
+
+  if (aceiteTermos !== 'on') {
+    return { erro: 'Você precisa aceitar os Termos de Uso e a Política de Privacidade para continuar.' }
+  }
 
   const podeCadastrar = await dentroDoLimite(`cadastro:${ipDoRequest()}`, 5, 60 * 60)
   if (!podeCadastrar) {

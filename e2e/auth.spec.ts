@@ -11,6 +11,7 @@ test.describe('Autenticação', () => {
     await page.getByLabel(/nome completo/i).fill(`Morador Teste ${sufixo}`)
     await page.getByLabel(/e-mail/i).fill(`e2e.signup.${sufixo}@${DOMINIO_TESTE}`)
     await page.getByLabel(/senha/i).fill('SenhaForte!123')
+    await page.getByLabel(/termos de uso/i).check()
     await page.getByRole('button', { name: /criar minha conta/i }).click()
     await expect(page).toHaveURL(/confirme-seu-email/)
   })
@@ -22,8 +23,20 @@ test.describe('Autenticação', () => {
     await page.getByLabel(/nome completo/i).fill(`Profissional Teste ${sufixo}`)
     await page.getByLabel(/e-mail/i).fill(`e2e.signup.${sufixo}@${DOMINIO_TESTE}`)
     await page.getByLabel(/senha/i).fill('SenhaForte!123')
+    await page.getByLabel(/termos de uso/i).check()
     await page.getByRole('button', { name: /criar minha conta/i }).click()
     await expect(page).toHaveURL(/confirme-seu-email/)
+  })
+
+  test('cadastro sem aceitar os termos é bloqueado pelo navegador (campo obrigatório)', async ({ page }) => {
+    const sufixo = `${Date.now()}-semtermos`
+    await page.goto('/cadastrar')
+    await page.getByLabel(/nome completo/i).fill(`Sem Termos ${sufixo}`)
+    await page.getByLabel(/e-mail/i).fill(`e2e.signup.${sufixo}@${DOMINIO_TESTE}`)
+    await page.getByLabel(/senha/i).fill('SenhaForte!123')
+    await page.getByRole('button', { name: /criar minha conta/i }).click()
+    // continua na mesma página — o checkbox "required" impede o submit
+    await expect(page).toHaveURL(/\/cadastrar/)
   })
 
   test('login com usuário confirmado leva pra home, e sair funciona', async ({ page }) => {

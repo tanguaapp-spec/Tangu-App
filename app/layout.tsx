@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Fraunces, Inter, JetBrains_Mono } from 'next/font/google'
+import { RegistrarServiceWorker } from '@/components/pwa/registrar-service-worker'
 import './globals.css'
 
 const fraunces = Fraunces({
@@ -63,7 +64,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="font-body antialiased">{children}</body>
+      <body className="font-body antialiased">
+        <RegistrarServiceWorker />
+        {children}
+      </body>
     </html>
   )
 }

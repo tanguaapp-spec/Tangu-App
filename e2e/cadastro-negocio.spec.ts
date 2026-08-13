@@ -1,6 +1,20 @@
 import { test, expect } from '@playwright/test'
 import { criarUsuarioTeste, removerUsuarioTeste } from './helpers/usuarios-teste'
 import { loginPelaUI } from './helpers/ui'
+import { clienteAdmin } from './helpers/supabase-admin'
+
+// Sem isso, cada rodada deixa um negócio "[TESTE-E2E]" órfão em produção:
+// o usuário é removido no finally, mas o negócio criado por ele não —
+// e negocios.reivindicado_por não tem "on delete cascade", então a linha fica
+// pra sempre com dono inexistente. Chamado no finally de cada teste que cadastra.
+async function removerNegocioDoUsuario(usuarioId: string) {
+  const admin = clienteAdmin()
+  try {
+    await admin.from('negocios').delete().eq('reivindicado_por', usuarioId)
+  } catch {
+    // ignora — cleanup de teste nunca pode quebrar o teste em si
+  }
+}
 
 test.describe('Cadastro de negócio — modalidade de atendimento (Fase 0)', () => {
   test('profissional cadastra negócio escolhendo modalidades e vê "em análise" no painel', async ({ page }) => {
@@ -23,6 +37,7 @@ test.describe('Cadastro de negócio — modalidade de atendimento (Fase 0)', () 
       await expect(page).toHaveURL('/painel/negocio')
       await expect(page.getByText(/está em análise/i)).toBeVisible()
     } finally {
+      await removerNegocioDoUsuario(usuario.id)
       await removerUsuarioTeste(usuario.id)
     }
   })
@@ -40,6 +55,7 @@ test.describe('Cadastro de negócio — modalidade de atendimento (Fase 0)', () 
       await expect(page.getByText(/escolha ao menos uma forma de atendimento/i)).toBeVisible()
       await expect(page).toHaveURL(/\/painel\/negocio\/cadastrar/)
     } finally {
+      await removerNegocioDoUsuario(usuario.id)
       await removerUsuarioTeste(usuario.id)
     }
   })
@@ -59,6 +75,7 @@ test.describe('Cadastro de negócio — modalidade de atendimento (Fase 0)', () 
       await expect(page).toHaveURL('/painel/negocio')
       await expect(page.getByText(/está em análise/i)).toBeVisible()
     } finally {
+      await removerNegocioDoUsuario(usuario.id)
       await removerUsuarioTeste(usuario.id)
     }
   })

@@ -10,6 +10,16 @@ const withPWA = require('next-pwa')({
   fallbacks: {
     document: '/offline.html',
   },
+  // next-pwa v5 inclui /_next/app-build-manifest.json no precache por padrão,
+  // mas esse arquivo é uso interno do Next (App Router) e nunca é servido
+  // publicamente (404) — o workbox tentava buscá-lo durante a instalação do
+  // service worker, a instalação inteira falhava por causa desse único
+  // arquivo, e o SW nunca ficava "active". Resultado: nenhum usuário real
+  // jamais teve o service worker funcionando (achado via teste E2E real de
+  // push notification, não em code review — sem esse teste, ficaria
+  // invisível pra sempre, já que o app continua funcionando normal sem SW,
+  // só sem push/offline).
+  buildExcludes: [/app-build-manifest\.json$/],
 })
 
 // CSP pensada pro que o app de fato usa: fontes self-hosted (next/font), imagens

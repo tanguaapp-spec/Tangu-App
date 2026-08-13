@@ -13,6 +13,9 @@ import {
   Briefcase,
   Megaphone,
   AlertTriangle,
+  Flag,
+  Sparkles,
+  Radar,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -30,9 +33,12 @@ const LINKS_PROFISSIONAL: LinkPainel[] = [{ href: '/painel/negocio', rotulo: 'Me
 const LINKS_ADMIN: LinkPainel[] = [
   { href: '/painel/admin', rotulo: 'Visão geral', icone: LayoutDashboard },
   { href: '/painel/admin/negocios-pendentes', rotulo: 'Cadastros pendentes', icone: Store },
+  { href: '/painel/admin/negocios', rotulo: 'Negócios (destaque)', icone: Sparkles },
   { href: '/painel/admin/reivindicacoes', rotulo: 'Reivindicações', icone: ShieldCheck },
+  { href: '/painel/admin/denuncias', rotulo: 'Denúncias', icone: Flag },
   { href: '/painel/admin/vagas', rotulo: 'Vagas', icone: Briefcase },
   { href: '/painel/admin/avisos', rotulo: 'Avisos da cidade', icone: Megaphone },
+  { href: '/painel/admin/prospeccao', rotulo: 'Prospecção (Google Maps)', icone: Radar },
   { href: '/painel/admin/logs', rotulo: 'Logs de erro', icone: AlertTriangle },
 ]
 

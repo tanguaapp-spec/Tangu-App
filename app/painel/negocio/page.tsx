@@ -13,6 +13,7 @@ import { DesempenhoSemanal } from '@/components/painel/desempenho-semanal'
 import { BotaoEncerrarVaga } from '@/components/painel/botao-encerrar-vaga'
 import { AlternadorAbertoAgora } from '@/components/painel/alternador-aberto-agora'
 import { CartaoDivulgacao } from '@/components/painel/cartao-divulgacao'
+import { CartaoDestaque } from '@/components/painel/cartao-destaque'
 import { CartaoFerramentaParceira } from '@/components/painel/cartao-ferramenta-parceira'
 import { reenviarCadastroNegocio } from '@/lib/actions/painel-negocio-actions'
 import { Star, Store, Clock3, ShieldAlert } from 'lucide-react'
@@ -198,6 +199,13 @@ export default async function PainelNegocio() {
       </div>
 
       <CartaoDivulgacao urlPublica={urlPublica} nomeNegocio={negocio.nome} />
+
+      <CartaoDestaque
+        negocioId={negocio.id}
+        nomeNegocio={negocio.nome}
+        destaqueAtivo={negocio.destaque_ativo}
+        destaqueExpiraEm={negocio.destaque_expira_em}
+      />
 
       <div className="mt-8 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
         <h2 className="font-display text-lg font-semibold text-barro-900">Informações do negócio</h2>

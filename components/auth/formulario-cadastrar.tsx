@@ -68,6 +68,27 @@ export function FormularioCadastrar({
       <Campo type="email" name="email" id="email" rotulo="E-mail" placeholder="voce@email.com" required />
       <Campo type="password" name="senha" id="senha" rotulo="Senha" placeholder="Mínimo 6 caracteres" minLength={6} required />
 
+      <label htmlFor="aceite-termos" className="flex items-start gap-2 text-sm text-barro-600">
+        <input
+          type="checkbox"
+          id="aceite-termos"
+          name="aceiteTermos"
+          required
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-barro-300 text-casca-600 focus:ring-casca-500"
+        />
+        <span>
+          Li e concordo com os{' '}
+          <a href="/termos" target="_blank" rel="noopener noreferrer" className="font-medium text-casca-600 hover:underline">
+            Termos de Uso
+          </a>{' '}
+          e a{' '}
+          <a href="/privacidade" target="_blank" rel="noopener noreferrer" className="font-medium text-casca-600 hover:underline">
+            Política de Privacidade
+          </a>
+          .
+        </span>
+      </label>
+
       {erro && <p className="text-sm text-red-600">{erro}</p>}
 
       <Botao type="submit" carregando={carregando} className="mt-2">

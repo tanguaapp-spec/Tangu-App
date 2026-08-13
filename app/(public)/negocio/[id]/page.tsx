@@ -24,6 +24,7 @@ import { FormularioAvaliacao } from '@/components/negocio/formulario-avaliacao'
 import { registrarEventoPerfil } from '@/lib/actions/negocio-actions'
 import { CupomBanner } from '@/components/negocio/cupom-banner'
 import { SeloRespondeRapido, negocioEstaAtivo } from '@/components/negocio/selo-responde-rapido'
+import { BotaoDenunciar } from '@/components/moderacao/botao-denunciar'
 
 const diasSemana: Record<string, string> = {
   seg: 'Segunda',
@@ -264,6 +265,12 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
                         <span className="font-semibold">Resposta do profissional:</span> {av.resposta_profissional}
                       </div>
                     )}
+                    <BotaoDenunciar
+                      tipoConteudo="avaliacao"
+                      conteudoId={av.id}
+                      negocioId={params.id}
+                      logado={!!user}
+                    />
                   </div>
                 ))}
               </div>

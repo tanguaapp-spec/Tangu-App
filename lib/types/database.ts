@@ -6,6 +6,9 @@ export type TipoAviso = 'aviso' | 'evento' | 'utilidade_publica' | 'achados_perd
 export type ModalidadeAtendimento = 'loja_fisica' | 'atende_em_casa' | 'atende_domicilio' | 'servico_digital'
 export type TipoEventoPerfil = 'visualizacao' | 'favorito' | 'clique_whatsapp'
 export type TipoReacaoAviso = 'gostei' | 'parabens' | 'obrigado'
+export type TipoConteudoDenuncia = 'avaliacao' | 'aviso' | 'resposta_pergunta'
+export type StatusDenuncia = 'pendente' | 'removido' | 'arquivado'
+export type StatusProspeccao = 'novo' | 'contactado' | 'convidado' | 'convertido' | 'ignorado'
 
 export type Perfil = {
   id: string
@@ -208,6 +211,41 @@ export type CartaoFidelidade = {
   negocio?: Negocio
 }
 
+export type Denuncia = {
+  id: string
+  tipo_conteudo: TipoConteudoDenuncia
+  conteudo_id: string
+  negocio_id: string | null
+  motivo: string
+  denunciante_id: string
+  status: StatusDenuncia
+  revisado_por: string | null
+  revisado_em: string | null
+  criado_em: string
+  denunciante?: Perfil
+  negocio?: Negocio
+}
+
+export type ProspeccaoNegocio = {
+  id: string
+  google_place_id: string
+  nome: string
+  categoria_slug: string | null
+  endereco: string | null
+  bairro: string | null
+  telefone: string | null
+  site: string | null
+  latitude: number | null
+  longitude: number | null
+  nota_google: number | null
+  total_avaliacoes_google: number | null
+  negocio_vinculado_id: string | null
+  status: StatusProspeccao
+  observacoes: string | null
+  sincronizado_em: string
+  criado_em: string
+}
+
 export type PushSubscriptionSalva = {
   id: string
   perfil_id: string
@@ -245,6 +283,8 @@ export type Database = {
       reacoes_aviso: TabelaGenerica<ReacaoAviso>
       pontos_laranjas: TabelaGenerica<PontoLaranja>
       cartoes_fidelidade: TabelaGenerica<CartaoFidelidade>
+      denuncias: TabelaGenerica<Denuncia>
+      prospeccoes_negocios: TabelaGenerica<ProspeccaoNegocio>
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -255,6 +295,7 @@ export type Database = {
       post_tipo: TipoPost
       aviso_tipo: TipoAviso
       modalidade_atendimento: ModalidadeAtendimento
+      tipo_conteudo_denuncia: TipoConteudoDenuncia
     }
     CompositeTypes: Record<string, never>
   }
