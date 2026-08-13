@@ -109,7 +109,26 @@ async function main() {
     const botaoSino = page.getByRole('button', { name: /ativar notifica/i }).first()
     await botaoSino.waitFor({ state: 'visible', timeout: 15000 })
     await botaoSino.click()
-    await expectEm(page, /desativar notifica/i, 15000)
+
+    try {
+      // pushManager.subscribe() bate no serviço de push real (Google) — às
+      // vezes leva mais que alguns segundos, então damos folga maior aqui
+      // antes de considerar falha de verdade.
+      await expectEm(page, /desativar notifica/i, 30000)
+    } catch (e) {
+      const posClique = await page.evaluate(async () => {
+        const reg = await navigator.serviceWorker.ready.catch((err) => `ready falhou: ${err}`)
+        const sub = typeof reg === 'string' ? null : await reg.pushManager.getSubscription().catch((err) => `getSubscription falhou: ${err}`)
+        return { permissao: Notification.permission, temInscricao: !!sub, subErro: typeof sub === 'string' ? sub : null }
+      })
+      console.log('   diagnóstico pós-clique:', posClique)
+      const botoes = await page.locator('button[aria-label*="notifica" i]').allTextContents()
+      const titles = await page.locator('button[aria-label*="notifica" i]').evaluateAll((els) =>
+        els.map((e) => ({ aria: e.getAttribute('aria-label'), title: e.getAttribute('title'), disabled: (e as HTMLButtonElement).disabled }))
+      )
+      console.log('   estado dos botões de notificação:', titles)
+      throw e
+    }
 
     await context.close()
     console.log('   ✔ Sino mudou para "ativo" — o browser concluiu a inscrição push.')
