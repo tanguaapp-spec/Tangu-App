@@ -28,20 +28,32 @@ export default async function PaginaPerfil() {
       buscarCartoesFidelidadeDoUsuario(user.id),
     ])
 
+  const primeiroNome = perfil.nome_completo?.split(' ')[0] || 'você'
+
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <div className="mb-6 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-mata-100 text-mata-600">
-          <User className="h-6 w-6" />
+    <div className="mx-auto max-w-3xl pb-10">
+      <div className="relative overflow-hidden rounded-b-[28px] bg-barro-900 px-4 pb-6 pt-3 text-white sm:px-6">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-14 -top-20 h-56 w-56 rounded-full bg-casca-500 opacity-25 blur-3xl"
+        />
+        <div className="relative flex items-center gap-3">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+            <User className="h-7 w-7" />
+          </span>
+          <div className="min-w-0">
+            <h1 className="truncate font-display text-2xl font-bold">Olá, {primeiroNome}!</h1>
+            {perfil.bairro && <p className="text-sm text-barro-200">{perfil.bairro}, Tanguá</p>}
+          </div>
         </div>
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">Meu perfil</h1>
       </div>
 
-      <div className="mb-6">
-        <SaldoLaranjas saldo={saldoLaranjas} />
-      </div>
+      <div className="px-4 sm:px-6">
+        <div className="-mt-4 mb-6">
+          <SaldoLaranjas saldo={saldoLaranjas} />
+        </div>
 
-      {cartoesFidelidade.length > 0 && (
+        {cartoesFidelidade.length > 0 && (
         <div className="mb-6">
           <CartoesFidelidade cartoes={cartoesFidelidade as any} />
         </div>
@@ -59,6 +71,7 @@ export default async function PaginaPerfil() {
       )}
 
       <FormularioPerfil perfil={perfil} />
+      </div>
     </div>
   )
 }

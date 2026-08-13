@@ -11,9 +11,14 @@ export function CardVaga({ vaga, indice = 0 }: { vaga: Vaga; indice?: number }) 
       style={{ '--i': Math.min(indice, 8) } as React.CSSProperties}
     >
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="font-display text-lg font-semibold text-barro-900">{vaga.titulo}</h3>
-          <p className="text-sm text-barro-600">{vaga.empresa_nome}</p>
+        <div className="flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-barro-900 text-white">
+            <Briefcase className="h-5 w-5" />
+          </span>
+          <div>
+            <h3 className="font-display text-lg font-semibold text-barro-900">{vaga.titulo}</h3>
+            <p className="text-sm text-barro-600">{vaga.empresa_nome}</p>
+          </div>
         </div>
         {vaga.tipo_contrato && <Selo tom="verde">{vaga.tipo_contrato}</Selo>}
       </div>

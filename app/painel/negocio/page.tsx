@@ -146,7 +146,26 @@ export default async function PainelNegocio() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* cabeçalho — mobile: painel escuro compacto, cara de app */}
+      <div className="relative overflow-hidden rounded-[28px] bg-barro-900 px-5 py-5 text-white lg:hidden">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-14 -top-20 h-56 w-56 rounded-full bg-casca-500 opacity-25 blur-3xl"
+        />
+        <div className="relative flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="truncate font-display text-2xl font-bold">{negocio.nome}</h1>
+              {negocio.verificado && <Selo tom="verde">Verificado</Selo>}
+            </div>
+            <p className="text-sm text-barro-200">Gerencie as informações e novidades do seu negócio.</p>
+          </div>
+          <AlternadorAbertoAgora negocioId={negocio.id} valorInicial={negocio.aberto_agora} />
+        </div>
+      </div>
+
+      {/* cabeçalho — desktop: como já era */}
+      <div className="hidden flex-wrap items-center justify-between gap-3 lg:flex">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">{negocio.nome}</h1>
@@ -157,7 +176,7 @@ export default async function PainelNegocio() {
         <AlternadorAbertoAgora negocioId={negocio.id} valorInicial={negocio.aberto_agora} />
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:mt-6">
         <div className="rounded-xl border border-barro-100 bg-white p-4">
           <Star className="h-5 w-5 text-casca-500" />
           <p className="mt-2 text-2xl font-semibold text-barro-900">{notasMedia}</p>

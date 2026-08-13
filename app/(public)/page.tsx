@@ -4,18 +4,22 @@ import { BuscaRapida } from '@/components/busca-rapida'
 import { MotivoGomo } from '@/components/motivo-gomo'
 import { Laranja3D } from '@/components/laranja-3d'
 import { Revelar } from '@/components/ui/revelar'
-import { CardNegocio } from '@/components/negocio/card-negocio'
-import { buscarAchadoDoDia } from '@/lib/queries/negocios'
+import { CardAchadoDoDia } from '@/components/negocio/card-achado-do-dia'
+import { CardNegocioMini } from '@/components/negocio/card-negocio-mini'
+import { iconeCategoria } from '@/lib/ui/icone-categoria'
+import { buscarAchadoDoDia, buscarNegociosVitrine } from '@/lib/queries/negocios'
 
 export const revalidate = 60
 
+// nome do ícone bate com o seed de `categorias.icone` (supabase/migrations/0001) —
+// mesmo ícone que aparece no card de cada negócio dessa categoria.
 const categoriasDestaque = [
-  { nome: 'Alimentação', slug: 'alimentacao', emoji: '🍽️' },
-  { nome: 'Beleza e Estética', slug: 'beleza-estetica', emoji: '💇' },
-  { nome: 'Casa e Construção', slug: 'casa-construcao', emoji: '🔨' },
-  { nome: 'Automotivo', slug: 'automotivo', emoji: '🚗' },
-  { nome: 'Saúde e Bem-estar', slug: 'saude-bem-estar', emoji: '🩺' },
-  { nome: 'Agro e Produção Rural', slug: 'agro-producao-rural', emoji: '🌱' },
+  { nome: 'Alimentação', slug: 'alimentacao', icone: 'utensils' },
+  { nome: 'Beleza e Estética', slug: 'beleza-estetica', icone: 'scissors' },
+  { nome: 'Casa e Construção', slug: 'casa-construcao', icone: 'hammer' },
+  { nome: 'Automotivo', slug: 'automotivo', icone: 'car' },
+  { nome: 'Saúde e Bem-estar', slug: 'saude-bem-estar', icone: 'heart-pulse' },
+  { nome: 'Agro e Produção Rural', slug: 'agro-producao-rural', icone: 'sprout' },
 ]
 
 function saudacao() {
@@ -60,6 +64,7 @@ const coresPilar = {
 
 export default async function PaginaInicial() {
   const achadoDoDia = await buscarAchadoDoDia()
+  const pertoDeVoce = await buscarNegociosVitrine(4, achadoDoDia?.id)
 
   return (
     <>
@@ -131,28 +136,50 @@ export default async function PaginaInicial() {
       {/* CATEGORIAS — pílulas de atalho, compartilhadas pelas duas versões do hero */}
       <section className="mx-auto max-w-6xl px-4 pt-4 sm:px-6 lg:pt-0">
         <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible">
-          {categoriasDestaque.map((cat) => (
-            <Link
-              key={cat.slug}
-              href={`/buscar?categoria=${cat.slug}`}
-              className="shrink-0 rounded-full bg-white px-4 py-1.5 text-sm text-barro-700 shadow-sm transition-colors hover:bg-casca-50 hover:text-casca-700"
-            >
-              {cat.emoji} {cat.nome}
-            </Link>
-          ))}
+          <Link
+            href="/buscar"
+            className="shrink-0 rounded-full bg-casca-500 px-4 py-1.5 text-sm font-semibold text-white shadow-sm"
+          >
+            Tudo
+          </Link>
+          {categoriasDestaque.map((cat) => {
+            const Icone = iconeCategoria(cat.icone)
+            return (
+              <Link
+                key={cat.slug}
+                href={`/buscar?categoria=${cat.slug}`}
+                className="flex shrink-0 items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-sm text-barro-700 shadow-sm transition-colors hover:bg-casca-50 hover:text-casca-700"
+              >
+                <Icone className="h-3.5 w-3.5" />
+                {cat.nome}
+              </Link>
+            )
+          })}
         </div>
       </section>
 
       {/* ACHADO DO DIA */}
       {achadoDoDia && (
-        <section className="mx-auto max-w-6xl px-4 pt-4 sm:px-6">
+        <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-casca-500" />
             <h2 className="font-display text-xl font-semibold text-barro-900">Achado do dia</h2>
           </div>
-          <p className="mt-1 text-sm text-barro-600">Um negócio novo em destaque todo dia — hoje é a vez desse aqui.</p>
+          <p className="mt-1 text-sm text-barro-600">Um negócio em destaque todo dia — hoje é a vez desse aqui.</p>
           <div className="mt-4 max-w-sm">
-            <CardNegocio negocio={achadoDoDia} />
+            <CardAchadoDoDia negocio={achadoDoDia} />
+          </div>
+        </section>
+      )}
+
+      {/* PERTO DE VOCÊ */}
+      {pertoDeVoce.length > 0 && (
+        <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
+          <h2 className="font-display text-xl font-semibold text-barro-900">Perto de você</h2>
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {pertoDeVoce.map((negocio) => (
+              <CardNegocioMini key={negocio.id} negocio={negocio} />
+            ))}
           </div>
         </section>
       )}

@@ -14,7 +14,16 @@ function urlBase64ParaUint8Array(base64: string) {
   return Uint8Array.from([...bruto].map((c) => c.charCodeAt(0)))
 }
 
-export function SinoNotificacoes({ logado, comRotulo = false }: { logado: boolean; comRotulo?: boolean }) {
+export function SinoNotificacoes({
+  logado,
+  comRotulo = false,
+  tema = 'claro',
+}: {
+  logado: boolean
+  comRotulo?: boolean
+  /** "escuro" ajusta o estado inativo pra ter contraste num fundo escuro (cabeçalho mobile) */
+  tema?: 'claro' | 'escuro'
+}) {
   const [estado, setEstado] = useState<Estado>('carregando')
 
   useEffect(() => {
@@ -94,7 +103,8 @@ export function SinoNotificacoes({ logado, comRotulo = false }: { logado: boolea
       <span
         title="Notificações bloqueadas nas configurações do navegador"
         className={cn(
-          'flex items-center gap-2 text-barro-300',
+          'flex items-center gap-2',
+          tema === 'escuro' ? 'text-barro-400' : 'text-barro-300',
           comRotulo ? 'rounded-lg px-3 py-3 text-sm' : 'h-9 w-9 justify-center rounded-lg'
         )}
       >
@@ -120,8 +130,12 @@ export function SinoNotificacoes({ logado, comRotulo = false }: { logado: boolea
           ? 'w-full rounded-lg px-3 py-3 text-left text-sm'
           : 'h-9 w-9 justify-center rounded-lg',
         ativo
-          ? 'text-casca-600 hover:bg-casca-50'
-          : 'text-barro-500 hover:bg-barro-100 hover:text-barro-800'
+          ? tema === 'escuro'
+            ? 'text-casca-400 hover:bg-white/10'
+            : 'text-casca-600 hover:bg-casca-50'
+          : tema === 'escuro'
+            ? 'text-barro-200 hover:bg-white/10 hover:text-white'
+            : 'text-barro-500 hover:bg-barro-100 hover:text-barro-800'
       )}
     >
       <Icone className={comRotulo ? 'h-5 w-5' : 'h-4 w-4'} />

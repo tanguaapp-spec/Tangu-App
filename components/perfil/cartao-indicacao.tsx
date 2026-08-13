@@ -7,8 +7,10 @@ export function CartaoIndicacao({ codigoConvite, totalIndicados }: { codigoConvi
 
   return (
     <div className="rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
-      <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-barro-900">
-        <Users className="h-5 w-5 text-casca-500" />
+      <h2 className="flex items-center gap-2.5 font-display text-lg font-semibold text-barro-900">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-mata-600 text-white">
+          <Users className="h-4 w-4" />
+        </span>
         Indique um vizinho
       </h2>
       <p className="mt-1 text-sm text-barro-600">

@@ -2,11 +2,13 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { MapPin, MessageCircle, Star, Store } from 'lucide-react'
 import type { Negocio } from '@/lib/types/database'
-import { Selo, SeloVerificado } from '@/components/ui/selo'
+import { SeloVerificado } from '@/components/ui/selo'
 import { SelosModalidade } from '@/components/negocio/selos-modalidade'
 import { BotaoWhatsapp } from '@/components/negocio/botao-whatsapp'
+import { iconeCategoria } from '@/lib/ui/icone-categoria'
 
 export function CardNegocio({ negocio, indice = 0 }: { negocio: Negocio; indice?: number }) {
+  const IconeCategoria = iconeCategoria(negocio.categoria?.icone)
   return (
     <div
       className="entrada-lista group relative overflow-hidden rounded-casca border border-barro-100 bg-white shadow-feira transition-all duration-300 hover:-translate-y-1.5 hover:shadow-feira-lg"
@@ -46,9 +48,10 @@ export function CardNegocio({ negocio, indice = 0 }: { negocio: Negocio; indice?
         </div>
 
         {negocio.categoria && (
-          <Selo tom="neutro" className="mt-1.5">
+          <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-barro-100 px-2.5 py-1 text-xs font-semibold text-barro-700">
+            <IconeCategoria className="h-3 w-3" />
             {negocio.categoria.nome}
-          </Selo>
+          </span>
         )}
 
         <SelosModalidade modalidades={negocio.modalidades_atendimento} className="mt-2" />

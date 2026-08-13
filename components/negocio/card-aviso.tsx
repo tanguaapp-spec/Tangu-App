@@ -24,6 +24,14 @@ const rotulosPorTipo = {
   pergunta: 'Pergunta pra cidade',
 }
 
+const corPorTipo = {
+  aviso: 'bg-barro-800',
+  evento: 'bg-casca-500',
+  utilidade_publica: 'bg-mata-600',
+  achados_perdidos: 'bg-barro-600',
+  pergunta: 'bg-mata-500',
+}
+
 interface Props {
   aviso: AvisoCidade
   indice?: number
@@ -41,11 +49,13 @@ export function CardAviso({ aviso, indice = 0, contagensReacao = {}, minhaReacao
       className="entrada-lista rounded-casca border border-barro-100 bg-white p-5 shadow-feira transition-all duration-300 hover:-translate-y-1 hover:shadow-feira-lg"
       style={{ '--i': Math.min(indice, 8) } as React.CSSProperties}
     >
-      <div className="flex items-center justify-between">
-        <Selo tom={aviso.tipo === 'evento' ? 'laranja' : aviso.tipo === 'pergunta' ? 'verde' : 'neutro'}>
-          <Icone className="h-3.5 w-3.5" />
-          {rotulosPorTipo[aviso.tipo]}
-        </Selo>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white ${corPorTipo[aviso.tipo]}`}>
+            <Icone className="h-4 w-4" />
+          </span>
+          <span className="text-xs font-bold uppercase tracking-wide text-barro-500">{rotulosPorTipo[aviso.tipo]}</span>
+        </div>
         {aviso.fixado && <Selo tom="aviso">Fixado</Selo>}
       </div>
 

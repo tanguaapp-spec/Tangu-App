@@ -105,6 +105,34 @@ export async function buscarAchadoDoDia(): Promise<Negocio | null> {
   return data as unknown as Negocio | null
 }
 
+/**
+ * Vitrine pequena pra home ("Perto de você") — cliente público (não toca em
+ * cookies) pra não forçar a home a virar dynamic, mesmo princípio do achado
+ * do dia. Não é distância geográfica de verdade (sem geolocalização ainda),
+ * é a mesma ordenação de relevância da busca (destaque > verificado > nota).
+ */
+export async function buscarNegociosVitrine(limite: number, excluirId?: string | null): Promise<Negocio[]> {
+  const supabase = createPublicClient()
+  let query = supabase
+    .from('negocios')
+    .select('*, categoria:categorias(*)')
+    .eq('ativo', true)
+    .eq('status_cadastro', 'aprovado')
+    .order('destaque_ativo', { ascending: false })
+    .order('verificado', { ascending: false })
+    .order('nota_google', { ascending: false, nullsFirst: false })
+    .limit(excluirId ? limite + 1 : limite)
+
+  if (excluirId) query = query.neq('id', excluirId)
+
+  const { data, error } = await query
+  if (error) {
+    console.error('Erro ao buscar vitrine de negócios:', error.message)
+    return []
+  }
+  return (data as unknown as Negocio[]).slice(0, limite)
+}
+
 export async function buscarNegocioPorId(id: string): Promise<Negocio | null> {
   const supabase = createClient()
   const { data, error } = await supabase

@@ -134,13 +134,16 @@ export function Cabecalho() {
           )}
         </div>
 
-        <button
-          aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
-          onClick={() => setMenuAberto(!menuAberto)}
-          className="rounded-lg p-2 text-white hover:bg-white/10 md:hidden"
-        >
-          {menuAberto ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="flex items-center gap-1 md:hidden">
+          {user && <SinoNotificacoes logado={!!user} tema="escuro" />}
+          <button
+            aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
+            onClick={() => setMenuAberto(!menuAberto)}
+            className="rounded-lg p-2 text-white hover:bg-white/10"
+          >
+            {menuAberto ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
 
       {menuAberto && (
