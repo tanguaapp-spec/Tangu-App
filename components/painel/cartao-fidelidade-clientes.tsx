@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Stamp, Gift } from 'lucide-react'
 import { adicionarCarimbo, confirmarResgateFidelidade } from '@/lib/actions/painel-negocio-actions'
+import { vibrar } from '@/lib/ui/vibrar'
 import type { CartaoFidelidade } from '@/lib/types/database'
 
 interface Cliente {
@@ -22,6 +23,7 @@ export function CartaoFidelidadeClientes({ negocioId, clientes, meta = 10 }: { n
     const resultado = await adicionarCarimbo(negocioId, perfilId)
     setCarregandoId(null)
     if (resultado.erro) return setErro(resultado.erro)
+    vibrar(12)
     router.refresh()
   }
 
@@ -31,6 +33,7 @@ export function CartaoFidelidadeClientes({ negocioId, clientes, meta = 10 }: { n
     const resultado = await confirmarResgateFidelidade(negocioId, perfilId)
     setCarregandoId(null)
     if (resultado.erro) return setErro(resultado.erro)
+    vibrar([15, 60, 15])
     router.refresh()
   }
 

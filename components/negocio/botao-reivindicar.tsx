@@ -4,7 +4,9 @@ import { useMemo, useState } from 'react'
 import { ShieldCheck } from 'lucide-react'
 import { Botao } from '@/components/ui/botao'
 import { AreaTexto } from '@/components/ui/campo'
+import { BottomSheet } from '@/components/ui/bottom-sheet'
 import { solicitarReivindicacao } from '@/lib/actions/negocio-actions'
+import { vibrar } from '@/lib/ui/vibrar'
 
 const WHATSAPP_NUMERO = '21972652314'
 
@@ -33,6 +35,8 @@ export function BotaoReivindicar({ negocioId }: { negocioId: string }) {
     if (resultado.erro) {
       setErro(resultado.erro)
     } else {
+      vibrar(12)
+      setAberto(false)
       setEnviado(true)
     }
   }
@@ -50,35 +54,33 @@ export function BotaoReivindicar({ negocioId }: { negocioId: string }) {
     )
   }
 
-  if (!aberto) {
-    return (
+  return (
+    <>
       <Botao variante="fantasma" onClick={() => setAberto(true)} className="w-full">
         <ShieldCheck className="h-4 w-4" />
         Este negócio é seu? Reivindique o perfil
       </Botao>
-    )
-  }
 
-  return (
-    <div className="rounded-xl border border-barro-200 p-4">
-      <p className="text-sm text-barro-700">
-        Conte pra gente como podemos confirmar que você é o responsável (telefone, CNPJ, etc).
-      </p>
-      <AreaTexto
-        className="mt-2"
-        placeholder="Ex: Sou o proprietário, meu telefone é (21) 9...."
-        value={mensagem}
-        onChange={(e) => setMensagem(e.target.value)}
-      />
-      {erro && <p className="mt-2 text-sm text-red-600">{erro}</p>}
-      <div className="mt-3 flex gap-2">
-        <Botao tamanho="sm" carregando={enviando} onClick={enviar}>
-          Enviar solicitação
-        </Botao>
-        <Botao tamanho="sm" variante="fantasma" onClick={() => setAberto(false)}>
-          Cancelar
-        </Botao>
-      </div>
-    </div>
+      <BottomSheet aberto={aberto} onFechar={() => setAberto(false)} titulo="Reivindicar este perfil">
+        <p className="text-sm text-barro-700">
+          Conte pra gente como podemos confirmar que você é o responsável (telefone, CNPJ, etc).
+        </p>
+        <AreaTexto
+          className="mt-2"
+          placeholder="Ex: Sou o proprietário, meu telefone é (21) 9...."
+          value={mensagem}
+          onChange={(e) => setMensagem(e.target.value)}
+        />
+        {erro && <p className="mt-2 text-sm text-red-600">{erro}</p>}
+        <div className="mt-3 flex gap-2">
+          <Botao tamanho="sm" carregando={enviando} onClick={enviar}>
+            Enviar solicitação
+          </Botao>
+          <Botao tamanho="sm" variante="fantasma" onClick={() => setAberto(false)}>
+            Cancelar
+          </Botao>
+        </div>
+      </BottomSheet>
+    </>
   )
 }

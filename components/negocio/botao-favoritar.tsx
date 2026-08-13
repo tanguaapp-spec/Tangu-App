@@ -3,6 +3,7 @@
 import { Heart } from 'lucide-react'
 import { useTransition, useState } from 'react'
 import { alternarFavorito } from '@/lib/actions/negocio-actions'
+import { vibrar } from '@/lib/ui/vibrar'
 
 interface Props {
   negocioId: string
@@ -14,6 +15,7 @@ export function BotaoFavoritar({ negocioId, initialIsFavorito }: Props) {
   const [isFavorito, setIsFavorito] = useState(initialIsFavorito)
 
   const handleClick = async () => {
+    vibrar(12)
     startTransition(async () => {
       setIsFavorito(!isFavorito)
       await alternarFavorito(negocioId)
@@ -22,8 +24,13 @@ export function BotaoFavoritar({ negocioId, initialIsFavorito }: Props) {
 
   return (
     <button
+      type="button"
       onClick={handleClick}
       disabled={isPending}
+      aria-label={isFavorito ? 'Remover dos favoritos' : 'Favoritar'}
+      aria-pressed={isFavorito}
+      title={isFavorito ? 'Remover dos favoritos' : 'Favoritar'}
+      data-testid="botao-favoritar"
       className="p-2 rounded-full hover:bg-white/50 transition-colors"
     >
       <Heart

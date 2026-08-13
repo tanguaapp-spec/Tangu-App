@@ -1,6 +1,7 @@
 import QRCode from 'qrcode'
 import { Share2, Download } from 'lucide-react'
 import { BotaoCopiarLink } from '@/components/painel/botao-copiar-link'
+import { BotaoCompartilhar } from '@/components/ui/botao-compartilhar'
 
 export async function CartaoDivulgacao({ urlPublica, nomeNegocio }: { urlPublica: string; nomeNegocio: string }) {
   const qrCodeDataUrl = await QRCode.toDataURL(urlPublica, {
@@ -35,6 +36,13 @@ export async function CartaoDivulgacao({ urlPublica, nomeNegocio }: { urlPublica
           <div className="rounded-lg bg-barro-50 px-3 py-2 text-sm text-barro-700 break-all">{urlPublica}</div>
 
           <div className="flex flex-wrap gap-2">
+            <BotaoCompartilhar
+              titulo={nomeNegocio}
+              texto={mensagemCompartilhamento}
+              url={urlPublica}
+              rotulo="Compartilhar"
+              className="border border-barro-300 bg-transparent px-3 py-1.5 text-sm text-barro-800 hover:bg-barro-100"
+            />
             <BotaoCopiarLink texto={urlPublica} />
             <a href={qrCodeDataUrl} download={`qrcode-${nomeNegocio.replace(/\s+/g, '-').toLowerCase()}.png`}>
               <button

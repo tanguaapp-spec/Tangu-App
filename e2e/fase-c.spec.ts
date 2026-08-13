@@ -14,7 +14,7 @@ test.describe('Fase C — moeda "Laranjas" & cartão fidelidade', () => {
 
       // favoritar credita pontos
       await page.goto(`/negocio/${NEGOCIO_TESTE.negocioId}`)
-      const botaoFavoritar = page.locator('.absolute.top-3.right-3 button')
+      const botaoFavoritar = page.getByTestId('botao-favoritar')
       await botaoFavoritar.click()
       // espera o coração preencher (confirma que a ação client-side rodou),
       // e dá tempo real pra requisição do server action completar antes de
@@ -37,7 +37,7 @@ test.describe('Fase C — moeda "Laranjas" & cartão fidelidade', () => {
       // morador favorita o negócio de teste, virando elegível pro carimbo
       await loginPelaUI(page, morador.email, morador.senha)
       await page.goto(`/negocio/${NEGOCIO_TESTE.negocioId}`)
-      const botaoFavoritar = page.locator('.absolute.top-3.right-3 button')
+      const botaoFavoritar = page.getByTestId('botao-favoritar')
       await botaoFavoritar.click()
       // espera o coração preencher (confirma que a ação client-side rodou),
       // e dá tempo real pra requisição do server action completar antes de

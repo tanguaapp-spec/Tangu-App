@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Menu, X, MapPin, Briefcase, Megaphone, Search, User, LogOut, Store, Settings, Heart, Wrench } from 'lucide-react'
 import { Botao } from '@/components/ui/botao'
 import { createClient } from '@/lib/supabase/client'
@@ -27,8 +27,35 @@ export function Cabecalho() {
   const [menuAberto, setMenuAberto] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [perfil, setPerfil] = useState<Perfil | null>(null)
+  const [escondido, setEscondido] = useState(false)
+  const ultimoScrollY = useRef(0)
   const supabase = createClient()
   const pathname = usePathname()
+
+  // esconde o cabeçalho ao rolar pra baixo, mostra de novo ao rolar pra
+  // cima — ganha espaço de tela lendo conteúdo, comum em apps de conteúdo.
+  // Só faz efeito no mobile (a classe md:translate-y-0 trava o desktop).
+  useEffect(() => {
+    let ticking = false
+    function aoRolar() {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        const y = window.scrollY
+        if (menuAberto || y < 40) {
+          setEscondido(false)
+        } else if (y > ultimoScrollY.current + 4) {
+          setEscondido(true)
+        } else if (y < ultimoScrollY.current - 4) {
+          setEscondido(false)
+        }
+        ultimoScrollY.current = y
+        ticking = false
+      })
+    }
+    window.addEventListener('scroll', aoRolar, { passive: true })
+    return () => window.removeEventListener('scroll', aoRolar)
+  }, [menuAberto])
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -63,7 +90,12 @@ export function Cabecalho() {
   }
 
   return (
-    <header className="casca-divisor sticky top-0 z-50 overflow-hidden border-b border-black/10 bg-barro-900 md:overflow-visible md:border-barro-100 md:bg-feira/95 md:backdrop-blur-sm">
+    <header
+      className={cn(
+        'casca-divisor sticky top-0 z-50 overflow-hidden border-b border-black/10 bg-barro-900 transition-transform duration-300 md:translate-y-0 md:overflow-visible md:border-barro-100 md:bg-feira/95 md:backdrop-blur-sm',
+        escondido ? '-translate-y-full' : 'translate-y-0'
+      )}
+    >
       {/* brilho decorativo — só no cabeçalho escuro do mobile */}
       <div
         aria-hidden="true"

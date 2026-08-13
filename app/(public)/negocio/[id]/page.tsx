@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { headers } from 'next/headers'
 import {
   MapPin,
   MessageCircle,
@@ -25,6 +26,7 @@ import { registrarEventoPerfil } from '@/lib/actions/negocio-actions'
 import { CupomBanner } from '@/components/negocio/cupom-banner'
 import { SeloRespondeRapido, negocioEstaAtivo } from '@/components/negocio/selo-responde-rapido'
 import { BotaoDenunciar } from '@/components/moderacao/botao-denunciar'
+import { BotaoCompartilhar } from '@/components/ui/botao-compartilhar'
 
 const diasSemana: Record<string, string> = {
   seg: 'Segunda',
@@ -79,6 +81,11 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
   const cupomAtivo = await buscarCupomAtivo(params.id)
   const cartaoFidelidade = user ? await buscarCartaoFidelidade(params.id, user.id) : null
 
+  const headerList = headers()
+  const host = headerList.get('x-forwarded-host') ?? headerList.get('host') ?? 'tangua-app.vercel.app'
+  const protocolo = headerList.get('x-forwarded-proto') ?? (host.includes('localhost') ? 'http' : 'https')
+  const urlPublica = `${protocolo}://${host}/negocio/${params.id}`
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
       <Link
@@ -96,11 +103,23 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
             <Store className="h-16 w-16" />
           </div>
         )}
-        {user && (
-          <div className="absolute top-3 right-3 bg-white/80 rounded-full">
-            <BotaoFavoritar negocioId={params.id} initialIsFavorito={isFav} />
-          </div>
-        )}
+        <div className="absolute right-3 top-3 flex gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-feira">
+            <BotaoCompartilhar
+              titulo={negocio.nome}
+              texto={`Confira ${negocio.nome} no Tanguá App`}
+              url={urlPublica}
+              rotulo="Compartilhar perfil"
+              iconApenas
+              className="h-9 w-9 text-barro-700"
+            />
+          </span>
+          {user && (
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-feira">
+              <BotaoFavoritar negocioId={params.id} initialIsFavorito={isFav} />
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="mt-6 grid gap-8 sm:grid-cols-3">
@@ -297,9 +316,12 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
                   href={`https://instagram.com/${negocio.instagram.replace('@', '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-barro-700 hover:text-casca-600"
+                  className="flex items-center gap-2.5 text-barro-700 hover:text-casca-600"
                 >
-                  <Instagram className="h-4 w-4" /> @{negocio.instagram.replace('@', '')}
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-barro-100">
+                    <Instagram className="h-3.5 w-3.5" />
+                  </span>
+                  @{negocio.instagram.replace('@', '')}
                 </a>
               )}
               {negocio.site && (
@@ -307,9 +329,12 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
                   href={negocio.site}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-barro-700 hover:text-casca-600"
+                  className="flex items-center gap-2.5 text-barro-700 hover:text-casca-600"
                 >
-                  <Globe className="h-4 w-4" /> Site oficial
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-barro-100">
+                    <Globe className="h-3.5 w-3.5" />
+                  </span>
+                  Site oficial
                 </a>
               )}
             </div>

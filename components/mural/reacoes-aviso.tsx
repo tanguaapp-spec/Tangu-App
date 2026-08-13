@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
 import { alternarReacao } from '@/lib/actions/mural-actions'
+import { vibrar } from '@/lib/ui/vibrar'
 import type { TipoReacaoAviso } from '@/lib/types/database'
 
 const OPCOES: { tipo: TipoReacaoAviso; emoji: string; rotulo: string }[] = [
@@ -24,6 +25,7 @@ export function ReacoesAviso({ avisoId, contagens, minhaReacao, logado }: Props)
 
   function reagir(tipo: TipoReacaoAviso) {
     if (!logado || pendente) return
+    vibrar(10)
     startTransition(async () => {
       await alternarReacao(avisoId, tipo)
       router.refresh()
