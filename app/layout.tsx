@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Fraunces, Inter, JetBrains_Mono } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { RegistrarServiceWorker } from '@/components/pwa/registrar-service-worker'
 import { SplashScreen } from '@/components/pwa/splash-screen'
 import './globals.css'
@@ -70,6 +72,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SplashScreen />
         <RegistrarServiceWorker />
         {children}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

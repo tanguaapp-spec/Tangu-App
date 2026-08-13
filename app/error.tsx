@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { RefreshCw, Home } from 'lucide-react'
 import Link from 'next/link'
+import * as Sentry from '@sentry/nextjs'
 import { Botao } from '@/components/ui/botao'
 import { registrarErroCliente } from '@/lib/actions/observabilidade-actions'
 
@@ -15,6 +16,7 @@ export default function Error({
 }) {
   useEffect(() => {
     console.error('Erro global:', error)
+    Sentry.captureException(error)
     registrarErroCliente(
       error.message || 'Erro sem mensagem (digest: ' + (error.digest ?? 'nenhum') + ')',
       error.stack,
