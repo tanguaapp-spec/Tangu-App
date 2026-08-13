@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { buscarCategorias, buscarDesempenhoSemanal } from '@/lib/queries/negocios'
+import { buscarCategorias, buscarDesempenhoSemanal, buscarClientesConectados } from '@/lib/queries/negocios'
+import { CartaoFidelidadeClientes } from '@/components/painel/cartao-fidelidade-clientes'
 import { FormularioEditarNegocio } from '@/components/painel/formulario-editar-negocio'
 import { FormularioCriarPost } from '@/components/painel/formulario-criar-post'
 import { FormularioCriarVagaPropria } from '@/components/painel/formulario-criar-vaga-propria'
@@ -114,6 +115,7 @@ export default async function PainelNegocio() {
     { data: avaliacoes },
     { data: cupons },
     desempenho,
+    clientesConectados,
   ] = await Promise.all([
     supabase.from('posts_negocio').select('*').eq('negocio_id', negocio.id).order('criado_em', { ascending: false }),
     supabase.from('vagas').select('*').eq('negocio_id', negocio.id).order('criado_em', { ascending: false }),
@@ -127,6 +129,7 @@ export default async function PainelNegocio() {
       .order('criado_em', { ascending: false }),
     supabase.from('cupons').select('*').eq('negocio_id', negocio.id).order('criado_em', { ascending: false }),
     buscarDesempenhoSemanal(negocio.id),
+    buscarClientesConectados(negocio.id),
   ])
 
   const notasMedia = mediaAvaliacoes?.length
@@ -180,6 +183,17 @@ export default async function PainelNegocio() {
         <div className="mt-4">
           <ListaCupons cupons={(cupons as any) ?? []} negocioId={negocio.id} />
           <FormularioCriarCupom negocioId={negocio.id} />
+        </div>
+      </div>
+
+      <div className="mt-8 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+        <h2 className="font-display text-lg font-semibold text-barro-900">Cartão fidelidade</h2>
+        <p className="text-sm text-barro-500">
+          Carimbe o cartão de quem já favoritou ou avaliou seu perfil — a cada 10 carimbos a pessoa completa e você
+          combina o prêmio pessoalmente.
+        </p>
+        <div className="mt-4">
+          <CartaoFidelidadeClientes negocioId={negocio.id} clientes={clientesConectados} />
         </div>
       </div>
 

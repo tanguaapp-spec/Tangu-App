@@ -188,6 +188,26 @@ export type ReacaoAviso = {
   criado_em: string
 }
 
+export type PontoLaranja = {
+  id: string
+  perfil_id: string
+  quantidade: number
+  motivo: string
+  criado_em: string
+}
+
+export type CartaoFidelidade = {
+  id: string
+  negocio_id: string
+  perfil_id: string
+  carimbos: number
+  meta: number
+  completos: number
+  criado_em: string
+  atualizado_em: string
+  negocio?: Negocio
+}
+
 export type PushSubscriptionSalva = {
   id: string
   perfil_id: string
@@ -223,6 +243,8 @@ export type Database = {
       eventos_perfil: TabelaGenerica<EventoPerfil>
       respostas_pergunta: TabelaGenerica<RespostaPergunta>
       reacoes_aviso: TabelaGenerica<ReacaoAviso>
+      pontos_laranjas: TabelaGenerica<PontoLaranja>
+      cartoes_fidelidade: TabelaGenerica<CartaoFidelidade>
     }
     Views: Record<string, never>
     Functions: Record<string, never>

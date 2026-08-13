@@ -4,6 +4,10 @@ import { User } from 'lucide-react'
 import { FormularioPerfil } from '@/components/perfil/formulario-perfil'
 import { SelosContribuicao } from '@/components/perfil/selos-contribuicao'
 import { CartaoIndicacao } from '@/components/perfil/cartao-indicacao'
+import { SaldoLaranjas } from '@/components/perfil/saldo-laranjas'
+import { CartoesFidelidade } from '@/components/perfil/cartoes-fidelidade'
+import { buscarSaldoLaranjas } from '@/lib/gamificacao/pontos'
+import { buscarCartoesFidelidadeDoUsuario } from '@/lib/queries/negocios'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,11 +19,14 @@ export default async function PaginaPerfil() {
   const { data: perfil } = await supabase.from('perfis').select('*').eq('id', user.id).single()
   if (!perfil) redirect('/entrar')
 
-  const [{ count: totalAvaliacoes }, { count: totalFavoritos }, { count: totalIndicados }] = await Promise.all([
-    supabase.from('avaliacoes').select('*', { count: 'exact', head: true }).eq('autor_id', user.id),
-    supabase.from('favoritos').select('*', { count: 'exact', head: true }).eq('perfil_id', user.id),
-    supabase.from('perfis').select('*', { count: 'exact', head: true }).eq('convidado_por', user.id),
-  ])
+  const [{ count: totalAvaliacoes }, { count: totalFavoritos }, { count: totalIndicados }, saldoLaranjas, cartoesFidelidade] =
+    await Promise.all([
+      supabase.from('avaliacoes').select('*', { count: 'exact', head: true }).eq('autor_id', user.id),
+      supabase.from('favoritos').select('*', { count: 'exact', head: true }).eq('perfil_id', user.id),
+      supabase.from('perfis').select('*', { count: 'exact', head: true }).eq('convidado_por', user.id),
+      buscarSaldoLaranjas(user.id),
+      buscarCartoesFidelidadeDoUsuario(user.id),
+    ])
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
@@ -29,6 +36,16 @@ export default async function PaginaPerfil() {
         </div>
         <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">Meu perfil</h1>
       </div>
+
+      <div className="mb-6">
+        <SaldoLaranjas saldo={saldoLaranjas} />
+      </div>
+
+      {cartoesFidelidade.length > 0 && (
+        <div className="mb-6">
+          <CartoesFidelidade cartoes={cartoesFidelidade as any} />
+        </div>
+      )}
 
       <div className="mb-6">
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-barro-500">Seus selos</h2>

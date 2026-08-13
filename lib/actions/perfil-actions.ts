@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { creditarPontos, jaCreditouPontos } from '@/lib/gamificacao/pontos'
 
 export async function atualizarPerfil(data: {
   nome_completo?: string
@@ -23,6 +24,11 @@ export async function atualizarPerfil(data: {
     console.error('[ERROR] Erro ao atualizar perfil:', error)
     return { erro: error.message }
   }
+
+  if (data.bairro && !(await jaCreditouPontos(user.id, 'perfil_completo'))) {
+    creditarPontos(user.id, 'perfil_completo').catch(() => {})
+  }
+
   revalidatePath('/perfil')
   return { erro: null }
 }

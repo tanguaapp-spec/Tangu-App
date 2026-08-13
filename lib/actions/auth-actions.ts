@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { dentroDoLimite, ipDoRequest } from '@/lib/seguranca/rate-limit'
+import { creditarPontos } from '@/lib/gamificacao/pontos'
 
 export async function entrarComEmail(formData: FormData) {
   const email = formData.get('email') as string
@@ -38,7 +39,7 @@ export async function cadastrarComEmail(formData: FormData) {
   }
 
   const supabase = createClient()
-  const { error } = await supabase.auth.signUp({
+  const { data: cadastro, error } = await supabase.auth.signUp({
     email,
     password: senha,
     options: {
@@ -48,6 +49,26 @@ export async function cadastrarComEmail(formData: FormData) {
 
   if (error) {
     return { erro: error.message || 'Falha ao cadastrar. Tente novamente.' }
+  }
+
+  // A linha em perfis já existe nesse ponto (trigger roda na mesma transação
+  // do signUp), mesmo antes da confirmação do e-mail — dá pra creditar já.
+  // Espera terminar antes do redirect: em serverless a função pode ser
+  // congelada logo depois da resposta, então um "fire-and-forget" aqui
+  // corre o risco de nunca completar.
+  if (cadastro.user) {
+    await creditarPontos(cadastro.user.id, 'boas_vindas').catch(() => {})
+
+    if (codigoConvite) {
+      const { data: perfilNovo } = await supabase
+        .from('perfis')
+        .select('convidado_por')
+        .eq('id', cadastro.user.id)
+        .maybeSingle()
+      if (perfilNovo?.convidado_por) {
+        await creditarPontos(perfilNovo.convidado_por, 'indicacao').catch(() => {})
+      }
+    }
   }
 
   redirect('/cadastrar/confirme-seu-email')

@@ -5,6 +5,7 @@ interface UsuarioTeste {
   email: string
   senha: string
   papel: 'morador' | 'profissional'
+  nomeCompleto: string
 }
 
 /**
@@ -17,18 +18,19 @@ export async function criarUsuarioTeste(papel: 'morador' | 'profissional' = 'mor
   const sufixo = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
   const email = `e2e.${papel}.${sufixo}@${DOMINIO_TESTE}`
   const senha = `Teste!${sufixo}Aa1`
+  const nomeCompleto = `E2E ${papel} ${sufixo}`
 
   const { data, error } = await admin.auth.admin.createUser({
     email,
     password: senha,
     email_confirm: true,
-    user_metadata: { nome_completo: `E2E ${papel} ${sufixo}`, papel },
+    user_metadata: { nome_completo: nomeCompleto, papel },
   })
   if (error || !data.user) {
     throw new Error(`Falha ao criar usuário de teste E2E: ${error?.message}`)
   }
 
-  return { id: data.user.id, email, senha, papel }
+  return { id: data.user.id, email, senha, papel, nomeCompleto }
 }
 
 export async function removerUsuarioTeste(id: string) {

@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { enviarNotificacaoParaPerfis, enviarNotificacaoParaAdmins } from '@/lib/push/enviar-notificacao'
 import { enviarImagem, extensaoDoArquivo } from '@/lib/storage/imagens'
@@ -508,6 +508,88 @@ export async function encerrarCupom(cupomId: string, negocioId: string) {
 
   revalidatePath('/painel/negocio')
   revalidatePath(`/negocio/${negocioId}`)
+  return { erro: null }
+}
+
+// ---------------------------------------------------------------------
+// Cartão fidelidade digital (carimbo) — só pra clientes que já
+// favoritaram ou avaliaram o negócio, pra não virar ferramenta de
+// procurar qualquer perfil ao acaso.
+// ---------------------------------------------------------------------
+export async function adicionarCarimbo(negocioId: string, perfilId: string) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Não autenticado.' }
+
+  const { data: negocio } = await supabase
+    .from('negocios')
+    .select('id')
+    .eq('id', negocioId)
+    .eq('reivindicado_por', user.id)
+    .single()
+  if (!negocio) return { erro: 'Negócio não encontrado.' }
+
+  const [{ data: favorito }, { data: avaliacao }] = await Promise.all([
+    supabase.from('favoritos').select('perfil_id').eq('negocio_id', negocioId).eq('perfil_id', perfilId).maybeSingle(),
+    supabase.from('avaliacoes').select('autor_id').eq('negocio_id', negocioId).eq('autor_id', perfilId).maybeSingle(),
+  ])
+  if (!favorito && !avaliacao) return { erro: 'Esse cliente ainda não interagiu com seu perfil.' }
+
+  const admin = createServiceClient()
+  const { data: cartaoAtual } = await admin
+    .from('cartoes_fidelidade')
+    .select('*')
+    .eq('negocio_id', negocioId)
+    .eq('perfil_id', perfilId)
+    .maybeSingle()
+
+  if (cartaoAtual) {
+    if (cartaoAtual.carimbos >= cartaoAtual.meta) {
+      return { erro: 'Esse cartão já está completo — confirme o resgate antes de carimbar de novo.' }
+    }
+    const { error } = await admin
+      .from('cartoes_fidelidade')
+      .update({ carimbos: cartaoAtual.carimbos + 1, atualizado_em: new Date().toISOString() })
+      .eq('id', cartaoAtual.id)
+    if (error) return { erro: error.message }
+  } else {
+    const { error } = await admin.from('cartoes_fidelidade').insert({ negocio_id: negocioId, perfil_id: perfilId, carimbos: 1 })
+    if (error) return { erro: error.message }
+  }
+
+  revalidatePath('/painel/negocio')
+  return { erro: null }
+}
+
+export async function confirmarResgateFidelidade(negocioId: string, perfilId: string) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Não autenticado.' }
+
+  const { data: negocio } = await supabase
+    .from('negocios')
+    .select('id')
+    .eq('id', negocioId)
+    .eq('reivindicado_por', user.id)
+    .single()
+  if (!negocio) return { erro: 'Negócio não encontrado.' }
+
+  const admin = createServiceClient()
+  const { data: cartao } = await admin
+    .from('cartoes_fidelidade')
+    .select('*')
+    .eq('negocio_id', negocioId)
+    .eq('perfil_id', perfilId)
+    .maybeSingle()
+  if (!cartao || cartao.carimbos < cartao.meta) return { erro: 'Esse cartão ainda não está completo.' }
+
+  const { error } = await admin
+    .from('cartoes_fidelidade')
+    .update({ carimbos: 0, completos: cartao.completos + 1, atualizado_em: new Date().toISOString() })
+    .eq('id', cartao.id)
+  if (error) return { erro: error.message }
+
+  revalidatePath('/painel/negocio')
   return { erro: null }
 }
 

@@ -1,5 +1,5 @@
-import { buscarNegocioPorId, isFavorito, buscarCupomAtivo } from '@/lib/queries/negocios'
-import { createClient } from '@/lib/supabase/server'
+import { buscarNegocioPorId, isFavorito, buscarCupomAtivo, buscarCartaoFidelidade } from '@/lib/queries/negocios'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -68,12 +68,15 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
     .order('ordem')
     .order('criado_em')
 
-  const { count: totalFavoritos } = await supabase
+  // RLS de favoritos só libera pro próprio dono/favoritador — a contagem
+  // pública precisa do service role pra não ficar zerada pra quem visita.
+  const { count: totalFavoritos } = await createServiceClient()
     .from('favoritos')
     .select('*', { count: 'exact', head: true })
     .eq('negocio_id', params.id)
 
   const cupomAtivo = await buscarCupomAtivo(params.id)
+  const cartaoFidelidade = user ? await buscarCartaoFidelidade(params.id, user.id) : null
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
@@ -304,6 +307,25 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
               )}
             </div>
           </div>
+
+          {cartaoFidelidade && (
+            <div className="rounded-casca border border-barro-100 bg-white p-4 shadow-feira">
+              <p className="text-sm font-semibold text-barro-800">Seu cartão fidelidade</p>
+              <div className="mt-2 flex gap-1">
+                {Array.from({ length: cartaoFidelidade.meta }).map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-2.5 w-2.5 rounded-full ${i < cartaoFidelidade.carimbos ? 'bg-casca-500' : 'bg-barro-100'}`}
+                  />
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-barro-500">
+                {cartaoFidelidade.carimbos >= cartaoFidelidade.meta
+                  ? 'Completo! Mostre esse cartão pro dono resgatar seu prêmio.'
+                  : `${cartaoFidelidade.carimbos}/${cartaoFidelidade.meta} carimbos`}
+              </p>
+            </div>
+          )}
 
           {!negocio.reivindicado_por && <BotaoReivindicar negocioId={negocio.id} />}
         </aside>

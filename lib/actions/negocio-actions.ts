@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { enviarNotificacaoParaAdmins } from '@/lib/push/enviar-notificacao'
 import { dentroDoLimite } from '@/lib/seguranca/rate-limit'
 import { enviarImagem, extensaoDoArquivo } from '@/lib/storage/imagens'
+import { creditarPontos } from '@/lib/gamificacao/pontos'
 import { z } from 'zod'
 import type { TipoEventoPerfil } from '@/lib/types/database'
 
@@ -60,6 +61,7 @@ export async function alternarFavorito(negocioId: string) {
 
     if (error) return { erro: error.message }
     registrarEventoPerfil(negocioId, 'favorito').catch(() => {})
+    creditarPontos(user.id, 'favorito').catch(() => {})
   }
 
   revalidatePath(`/negocio/${negocioId}`)
@@ -95,6 +97,13 @@ export async function enviarAvaliacao(negocioId: string, formData: FormData) {
     return { erro: 'Muitas avaliações enviadas. Aguarde um pouco e tente de novo.' }
   }
 
+  const { data: avaliacaoExistente } = await supabase
+    .from('avaliacoes')
+    .select('id')
+    .eq('negocio_id', negocioId)
+    .eq('autor_id', user.id)
+    .maybeSingle()
+
   const dados: Record<string, unknown> = {
     negocio_id: negocioId,
     autor_id: user.id,
@@ -115,6 +124,10 @@ export async function enviarAvaliacao(negocioId: string, formData: FormData) {
   const { error } = await supabase.from('avaliacoes').upsert(dados)
 
   if (error) return { erro: error.message }
+
+  if (!avaliacaoExistente) {
+    creditarPontos(user.id, 'avaliacao').catch(() => {})
+  }
 
   revalidatePath(`/negocio/${negocioId}`)
   return { erro: null }

@@ -206,6 +206,52 @@ export async function buscarDesempenhoSemanal(negocioId: string) {
   }
 }
 
+export async function buscarCartoesFidelidadeDoUsuario(perfilId: string) {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('cartoes_fidelidade')
+    .select('*, negocio:negocios(id, nome, foto_capa_url)')
+    .eq('perfil_id', perfilId)
+    .order('atualizado_em', { ascending: false })
+  if (error) {
+    console.error('Erro ao buscar cartões de fidelidade:', error.message)
+    return []
+  }
+  return data
+}
+
+/** Clientes que já favoritaram ou avaliaram o negócio — só esses podem ganhar carimbo. */
+export async function buscarClientesConectados(negocioId: string) {
+  const supabase = createClient()
+  const [{ data: favoritos }, { data: avaliacoes }, { data: cartoes }] = await Promise.all([
+    supabase.from('favoritos').select('perfil_id, perfil:perfis(id, nome_completo)').eq('negocio_id', negocioId),
+    supabase.from('avaliacoes').select('autor_id, autor:perfis(id, nome_completo)').eq('negocio_id', negocioId),
+    supabase.from('cartoes_fidelidade').select('*').eq('negocio_id', negocioId),
+  ])
+
+  const porId = new Map<string, { id: string; nome_completo: string }>()
+  for (const f of (favoritos ?? []) as any[]) if (f.perfil) porId.set(f.perfil.id, f.perfil)
+  for (const a of (avaliacoes ?? []) as any[]) if (a.autor) porId.set(a.autor.id, a.autor)
+
+  const cartaoPorPerfil = new Map((cartoes ?? []).map((c) => [c.perfil_id, c]))
+
+  return Array.from(porId.values()).map((perfil) => ({
+    perfil,
+    cartao: cartaoPorPerfil.get(perfil.id) ?? null,
+  }))
+}
+
+export async function buscarCartaoFidelidade(negocioId: string, perfilId: string) {
+  const supabase = createClient()
+  const { data } = await supabase
+    .from('cartoes_fidelidade')
+    .select('*')
+    .eq('negocio_id', negocioId)
+    .eq('perfil_id', perfilId)
+    .maybeSingle()
+  return data
+}
+
 export async function buscarBairros() {
   const supabase = createClient()
   const { data, error } = await supabase
