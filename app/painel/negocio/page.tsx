@@ -1,17 +1,20 @@
 import { createClient } from '@/lib/supabase/server'
-import { buscarCategorias } from '@/lib/queries/negocios'
+import { buscarCategorias, buscarDesempenhoSemanal } from '@/lib/queries/negocios'
 import { FormularioEditarNegocio } from '@/components/painel/formulario-editar-negocio'
 import { FormularioCriarPost } from '@/components/painel/formulario-criar-post'
 import { FormularioCriarVagaPropria } from '@/components/painel/formulario-criar-vaga-propria'
 import { FormularioCriarProduto } from '@/components/painel/formulario-criar-produto'
+import { FormularioCriarCupom } from '@/components/painel/formulario-criar-cupom'
 import { ListaProdutos } from '@/components/painel/lista-produtos'
 import { ListaAvaliacoes } from '@/components/painel/lista-avaliacoes'
+import { ListaCupons } from '@/components/painel/lista-cupons'
+import { DesempenhoSemanal } from '@/components/painel/desempenho-semanal'
 import { BotaoEncerrarVaga } from '@/components/painel/botao-encerrar-vaga'
 import { AlternadorAbertoAgora } from '@/components/painel/alternador-aberto-agora'
 import { CartaoDivulgacao } from '@/components/painel/cartao-divulgacao'
 import { CartaoFerramentaParceira } from '@/components/painel/cartao-ferramenta-parceira'
 import { reenviarCadastroNegocio } from '@/lib/actions/painel-negocio-actions'
-import { Eye, MessageCircle, Star, Store, Clock3, ShieldAlert } from 'lucide-react'
+import { Star, Store, Clock3, ShieldAlert } from 'lucide-react'
 import Link from 'next/link'
 import { headers } from 'next/headers'
 import { Botao } from '@/components/ui/botao'
@@ -102,22 +105,30 @@ export default async function PainelNegocio() {
     )
   }
 
-  const [{ data: posts }, { data: vagasProprias }, { count: totalAvaliacoes }, { data: mediaAvaliacoes }, { data: produtos }, { data: avaliacoes }] =
-    await Promise.all([
-      supabase.from('posts_negocio').select('*').eq('negocio_id', negocio.id).order('criado_em', { ascending: false }),
-      supabase.from('vagas').select('*').eq('negocio_id', negocio.id).order('criado_em', { ascending: false }),
-      supabase.from('avaliacoes').select('*', { count: 'exact', head: true }).eq('negocio_id', negocio.id),
-      supabase.from('avaliacoes').select('nota').eq('negocio_id', negocio.id),
-      supabase.from('produtos_servicos').select('*').eq('negocio_id', negocio.id).order('ordem').order('criado_em'),
-      supabase
-        .from('avaliacoes')
-        .select('*, autor:perfis(nome_completo, avatar_url)')
-        .eq('negocio_id', negocio.id)
-        .order('criado_em', { ascending: false }),
-    ])
+  const [
+    { data: posts },
+    { data: vagasProprias },
+    { count: totalAvaliacoes },
+    { data: mediaAvaliacoes },
+    { data: produtos },
+    { data: avaliacoes },
+    { data: cupons },
+    desempenho,
+  ] = await Promise.all([
+    supabase.from('posts_negocio').select('*').eq('negocio_id', negocio.id).order('criado_em', { ascending: false }),
+    supabase.from('vagas').select('*').eq('negocio_id', negocio.id).order('criado_em', { ascending: false }),
+    supabase.from('avaliacoes').select('*', { count: 'exact', head: true }).eq('negocio_id', negocio.id),
+    supabase.from('avaliacoes').select('nota').eq('negocio_id', negocio.id),
+    supabase.from('produtos_servicos').select('*').eq('negocio_id', negocio.id).order('ordem').order('criado_em'),
+    supabase
+      .from('avaliacoes')
+      .select('*, autor:perfis(nome_completo, avatar_url)')
+      .eq('negocio_id', negocio.id)
+      .order('criado_em', { ascending: false }),
+    supabase.from('cupons').select('*').eq('negocio_id', negocio.id).order('criado_em', { ascending: false }),
+    buscarDesempenhoSemanal(negocio.id),
+  ])
 
-  const totalVisualizacoes = posts?.reduce((acc, p) => acc + (p.visualizacoes ?? 0), 0) ?? 0
-  const totalCliques = posts?.reduce((acc, p) => acc + (p.cliques_contato ?? 0), 0) ?? 0
   const notasMedia = mediaAvaliacoes?.length
     ? (mediaAvaliacoes.reduce((acc, a) => acc + a.nota, 0) / mediaAvaliacoes.length).toFixed(1)
     : '—'
@@ -142,17 +153,7 @@ export default async function PainelNegocio() {
         <AlternadorAbertoAgora negocioId={negocio.id} valorInicial={negocio.aberto_agora} />
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-4">
-        <div className="rounded-xl border border-barro-100 bg-white p-4">
-          <Eye className="h-5 w-5 text-casca-500" />
-          <p className="mt-2 text-2xl font-semibold text-barro-900">{totalVisualizacoes}</p>
-          <p className="text-sm text-barro-500">Visualizações de posts</p>
-        </div>
-        <div className="rounded-xl border border-barro-100 bg-white p-4">
-          <MessageCircle className="h-5 w-5 text-mata-500" />
-          <p className="mt-2 text-2xl font-semibold text-barro-900">{totalCliques}</p>
-          <p className="text-sm text-barro-500">Cliques em &quot;Chamar no WhatsApp&quot;</p>
-        </div>
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <div className="rounded-xl border border-barro-100 bg-white p-4">
           <Star className="h-5 w-5 text-casca-500" />
           <p className="mt-2 text-2xl font-semibold text-barro-900">{notasMedia}</p>
@@ -162,6 +163,23 @@ export default async function PainelNegocio() {
           <Star className="h-5 w-5 text-casca-500" />
           <p className="mt-2 text-2xl font-semibold text-barro-900">{negocio.nota_google?.toFixed(1) ?? '—'}</p>
           <p className="text-sm text-barro-500">Nota no Google</p>
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <h2 className="font-display text-lg font-semibold text-barro-900">Seu desempenho</h2>
+        <p className="text-sm text-barro-500">Últimos 7 dias, comparado com os 7 dias anteriores.</p>
+        <div className="mt-4">
+          <DesempenhoSemanal desempenho={desempenho} />
+        </div>
+      </div>
+
+      <div className="mt-8 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+        <h2 className="font-display text-lg font-semibold text-barro-900">Oferta relâmpago</h2>
+        <p className="text-sm text-barro-500">Cria escassez de verdade — quem favoritou seu perfil recebe um aviso.</p>
+        <div className="mt-4">
+          <ListaCupons cupons={(cupons as any) ?? []} negocioId={negocio.id} />
+          <FormularioCriarCupom negocioId={negocio.id} />
         </div>
       </div>
 

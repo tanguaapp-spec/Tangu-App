@@ -160,6 +160,52 @@ export async function isFavorito(negocioId: string) {
   return !!data
 }
 
+export async function buscarCupomAtivo(negocioId: string) {
+  const supabase = createClient()
+  const { data } = await supabase
+    .from('cupons')
+    .select('*')
+    .eq('negocio_id', negocioId)
+    .eq('ativo', true)
+    .gt('expira_em', new Date().toISOString())
+    .order('criado_em', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  return data
+}
+
+/**
+ * Compara esta semana com a anterior por tipo de evento (visualização,
+ * favorito, clique no WhatsApp) — alimenta o painel "seu desempenho".
+ */
+export async function buscarDesempenhoSemanal(negocioId: string) {
+  const supabase = createClient()
+  const agora = Date.now()
+  const seteDias = 7 * 24 * 60 * 60 * 1000
+  const inicioSemanaAtual = new Date(agora - seteDias).toISOString()
+  const inicioSemanaAnterior = new Date(agora - 2 * seteDias).toISOString()
+
+  const [semanaAtual, semanaAnterior] = await Promise.all([
+    supabase.from('eventos_perfil').select('tipo').eq('negocio_id', negocioId).gte('criado_em', inicioSemanaAtual),
+    supabase
+      .from('eventos_perfil')
+      .select('tipo')
+      .eq('negocio_id', negocioId)
+      .gte('criado_em', inicioSemanaAnterior)
+      .lt('criado_em', inicioSemanaAtual),
+  ])
+
+  function contar(linhas: { tipo: string }[] | null, tipo: string) {
+    return (linhas ?? []).filter((l) => l.tipo === tipo).length
+  }
+
+  return {
+    visualizacoes: { atual: contar(semanaAtual.data, 'visualizacao'), anterior: contar(semanaAnterior.data, 'visualizacao') },
+    favoritos: { atual: contar(semanaAtual.data, 'favorito'), anterior: contar(semanaAnterior.data, 'favorito') },
+    cliquesWhatsapp: { atual: contar(semanaAtual.data, 'clique_whatsapp'), anterior: contar(semanaAnterior.data, 'clique_whatsapp') },
+  }
+}
+
 export async function buscarBairros() {
   const supabase = createClient()
   const { data, error } = await supabase

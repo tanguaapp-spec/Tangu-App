@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { User } from 'lucide-react'
 import { FormularioPerfil } from '@/components/perfil/formulario-perfil'
 import { SelosContribuicao } from '@/components/perfil/selos-contribuicao'
+import { CartaoIndicacao } from '@/components/perfil/cartao-indicacao'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,9 +15,10 @@ export default async function PaginaPerfil() {
   const { data: perfil } = await supabase.from('perfis').select('*').eq('id', user.id).single()
   if (!perfil) redirect('/entrar')
 
-  const [{ count: totalAvaliacoes }, { count: totalFavoritos }] = await Promise.all([
+  const [{ count: totalAvaliacoes }, { count: totalFavoritos }, { count: totalIndicados }] = await Promise.all([
     supabase.from('avaliacoes').select('*', { count: 'exact', head: true }).eq('autor_id', user.id),
     supabase.from('favoritos').select('*', { count: 'exact', head: true }).eq('perfil_id', user.id),
+    supabase.from('perfis').select('*', { count: 'exact', head: true }).eq('convidado_por', user.id),
   ])
 
   return (
@@ -32,6 +34,12 @@ export default async function PaginaPerfil() {
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-barro-500">Seus selos</h2>
         <SelosContribuicao totalAvaliacoes={totalAvaliacoes ?? 0} totalFavoritos={totalFavoritos ?? 0} />
       </div>
+
+      {perfil.codigo_convite && (
+        <div className="mb-6">
+          <CartaoIndicacao codigoConvite={perfil.codigo_convite} totalIndicados={totalIndicados ?? 0} />
+        </div>
+      )}
 
       <FormularioPerfil perfil={perfil} />
     </div>

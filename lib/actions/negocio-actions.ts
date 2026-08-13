@@ -1,11 +1,32 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { enviarNotificacaoParaAdmins } from '@/lib/push/enviar-notificacao'
 import { dentroDoLimite } from '@/lib/seguranca/rate-limit'
 import { enviarImagem, extensaoDoArquivo } from '@/lib/storage/imagens'
 import { z } from 'zod'
+import type { TipoEventoPerfil } from '@/lib/types/database'
+
+/**
+ * Grava um evento pro painel "seu desempenho" do profissional. Escreve via
+ * service role (a tabela não tem policy de insert pra ninguém mais, de
+ * propósito — evita gente inflar as próprias métricas via API direta).
+ * Nunca deve travar a ação principal, por isso sempre falha em silêncio.
+ */
+export async function registrarEventoPerfil(negocioId: string, tipo: TipoEventoPerfil) {
+  try {
+    const supabase = createServiceClient()
+    await supabase.from('eventos_perfil').insert({ negocio_id: negocioId, tipo })
+  } catch (err) {
+    console.error('Falha ao registrar evento de perfil:', err)
+  }
+}
+
+export async function registrarCliqueWhatsapp(negocioId: string) {
+  await registrarEventoPerfil(negocioId, 'clique_whatsapp')
+  return { erro: null }
+}
 
 export async function alternarFavorito(negocioId: string) {
   const supabase = createClient()
@@ -38,6 +59,7 @@ export async function alternarFavorito(negocioId: string) {
       .insert({ perfil_id: user.id, negocio_id: negocioId })
 
     if (error) return { erro: error.message }
+    registrarEventoPerfil(negocioId, 'favorito').catch(() => {})
   }
 
   revalidatePath(`/negocio/${negocioId}`)

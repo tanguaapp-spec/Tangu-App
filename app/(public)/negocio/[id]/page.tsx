@@ -1,4 +1,4 @@
-import { buscarNegocioPorId, isFavorito } from '@/lib/queries/negocios'
+import { buscarNegocioPorId, isFavorito, buscarCupomAtivo } from '@/lib/queries/negocios'
 import { createClient } from '@/lib/supabase/server'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -16,10 +16,14 @@ import {
 } from 'lucide-react'
 import { SeloVerificado, Selo } from '@/components/ui/selo'
 import { SelosModalidade } from '@/components/negocio/selos-modalidade'
-import { linkWhatsapp, formatarPrecoBRL } from '@/lib/utils'
+import { formatarPrecoBRL } from '@/lib/utils'
 import { BotaoReivindicar } from '@/components/negocio/botao-reivindicar'
 import { BotaoFavoritar } from '@/components/negocio/botao-favoritar'
+import { BotaoWhatsapp } from '@/components/negocio/botao-whatsapp'
 import { FormularioAvaliacao } from '@/components/negocio/formulario-avaliacao'
+import { registrarEventoPerfil } from '@/lib/actions/negocio-actions'
+import { CupomBanner } from '@/components/negocio/cupom-banner'
+import { SeloRespondeRapido, negocioEstaAtivo } from '@/components/negocio/selo-responde-rapido'
 
 const diasSemana: Record<string, string> = {
   seg: 'Segunda',
@@ -36,6 +40,8 @@ export const dynamic = 'force-dynamic'
 export default async function PaginaNegocio({ params }: { params: { id: string } }) {
   const negocio = await buscarNegocioPorId(params.id)
   if (!negocio) notFound()
+
+  registrarEventoPerfil(params.id, 'visualizacao').catch(() => {})
 
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -67,6 +73,8 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
     .select('*', { count: 'exact', head: true })
     .eq('negocio_id', params.id)
 
+  const cupomAtivo = await buscarCupomAtivo(params.id)
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
       <Link
@@ -96,6 +104,7 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="font-display text-3xl font-semibold text-barro-900">{negocio.nome}</h1>
             {negocio.verificado && <SeloVerificado />}
+            {negocioEstaAtivo(negocio.atualizado_em) && <SeloRespondeRapido />}
             {negocio.aberto_agora !== null && (
               <Selo tom={negocio.aberto_agora ? 'verde' : 'neutro'}>
                 {negocio.aberto_agora ? 'Aberto agora' : 'Fechado agora'}
@@ -109,6 +118,8 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
           </div>
 
           <SelosModalidade modalidades={negocio.modalidades_atendimento} className="mt-2" />
+
+          {cupomAtivo && <CupomBanner cupom={cupomAtivo} />}
 
           {negocio.descricao && <p className="mt-4 text-barro-700">{negocio.descricao}</p>}
 
@@ -261,14 +272,14 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
         <aside className="space-y-3">
           <div className="rounded-casca border border-barro-100 bg-white p-5 shadow-feira">
             {negocio.whatsapp && (
-              <a
-                href={linkWhatsapp(negocio.whatsapp, `Olá! Vi seu perfil no Tanguá App.`)}
-                target="_blank"
-                rel="noopener noreferrer"
+              <BotaoWhatsapp
+                negocioId={negocio.id}
+                whatsapp={negocio.whatsapp}
+                mensagem="Olá! Vi seu perfil no Tanguá App."
                 className="flex items-center justify-center gap-2 rounded-xl bg-mata-500 py-3 font-semibold text-white transition-colors hover:bg-mata-600"
               >
                 <MessageCircle className="h-5 w-5" /> Chamar no WhatsApp
-              </a>
+              </BotaoWhatsapp>
             )}
             <div className="mt-3 flex flex-col gap-2 text-sm">
               {negocio.instagram && (

@@ -30,6 +30,7 @@ export async function cadastrarComEmail(formData: FormData) {
   const senha = formData.get('senha') as string
   const nomeCompleto = formData.get('nomeCompleto') as string
   const papel = (formData.get('papel') as string) || 'morador'
+  const codigoConvite = (formData.get('codigo_convite') as string) || undefined
 
   const podeCadastrar = await dentroDoLimite(`cadastro:${ipDoRequest()}`, 5, 60 * 60)
   if (!podeCadastrar) {
@@ -41,7 +42,7 @@ export async function cadastrarComEmail(formData: FormData) {
     email,
     password: senha,
     options: {
-      data: { nome_completo: nomeCompleto, papel },
+      data: { nome_completo: nomeCompleto, papel, codigo_convite: codigoConvite },
     },
   })
 

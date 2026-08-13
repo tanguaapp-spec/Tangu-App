@@ -4,7 +4,7 @@ import { MapPin, MessageCircle, Star, Store } from 'lucide-react'
 import type { Negocio } from '@/lib/types/database'
 import { Selo, SeloVerificado } from '@/components/ui/selo'
 import { SelosModalidade } from '@/components/negocio/selos-modalidade'
-import { linkWhatsapp } from '@/lib/utils'
+import { BotaoWhatsapp } from '@/components/negocio/botao-whatsapp'
 
 export function CardNegocio({ negocio, indice = 0 }: { negocio: Negocio; indice?: number }) {
   return (
@@ -70,15 +70,15 @@ export function CardNegocio({ negocio, indice = 0 }: { negocio: Negocio; indice?
         </div>
 
         {negocio.whatsapp && (
-          <a
-            href={linkWhatsapp(negocio.whatsapp, `Olá! Vi seu perfil no Tanguá App.`)}
-            target="_blank"
-            rel="noopener noreferrer"
+          <BotaoWhatsapp
+            negocioId={negocio.id}
+            whatsapp={negocio.whatsapp}
+            mensagem="Olá! Vi seu perfil no Tanguá App."
             className="group/wpp mt-4 flex items-center justify-center gap-2 rounded-xl bg-mata-500 py-2.5 text-sm font-semibold text-white transition-all hover:bg-mata-600 active:scale-[0.97]"
           >
             <MessageCircle className="h-4 w-4 transition-transform group-hover/wpp:rotate-12" />
             Chamar no WhatsApp
-          </a>
+          </BotaoWhatsapp>
         )}
       </div>
     </div>

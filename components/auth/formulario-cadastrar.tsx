@@ -6,7 +6,13 @@ import { Botao } from '@/components/ui/botao'
 import { cadastrarComEmail } from '@/lib/actions/auth-actions'
 import { cn } from '@/lib/utils'
 
-export function FormularioCadastrar({ papelInicial }: { papelInicial: 'morador' | 'profissional' }) {
+export function FormularioCadastrar({
+  papelInicial,
+  codigoConvite,
+}: {
+  papelInicial: 'morador' | 'profissional'
+  codigoConvite?: string
+}) {
   const [papel, setPapel] = useState(papelInicial)
   const [erro, setErro] = useState<string | null>(null)
   const [carregando, setCarregando] = useState(false)
@@ -15,6 +21,7 @@ export function FormularioCadastrar({ papelInicial }: { papelInicial: 'morador' 
     setCarregando(true)
     setErro(null)
     formData.set('papel', papel)
+    if (codigoConvite) formData.set('codigo_convite', codigoConvite)
 
     const resultado = await cadastrarComEmail(formData)
 

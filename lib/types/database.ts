@@ -2,8 +2,10 @@ export type PapelUsuario = 'morador' | 'profissional' | 'admin'
 export type StatusReivindicacao = 'pendente' | 'aprovado' | 'rejeitado'
 export type StatusVaga = 'aberta' | 'pausada' | 'encerrada'
 export type TipoPost = 'novidade' | 'promocao' | 'vaga_propria'
-export type TipoAviso = 'aviso' | 'evento' | 'utilidade_publica' | 'achados_perdidos'
+export type TipoAviso = 'aviso' | 'evento' | 'utilidade_publica' | 'achados_perdidos' | 'pergunta'
 export type ModalidadeAtendimento = 'loja_fisica' | 'atende_em_casa' | 'atende_domicilio' | 'servico_digital'
+export type TipoEventoPerfil = 'visualizacao' | 'favorito' | 'clique_whatsapp'
+export type TipoReacaoAviso = 'gostei' | 'parabens' | 'obrigado'
 
 export type Perfil = {
   id: string
@@ -14,6 +16,8 @@ export type Perfil = {
   papel: PapelUsuario
   bairro: string | null
   notificacoes_resumo_diario: boolean
+  codigo_convite: string | null
+  convidado_por: string | null
   criado_em: string
   atualizado_em: string
 }
@@ -151,6 +155,39 @@ export type ProdutoServico = {
   criado_em: string
 }
 
+export type Cupom = {
+  id: string
+  negocio_id: string
+  titulo: string
+  desconto_texto: string
+  expira_em: string
+  ativo: boolean
+  criado_em: string
+}
+
+export type EventoPerfil = {
+  id: string
+  negocio_id: string
+  tipo: TipoEventoPerfil
+  criado_em: string
+}
+
+export type RespostaPergunta = {
+  id: string
+  aviso_id: string
+  negocio_id: string
+  autor_id: string
+  criado_em: string
+  negocio?: Negocio
+}
+
+export type ReacaoAviso = {
+  aviso_id: string
+  perfil_id: string
+  tipo: TipoReacaoAviso
+  criado_em: string
+}
+
 export type PushSubscriptionSalva = {
   id: string
   perfil_id: string
@@ -182,6 +219,10 @@ export type Database = {
       favoritos: TabelaGenerica<{ perfil_id: string; negocio_id: string; criado_em: string }>
       push_subscriptions: TabelaGenerica<PushSubscriptionSalva>
       produtos_servicos: TabelaGenerica<ProdutoServico>
+      cupons: TabelaGenerica<Cupom>
+      eventos_perfil: TabelaGenerica<EventoPerfil>
+      respostas_pergunta: TabelaGenerica<RespostaPergunta>
+      reacoes_aviso: TabelaGenerica<ReacaoAviso>
     }
     Views: Record<string, never>
     Functions: Record<string, never>

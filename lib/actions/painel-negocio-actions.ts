@@ -36,6 +36,12 @@ const schemaPost = z.object({
   conteudo: z.string().max(2000).optional(),
 })
 
+const schemaCupom = z.object({
+  titulo: z.string().trim().min(2, 'Dê um nome pra oferta.').max(120, 'Título muito longo.'),
+  descontoTexto: z.string().trim().min(1, 'Descreva o desconto (ex: "20% off", "Leve 2 pague 1").').max(60),
+  expiraEm: z.string().refine((v) => !Number.isNaN(Date.parse(v)), 'Escolha quando a oferta expira.'),
+})
+
 const schemaRespostaAvaliacao = z.object({
   resposta: z.string().trim().min(1, 'Escreva uma resposta.').max(1000, 'Resposta muito longa (máximo 1000 caracteres).'),
 })
@@ -434,6 +440,74 @@ export async function encerrarVagaPropria(vagaId: string) {
 
   revalidatePath('/painel/negocio')
   revalidatePath('/vagas')
+  return { erro: null }
+}
+
+// ---------------------------------------------------------------------
+// Cupons (oferta relâmpago)
+// ---------------------------------------------------------------------
+export async function criarCupom(negocioId: string, formData: FormData) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Não autenticado.' }
+
+  const validado = schemaCupom.safeParse({
+    titulo: formData.get('titulo') as string,
+    descontoTexto: formData.get('desconto_texto') as string,
+    expiraEm: formData.get('expira_em') as string,
+  })
+  if (!validado.success) return { erro: validado.error.issues[0].message }
+  const dados = validado.data
+
+  if (new Date(dados.expiraEm).getTime() <= Date.now()) {
+    return { erro: 'A data de expiração precisa ser no futuro.' }
+  }
+
+  const { data: negocio } = await supabase
+    .from('negocios')
+    .select('id, nome')
+    .eq('id', negocioId)
+    .eq('reivindicado_por', user.id)
+    .single()
+  if (!negocio) return { erro: 'Negócio não encontrado.' }
+
+  const { error } = await supabase.from('cupons').insert({
+    negocio_id: negocioId,
+    titulo: dados.titulo,
+    desconto_texto: dados.descontoTexto,
+    expira_em: new Date(dados.expiraEm).toISOString(),
+  })
+  if (error) return { erro: error.message }
+
+  // avisa quem favoritou — escassez real, então vale a pena notificar
+  const { data: favoritos } = await supabase.from('favoritos').select('perfil_id').eq('negocio_id', negocioId)
+  if (favoritos && favoritos.length > 0) {
+    enviarNotificacaoParaPerfis(
+      favoritos.map((f) => f.perfil_id),
+      {
+        title: `Oferta relâmpago: ${negocio.nome}`,
+        body: `${dados.titulo} — ${dados.descontoTexto}`,
+        url: `/negocio/${negocioId}`,
+        tag: `cupom-${negocioId}`,
+      }
+    ).catch((err) => console.error('Falha ao notificar favoritos sobre cupom:', err))
+  }
+
+  revalidatePath('/painel/negocio')
+  revalidatePath(`/negocio/${negocioId}`)
+  return { erro: null }
+}
+
+export async function encerrarCupom(cupomId: string, negocioId: string) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Não autenticado.' }
+
+  const { error } = await supabase.from('cupons').update({ ativo: false }).eq('id', cupomId)
+  if (error) return { erro: error.message }
+
+  revalidatePath('/painel/negocio')
+  revalidatePath(`/negocio/${negocioId}`)
   return { erro: null }
 }
 

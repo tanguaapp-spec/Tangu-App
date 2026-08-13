@@ -4,7 +4,7 @@ import { FormularioCadastrar } from '@/components/auth/formulario-cadastrar'
 export default function PaginaCadastrar({
   searchParams,
 }: {
-  searchParams: { papel?: string }
+  searchParams: { papel?: string; convite?: string }
 }) {
   const papelInicial = searchParams.papel === 'profissional' ? 'profissional' : 'morador'
 
@@ -16,9 +16,14 @@ export default function PaginaCadastrar({
           ? 'Cadastre-se para gerenciar seu negócio no Tanguá App.'
           : 'Cadastre-se para favoritar negócios e deixar avaliações.'}
       </p>
+      {searchParams.convite && (
+        <p className="mt-2 rounded-lg bg-mata-50 px-3 py-2 text-sm text-mata-700">
+          Você foi indicado por um vizinho — seja bem-vindo(a)!
+        </p>
+      )}
 
       <div className="mt-6">
-        <FormularioCadastrar papelInicial={papelInicial} />
+        <FormularioCadastrar papelInicial={papelInicial} codigoConvite={searchParams.convite} />
       </div>
 
       <p className="mt-6 text-center text-sm text-barro-600">
