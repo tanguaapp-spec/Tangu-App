@@ -55,7 +55,8 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#EF7A1A',
+  // combina com o cabeçalho escuro do mobile (components/layout/cabecalho.tsx)
+  themeColor: '#2E2219',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,

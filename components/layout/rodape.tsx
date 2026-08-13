@@ -8,7 +8,7 @@ const WHATSAPP_CONTATO = '21972652314'
 export function Rodape() {
   return (
     <footer className="mt-20 border-t border-barro-100 bg-barro-900 text-barro-100">
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+      <div className="mx-auto max-w-6xl px-4 pb-24 pt-12 sm:px-6 md:pb-12">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <div className="flex items-center gap-2">

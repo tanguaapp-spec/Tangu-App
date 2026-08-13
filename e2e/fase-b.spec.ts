@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { criarUsuarioTeste, removerUsuarioTeste } from './helpers/usuarios-teste'
 import { loginPelaUI } from './helpers/ui'
+import { clienteAdmin } from './helpers/supabase-admin'
 import manifesto from '../scripts/testes/massa-teste-gerada.json'
 
 const NEGOCIO_TESTE = manifesto.profissionais[1] // [TESTE] Salão da Ana
@@ -58,6 +59,12 @@ test.describe('Fase B — motor de vendas & social enxuto', () => {
       await card.getByRole('button').filter({ hasText: '👏' }).click()
       await page.waitForTimeout(1500)
     } finally {
+      // sem isso, a pergunta de teste fica pra sempre no mural de verdade —
+      // avisos_cidade.publicado_por não tem "on delete cascade".
+      const admin = clienteAdmin()
+      try {
+        await admin.from('avisos_cidade').delete().eq('publicado_por', morador.id)
+      } catch {}
       await removerUsuarioTeste(morador.id)
     }
   })

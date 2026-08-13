@@ -18,6 +18,13 @@ const categoriasDestaque = [
   { nome: 'Agro e Produção Rural', slug: 'agro-producao-rural', emoji: '🌱' },
 ]
 
+function saudacao() {
+  const hora = new Date().getHours()
+  if (hora < 12) return 'Bom dia'
+  if (hora < 18) return 'Boa tarde'
+  return 'Boa noite'
+}
+
 const pilares = [
   {
     href: '/buscar',
@@ -56,8 +63,30 @@ export default async function PaginaInicial() {
 
   return (
     <>
-      {/* HERO */}
-      <section className="relative overflow-hidden textura-papel">
+      {/* HERO — mobile: painel escuro compacto, cara de app (aba "Início") */}
+      <section className="relative overflow-hidden rounded-b-[28px] bg-barro-900 px-4 pb-6 pt-3 text-white lg:hidden">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-14 -top-20 h-56 w-56 rounded-full bg-casca-500 opacity-25 blur-3xl"
+        />
+        <div className="relative">
+          <p className="entrada-lista text-xs font-semibold uppercase tracking-wide text-barro-300" style={{ '--i': 0 } as React.CSSProperties}>
+            Tanguá, RJ
+          </p>
+          <h1 className="entrada-lista mt-1 font-display text-2xl font-bold" style={{ '--i': 1 } as React.CSSProperties}>
+            {saudacao()}! <span aria-hidden="true">🍊</span>
+          </h1>
+          <p className="entrada-lista mt-1 text-sm text-barro-200" style={{ '--i': 2 } as React.CSSProperties}>
+            O que você precisa encontrar hoje?
+          </p>
+          <div className="entrada-lista mt-4" style={{ '--i': 3 } as React.CSSProperties}>
+            <BuscaRapida />
+          </div>
+        </div>
+      </section>
+
+      {/* HERO — desktop/tablet: versão completa com mascote */}
+      <section className="relative hidden overflow-hidden textura-papel lg:block">
         <MotivoGomo className="pointer-events-none absolute -right-24 -top-24 h-[420px] w-[420px] text-casca-500 sm:-right-10" />
         <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-6">
           <div>
@@ -87,18 +116,6 @@ export default async function PaginaInicial() {
             <div className="entrada-lista mt-8" style={{ '--i': 3 } as React.CSSProperties}>
               <BuscaRapida />
             </div>
-
-            <div className="entrada-lista mt-6 flex flex-wrap gap-2" style={{ '--i': 4 } as React.CSSProperties}>
-              {categoriasDestaque.map((cat) => (
-                <Link
-                  key={cat.slug}
-                  href={`/buscar?categoria=${cat.slug}`}
-                  className="rounded-full bg-white px-4 py-1.5 text-sm text-barro-700 shadow-sm transition-colors hover:bg-casca-50 hover:text-casca-700"
-                >
-                  {cat.emoji} {cat.nome}
-                </Link>
-              ))}
-            </div>
           </div>
 
           {/* mascote: a laranja de Tanguá */}
@@ -108,6 +125,21 @@ export default async function PaginaInicial() {
           >
             <Laranja3D className="mx-auto w-48 sm:w-64 lg:w-full" />
           </div>
+        </div>
+      </section>
+
+      {/* CATEGORIAS — pílulas de atalho, compartilhadas pelas duas versões do hero */}
+      <section className="mx-auto max-w-6xl px-4 pt-4 sm:px-6 lg:pt-0">
+        <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible">
+          {categoriasDestaque.map((cat) => (
+            <Link
+              key={cat.slug}
+              href={`/buscar?categoria=${cat.slug}`}
+              className="shrink-0 rounded-full bg-white px-4 py-1.5 text-sm text-barro-700 shadow-sm transition-colors hover:bg-casca-50 hover:text-casca-700"
+            >
+              {cat.emoji} {cat.nome}
+            </Link>
+          ))}
         </div>
       </section>
 

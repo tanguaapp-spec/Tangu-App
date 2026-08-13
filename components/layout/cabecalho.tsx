@@ -19,6 +19,10 @@ const linksNav = [
   { href: '/favoritos', rotulo: 'Favoritos', icone: Heart },
 ]
 
+// No mobile, Profissionais/Vagas/Mural já vivem na barra inferior fixa
+// (components/layout/nav-inferior.tsx) — o menu aqui só cobre o resto.
+const linksMenuMobile = linksNav.filter((l) => l.href === '/ferramentas' || l.href === '/favoritos')
+
 export function Cabecalho() {
   const [menuAberto, setMenuAberto] = useState(false)
   const [user, setUser] = useState<any>(null)
@@ -59,12 +63,17 @@ export function Cabecalho() {
   }
 
   return (
-    <header className="casca-divisor sticky top-0 z-50 border-b border-barro-100 bg-feira/95 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 group">
+    <header className="casca-divisor sticky top-0 z-50 overflow-hidden border-b border-black/10 bg-barro-900 md:overflow-visible md:border-barro-100 md:bg-feira/95 md:backdrop-blur-sm">
+      {/* brilho decorativo — só no cabeçalho escuro do mobile */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-10 -top-16 h-40 w-40 rounded-full bg-casca-500 opacity-25 blur-2xl md:hidden"
+      />
+      <div className="relative mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+        <Link href="/" className="group flex items-center gap-2">
           <LogoTangua className="h-9 w-9 transition-transform group-hover:rotate-12" />
-          <span className="font-display text-xl font-semibold text-barro-900">
-            Tanguá <span className="text-casca-500">App</span>
+          <span className="font-display text-xl font-semibold text-white md:text-barro-900">
+            Tanguá <span className="text-casca-400 md:text-casca-500">App</span>
           </span>
         </Link>
 
@@ -128,16 +137,16 @@ export function Cabecalho() {
         <button
           aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
           onClick={() => setMenuAberto(!menuAberto)}
-          className="rounded-lg p-2 text-barro-800 hover:bg-barro-100 md:hidden"
+          className="rounded-lg p-2 text-white hover:bg-white/10 md:hidden"
         >
           {menuAberto ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
 
       {menuAberto && (
-        <div className="border-t border-barro-100 bg-feira px-4 py-3 md:hidden">
+        <div className="relative border-t border-barro-100 bg-feira px-4 py-3 md:hidden">
           <nav className="flex flex-col gap-1">
-            {linksNav.map((link) => {
+            {linksMenuMobile.map((link) => {
               const ativo = pathname === link.href
               return (
                 <Link

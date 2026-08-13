@@ -25,7 +25,9 @@ test.describe('Busca pública', () => {
 test.describe('Home', () => {
   test('carrega hero, busca rápida e pilares', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-    await expect(page.getByPlaceholder(/eletricista, salão/i)).toBeVisible()
+    // há duas versões do hero no DOM (mobile e desktop, uma delas com
+    // "hidden" via CSS conforme o breakpoint) — só a visível deve contar.
+    await expect(page.locator('h1:visible')).toBeVisible()
+    await expect(page.locator('input:visible[placeholder="Eletricista, salão, marcenaria, mercado..."]')).toBeVisible()
   })
 })
