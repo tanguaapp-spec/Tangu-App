@@ -1,31 +1,23 @@
 'use server'
 
+import { traduzirErroBanco } from '@/lib/planos/limites'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { enviarNotificacaoParaAdmins } from '@/lib/push/enviar-notificacao'
 import { dentroDoLimite } from '@/lib/seguranca/rate-limit'
-import { enviarImagem, extensaoDoArquivo } from '@/lib/storage/imagens'
+import { enviarImagem } from '@/lib/storage/imagens'
 import { creditarPontos } from '@/lib/gamificacao/pontos'
 import { z } from 'zod'
-import type { TipoEventoPerfil } from '@/lib/types/database'
-
-/**
- * Grava um evento pro painel "seu desempenho" do profissional. Escreve via
- * service role (a tabela não tem policy de insert pra ninguém mais, de
- * propósito — evita gente inflar as próprias métricas via API direta).
- * Nunca deve travar a ação principal, por isso sempre falha em silêncio.
- */
-export async function registrarEventoPerfil(negocioId: string, tipo: TipoEventoPerfil) {
-  try {
-    const supabase = createServiceClient()
-    await supabase.from('eventos_perfil').insert({ negocio_id: negocioId, tipo })
-  } catch (err) {
-    console.error('Falha ao registrar evento de perfil:', err)
-  }
-}
+import { registrarEventoPerfil } from '@/lib/metricas/eventos-perfil'
+import { mensagemErroCupom } from '@/lib/ofertas/desconto'
 
 export async function registrarCliqueWhatsapp(negocioId: string) {
-  await registrarEventoPerfil(negocioId, 'clique_whatsapp')
+  if (typeof negocioId !== 'string' || !/^[0-9a-f-]{36}$/i.test(negocioId)) return { erro: null }
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: negocio } = await supabase.from('negocios').select('reivindicado_por').eq('id', negocioId).maybeSingle()
+  if (!negocio) return { erro: null }
+  await registrarEventoPerfil(negocioId, 'clique_whatsapp', { usuarioId: user?.id ?? null, donoId: negocio.reivindicado_por })
   return { erro: null }
 }
 
@@ -53,14 +45,14 @@ export async function alternarFavorito(negocioId: string) {
       .eq('perfil_id', user.id)
       .eq('negocio_id', negocioId)
 
-    if (error) return { erro: error.message }
+    if (error) return { erro: traduzirErroBanco(error) }
   } else {
     const { error } = await supabase
       .from('favoritos')
       .insert({ perfil_id: user.id, negocio_id: negocioId })
 
-    if (error) return { erro: error.message }
-    registrarEventoPerfil(negocioId, 'favorito').catch(() => {})
+    if (error) return { erro: traduzirErroBanco(error) }
+    await registrarEventoPerfil(negocioId, 'favorito', { usuarioId: user.id })
     creditarPontos(user.id, 'favorito').catch(() => {})
   }
 
@@ -112,18 +104,14 @@ export async function enviarAvaliacao(negocioId: string, formData: FormData) {
   }
 
   if (foto && foto.size > 0) {
-    const { url, erro } = await enviarImagem(
-      supabase,
-      foto,
-      `avaliacoes/${negocioId}/${user.id}-${Date.now()}.${extensaoDoArquivo(foto)}`
-    )
+    const { url, erro } = await enviarImagem(supabase, foto, `usuarios/${user.id}/avaliacoes`)
     if (erro) return { erro }
     if (url) dados.foto_url = url
   }
 
   const { error } = await supabase.from('avaliacoes').upsert(dados)
 
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   if (!avaliacaoExistente) {
     creditarPontos(user.id, 'avaliacao').catch(() => {})
@@ -200,7 +188,7 @@ export async function solicitarReivindicacao(
       mensagem: validado.data.mensagem,
     })
 
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   enviarNotificacaoParaAdmins({
     title: 'Nova reivindicação de perfil',
@@ -210,4 +198,18 @@ export async function solicitarReivindicacao(
   }).catch((err) => console.error('Falha ao notificar admins:', err))
 
   return { erro: null }
+}
+
+/** Resgate atômico no banco (resgatar_cupom): respeita limite, prazo e devolve o mesmo código se repetir. */
+export async function resgatarCupom(cupomId: string) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { erro: mensagemErroCupom('CUPOM:login'), codigo: null }
+  if (!(await dentroDoLimite(`resgate:${user.id}`, 30, 60 * 60))) {
+    return { erro: 'Muitas tentativas seguidas. Aguarde um pouco.', codigo: null }
+  }
+
+  const { data, error } = await supabase.rpc('resgatar_cupom', { p_cupom_id: cupomId })
+  if (error) return { erro: mensagemErroCupom(error.message), codigo: null }
+  return { erro: null, codigo: data as string }
 }

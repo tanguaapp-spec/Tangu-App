@@ -8,7 +8,7 @@ export const metadata = {
 
 export const revalidate = 3600
 
-const ATUALIZADO_EM = '13 de agosto de 2026'
+const ATUALIZADO_EM = '22 de outubro de 2026'
 
 export default function PaginaPrivacidade() {
   return (
@@ -54,7 +54,11 @@ export default function PaginaPrivacidade() {
             <li><strong>Cadastro:</strong> nome completo, e-mail, telefone/WhatsApp e senha (armazenada de forma criptografada, nunca em texto puro).</li>
             <li><strong>Perfil:</strong> bairro, foto de avatar (opcional).</li>
             <li><strong>Negócio (para profissionais):</strong> nome do negócio, categoria, descrição, endereço, telefone, WhatsApp, redes sociais, horário de funcionamento, fotos, formas de pagamento e forma de atendimento.</li>
-            <li><strong>Interações:</strong> avaliações e fotos enviadas em avaliações, favoritos, perguntas e reações no mural, denúncias de conteúdo.</li>
+            <li><strong>Interações:</strong> avaliações e fotos enviadas em avaliações, favoritos, perguntas e reações no mural, denúncias de conteúdo, cupons que você pegou.</li>
+            <li><strong>Pedidos de orçamento:</strong> o texto do pedido e o bairro (opcional). O negócio que recebe vê só isso e seu primeiro nome — nunca seu telefone ou e-mail.</li>
+            <li><strong>Suporte:</strong> mensagens dos chamados que você abrir, a página de onde abriu e o tipo de navegador (para entender o problema).</li>
+            <li><strong>Assinatura de negócios:</strong> plano contratado, situação e histórico de cobranças (valor, data, status). Os dados do cartão ficam só no Mercado Pago — o Tanguá App nunca os recebe.</li>
+            <li><strong>Estatísticas do negócio:</strong> contagem de visitas ao perfil e cliques no WhatsApp. Para não contar a mesma pessoa várias vezes usamos um código irreversível derivado do IP e do navegador — o IP em si não é guardado.</li>
             <li><strong>Notificações:</strong> se você ativar notificações push, guardamos um identificador técnico do seu navegador/dispositivo (nunca conteúdo das notificações em si).</li>
             <li><strong>Uso técnico:</strong> registros de erro do sistema (para corrigir falhas), sem finalidade de perfilamento ou publicidade.</li>
           </ul>
@@ -79,6 +83,7 @@ export default function PaginaPrivacidade() {
           <ul>
             <li><strong>Supabase</strong> — banco de dados, autenticação e armazenamento de imagens.</li>
             <li><strong>Vercel</strong> — hospedagem da aplicação.</li>
+            <li><strong>Mercado Pago</strong> — só para negócios que contratam um plano pago: processa a cobrança (recebe o e-mail da conta e o valor).</li>
             <li>
               Quando você clica para falar com um profissional no <strong>WhatsApp</strong>, a conversa passa a
               ser diretamente entre vocês dois, fora do Tanguá App.
@@ -94,8 +99,10 @@ export default function PaginaPrivacidade() {
         <section>
           <h2>5. Por quanto tempo guardamos</h2>
           <p>
-            Enquanto sua conta existir. Se você pedir a exclusão da conta, removemos seus dados pessoais em até
-            15 dias, exceto o que a lei exigir manter por mais tempo (ex.: obrigações fiscais, caso existam).
+            Enquanto sua conta existir. Ao excluir a conta (em Meu perfil → Privacidade e dados), seus dados
+            pessoais são apagados na hora. Ficam apenas: registros de pagamento pelo prazo exigido em lei, sem
+            ligação com seu nome; e um registro de que uma exclusão aconteceu, sem identificar você. Registros
+            técnicos de erro são apagados após 90 dias e notificações do app após 180 dias.
           </p>
         </section>
 
@@ -105,12 +112,17 @@ export default function PaginaPrivacidade() {
           <ul>
             <li>Confirmar se tratamos seus dados e acessá-los;</li>
             <li>Corrigir dados incompletos, inexatos ou desatualizados (direto em <Link href="/perfil" className="font-medium text-casca-600 hover:underline">Meu perfil</Link>);</li>
-            <li>Pedir a exclusão da sua conta e dos dados associados;</li>
+            <li>Excluir sua conta e os dados associados — você mesmo faz isso em <Link href="/perfil#privacidade" className="font-medium text-casca-600 hover:underline">Meu perfil → Privacidade e dados</Link>;</li>
             <li>Revogar o consentimento de notificações a qualquer momento (nas configurações do navegador ou em <Link href="/perfil" className="font-medium text-casca-600 hover:underline">Meu perfil</Link>);</li>
-            <li>Solicitar a portabilidade dos seus dados.</li>
+            <li>Baixar uma cópia dos seus dados (portabilidade) — também em <Link href="/perfil#privacidade" className="font-medium text-casca-600 hover:underline">Privacidade e dados</Link>;</li>
+            <li>Escolher quais avisos quer receber, em <Link href="/perfil#comunicacao" className="font-medium text-casca-600 hover:underline">Comunicação</Link>.</li>
           </ul>
           <p>
-            Para exercer qualquer um desses direitos, fale com a gente pelo{' '}
+            Para qualquer outro pedido, abra um chamado na{' '}
+            <Link href="/ajuda/contato?assunto=privacidade" className="font-medium text-casca-600 hover:underline">
+              central de ajuda
+            </Link>{' '}
+            ou fale com a gente pelo{' '}
             <a
               href="https://wa.me/5521972652314?text=Ol%C3%A1!%20Quero%20exercer%20um%20direito%20sobre%20meus%20dados%20no%20Tangu%C3%A1%20App."
               target="_blank"

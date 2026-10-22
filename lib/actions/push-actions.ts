@@ -1,5 +1,6 @@
 'use server'
 
+import { traduzirErroBanco } from '@/lib/planos/limites'
 import { createClient } from '@/lib/supabase/server'
 
 type InscricaoPush = {
@@ -23,7 +24,7 @@ export async function inscreverPush(inscricao: InscricaoPush, userAgent?: string
     { onConflict: 'endpoint' }
   )
 
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
   return { erro: null }
 }
 
@@ -38,6 +39,6 @@ export async function desinscreverPush(endpoint: string) {
     .eq('endpoint', endpoint)
     .eq('perfil_id', user.id)
 
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
   return { erro: null }
 }

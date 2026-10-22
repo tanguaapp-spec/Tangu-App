@@ -34,6 +34,8 @@ export function Rodape() {
               <li><Link href="/vagas" className="hover:text-white">Vagas de emprego</Link></li>
               <li><Link href="/mural" className="hover:text-white">Mural da cidade</Link></li>
               <li><Link href="/cadastrar?papel=profissional" className="hover:text-white">Cadastre seu negócio</Link></li>
+              <li><Link href="/planos" className="hover:text-white">Planos para negócios</Link></li>
+              <li><Link href="/orcamentos/novo" className="hover:text-white">Pedir orçamento</Link></li>
             </ul>
           </div>
 
@@ -44,6 +46,7 @@ export function Rodape() {
             <ul className="mt-3 space-y-2 text-sm text-barro-300">
               <li><Link href="/privacidade" className="hover:text-white">Política de Privacidade</Link></li>
               <li><Link href="/termos" className="hover:text-white">Termos de Uso</Link></li>
+              <li><Link href="/ajuda" className="hover:text-white">Central de ajuda</Link></li>
             </ul>
           </div>
 

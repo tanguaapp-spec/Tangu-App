@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { MessageCircle, Globe, Star, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { atualizarStatusProspeccao } from '@/lib/actions/prospeccao-actions'
-import { linkWhatsapp } from '@/lib/utils'
+import { linkWhatsapp, urlSegura } from '@/lib/utils'
 import type { ProspeccaoNegocio } from '@/lib/types/database'
 
 const OPCOES_STATUS = [
@@ -75,9 +75,9 @@ export function LinhaProspeccao({ prospeccao }: { prospeccao: ProspeccaoNegocio 
                 <MessageCircle className="h-3.5 w-3.5" /> {prospeccao.telefone}
               </a>
             )}
-            {prospeccao.site && (
+            {urlSegura(prospeccao.site) && (
               <a
-                href={prospeccao.site}
+                href={urlSegura(prospeccao.site)!}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-barro-600 hover:underline"

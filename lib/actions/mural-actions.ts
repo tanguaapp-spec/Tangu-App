@@ -1,5 +1,6 @@
 'use server'
 
+import { traduzirErroBanco } from '@/lib/planos/limites'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { dentroDoLimite } from '@/lib/seguranca/rate-limit'
@@ -38,7 +39,7 @@ export async function criarPergunta(formData: FormData) {
     bairro: validado.data.bairro || null,
     publicado_por: user.id,
   })
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   revalidatePath('/mural')
   return { erro: null }
@@ -73,7 +74,7 @@ export async function responderPergunta(avisoId: string, negocioId: string) {
   })
   if (error) {
     if (error.code === '23505') return { erro: 'Você já indicou esse negócio nessa pergunta.' }
-    return { erro: error.message }
+    return { erro: traduzirErroBanco(error) }
   }
 
   revalidatePath('/mural')
@@ -104,7 +105,7 @@ export async function alternarReacao(avisoId: string, tipo: TipoReacaoAviso) {
       .delete()
       .eq('aviso_id', avisoId)
       .eq('perfil_id', user.id)
-    if (error) return { erro: error.message }
+    if (error) return { erro: traduzirErroBanco(error) }
   } else if (existente) {
     // troca de reação
     const { error } = await supabase
@@ -112,12 +113,12 @@ export async function alternarReacao(avisoId: string, tipo: TipoReacaoAviso) {
       .update({ tipo })
       .eq('aviso_id', avisoId)
       .eq('perfil_id', user.id)
-    if (error) return { erro: error.message }
+    if (error) return { erro: traduzirErroBanco(error) }
   } else {
     const { error } = await supabase
       .from('reacoes_aviso')
       .insert({ aviso_id: avisoId, perfil_id: user.id, tipo })
-    if (error) return { erro: error.message }
+    if (error) return { erro: traduzirErroBanco(error) }
   }
 
   revalidatePath('/mural')

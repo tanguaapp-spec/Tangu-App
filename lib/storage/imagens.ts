@@ -1,28 +1,39 @@
+import { randomUUID } from 'node:crypto'
 import { createClient } from '@/lib/supabase/server'
+import { detectarTipoImagem, EXTENSAO_POR_TIPO } from '@/lib/storage/assinatura-imagem'
 
-export const TAMANHO_MAX_IMAGEM = 5 * 1024 * 1024 // 5MB
+export const TAMANHO_MAX_IMAGEM = 5 * 1024 * 1024 // 5MB — igual ao limite do bucket (migration 0016)
 
-export function extensaoDoArquivo(arquivo: File) {
-  const partes = arquivo.name.split('.')
-  const ext = partes.length > 1 ? partes.pop() : null
-  return (ext || arquivo.type.split('/')[1] || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '')
-}
-
-/** Sobe uma imagem pro bucket público `imagens`. Usado por negócio, avaliação, etc. */
+/**
+ * Sobe uma imagem pro bucket público `imagens`.
+ *
+ * `pasta` precisa começar com `negocios/<negocio_id>` (dono do negócio) ou
+ * `usuarios/<user_id>` (o próprio usuário) — é o que a policy de storage
+ * aceita. O nome do arquivo é sempre gerado aqui (UUID + extensão do tipo
+ * REAL detectado pelos bytes), nunca vem do usuário.
+ */
 export async function enviarImagem(
   supabase: ReturnType<typeof createClient>,
   arquivo: File,
-  caminho: string
+  pasta: string
 ): Promise<{ url?: string; erro?: string }> {
   if (!arquivo || arquivo.size === 0) return {}
-  if (!arquivo.type.startsWith('image/')) return { erro: 'Envie apenas arquivos de imagem.' }
   if (arquivo.size > TAMANHO_MAX_IMAGEM) return { erro: 'Cada imagem deve ter no máximo 5MB.' }
 
-  const { error } = await supabase.storage.from('imagens').upload(caminho, arquivo, {
-    upsert: true,
-    contentType: arquivo.type,
+  const bytes = new Uint8Array(await arquivo.arrayBuffer())
+  const tipo = detectarTipoImagem(bytes)
+  if (!tipo) return { erro: 'Formato não aceito. Envie uma foto em JPG, PNG, WebP ou GIF.' }
+
+  const caminho = `${pasta.replace(/\/+$/, '')}/${randomUUID()}.${EXTENSAO_POR_TIPO[tipo]}`
+  const { error } = await supabase.storage.from('imagens').upload(caminho, bytes, {
+    contentType: tipo,
+    cacheControl: '31536000', // nome único por upload → pode cachear pra sempre
+    upsert: false,
   })
-  if (error) return { erro: error.message }
+  if (error) {
+    console.error('Falha no upload de imagem:', error.message)
+    return { erro: 'Não foi possível enviar a imagem agora. Tente de novo em instantes.' }
+  }
 
   const { data } = supabase.storage.from('imagens').getPublicUrl(caminho)
   return { url: data.publicUrl }

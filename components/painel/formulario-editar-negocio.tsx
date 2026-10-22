@@ -30,6 +30,7 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
   const [galeria, setGaleria] = useState<string[]>(negocio.galeria ?? [])
   const [formasPagamento, setFormasPagamento] = useState<string[]>(negocio.formas_pagamento ?? [])
   const [modalidades, setModalidades] = useState<ModalidadeAtendimento[]>(negocio.modalidades_atendimento ?? [])
+  const [tipo, setTipo] = useState<'estabelecimento' | 'autonomo'>(negocio.tipo_perfil ?? 'estabelecimento')
 
   async function handleSubmit(formData: FormData) {
     setCarregando(true)
@@ -62,7 +63,7 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
   return (
     <form action={handleSubmit} className="flex flex-col gap-5">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Campo name="nome" id="nome" rotulo="Nome do negócio" defaultValue={negocio.nome} required />
+        <Campo name="nome" id="nome" rotulo={tipo === 'autonomo' ? 'Nome profissional' : 'Nome do negócio'} defaultValue={negocio.nome} required />
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="categoria_id" className="text-sm font-medium text-barro-800">
@@ -92,14 +93,40 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
         placeholder="Conte pra cidade o que você faz, seus diferenciais..."
       />
 
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="tipo_perfil" className="text-sm font-medium text-barro-800">
+          Tipo de perfil
+        </label>
+        <select
+          id="tipo_perfil"
+          name="tipo_perfil"
+          value={tipo}
+          onChange={(e) => setTipo(e.target.value as 'estabelecimento' | 'autonomo')}
+          className="w-full rounded-xl border border-barro-300 bg-white px-4 py-2.5 text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100 sm:max-w-sm"
+        >
+          <option value="estabelecimento">Ponto comercial (loja, salão, oficina…)</option>
+          <option value="autonomo">Profissional autônomo (sem endereço público)</option>
+        </select>
+      </div>
+
       <CampoModalidadeAtendimento selecionadas={modalidades} onChange={setModalidades} />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Campo name="whatsapp" id="whatsapp" rotulo="WhatsApp" defaultValue={negocio.whatsapp ?? ''} placeholder="(21) 99999-9999" />
         <Campo name="telefone" id="telefone" rotulo="Telefone fixo" defaultValue={negocio.telefone ?? ''} placeholder="(21) 2665-0000" />
         <Campo name="instagram" id="instagram" rotulo="Instagram" defaultValue={negocio.instagram ?? ''} placeholder="@seuusuario" />
-        <Campo name="site" id="site" rotulo="Site" defaultValue={negocio.site ?? ''} placeholder="https://" />
-        <Campo name="endereco" id="endereco" rotulo="Endereço" defaultValue={negocio.endereco ?? ''} />
+        <Campo name="site" id="site" type="url" rotulo="Site" defaultValue={negocio.site ?? ''} placeholder="seusite.com.br" />
+        {tipo === 'autonomo' ? (
+          <Campo
+            name="area_atendimento"
+            id="area_atendimento"
+            rotulo="Onde você atende"
+            defaultValue={negocio.area_atendimento ?? ''}
+            placeholder="Ex: Tanguá toda e Rio Bonito"
+          />
+        ) : (
+          <Campo name="endereco" id="endereco" rotulo="Endereço" defaultValue={negocio.endereco ?? ''} />
+        )}
         <Campo name="bairro" id="bairro" rotulo="Bairro" defaultValue={negocio.bairro ?? ''} placeholder="Centro, Manilha..." />
       </div>
 
@@ -159,7 +186,7 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
           type="file"
           id="foto_capa"
           name="foto_capa"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp,image/gif"
           className="mt-2 block w-full text-sm text-barro-600 file:mr-3 file:rounded-lg file:border-0 file:bg-barro-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-barro-700 hover:file:bg-barro-200"
         />
       </div>
@@ -174,7 +201,7 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
                 <button
                   type="button"
                   onClick={() => removerFoto(url)}
-                  className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                  className="absolute right-1 top-1 rounded-full bg-black/60 p-1.5 text-white transition-opacity focus:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                   aria-label="Remover foto"
                 >
                   <X className="h-3 w-3" />
@@ -186,15 +213,23 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
         <input
           type="file"
           name="galeria_novas"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp,image/gif"
           multiple
           className="mt-2 block w-full text-sm text-barro-600 file:mr-3 file:rounded-lg file:border-0 file:bg-barro-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-barro-700 hover:file:bg-barro-200"
         />
         <p className="mt-1 text-xs text-barro-400">Você pode selecionar várias fotos de uma vez. Máximo 5MB por foto.</p>
       </div>
 
-      {erro && <p className="text-sm text-red-600">{erro}</p>}
-      {salvo && <p className="text-sm text-mata-600">Dados salvos com sucesso.</p>}
+      {erro && (
+        <p role="alert" className="text-sm text-red-600">
+          {erro}
+        </p>
+      )}
+      {salvo && (
+        <p role="status" className="text-sm text-mata-600">
+          Dados salvos com sucesso.
+        </p>
+      )}
       <Botao type="submit" carregando={carregando} className="self-start">
         Salvar alterações
       </Botao>

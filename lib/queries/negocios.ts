@@ -196,6 +196,7 @@ export async function buscarCupomAtivo(negocioId: string) {
     .eq('negocio_id', negocioId)
     .eq('ativo', true)
     .gt('expira_em', new Date().toISOString())
+    .lte('inicia_em', new Date().toISOString())
     .order('criado_em', { ascending: false })
     .limit(1)
     .maybeSingle()

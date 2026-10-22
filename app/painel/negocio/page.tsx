@@ -6,6 +6,7 @@ import { FormularioCriarPost } from '@/components/painel/formulario-criar-post'
 import { FormularioCriarVagaPropria } from '@/components/painel/formulario-criar-vaga-propria'
 import { FormularioCriarProduto } from '@/components/painel/formulario-criar-produto'
 import { FormularioCriarCupom } from '@/components/painel/formulario-criar-cupom'
+import { ValidarCupom } from '@/components/painel/validar-cupom'
 import { ListaProdutos } from '@/components/painel/lista-produtos'
 import { ListaAvaliacoes } from '@/components/painel/lista-avaliacoes'
 import { ListaCupons } from '@/components/painel/lista-cupons'
@@ -16,6 +17,10 @@ import { CartaoDivulgacao } from '@/components/painel/cartao-divulgacao'
 import { CartaoDestaque } from '@/components/painel/cartao-destaque'
 import { CartaoFerramentaParceira } from '@/components/painel/cartao-ferramenta-parceira'
 import { reenviarCadastroNegocio } from '@/lib/actions/painel-negocio-actions'
+import { ChecklistNegocio } from '@/components/painel/checklist-negocio'
+import { ResumoUsoPlano } from '@/components/planos/uso-plano'
+import { montarChecklistNegocio } from '@/lib/onboarding/checklist-negocio'
+import { buscarUsoPlano, listarPlanos } from '@/lib/queries/planos'
 import { Star, Store, Clock3, ShieldAlert } from 'lucide-react'
 import Link from 'next/link'
 import { headers } from 'next/headers'
@@ -76,10 +81,20 @@ export default async function PainelNegocio() {
           )}
           <h1 className="mt-3 font-display text-xl font-semibold text-barro-900">{negocio.nome}</h1>
           {negocio.status_cadastro === 'pendente' ? (
-            <p className="mt-2 text-barro-700">
-              Seu cadastro está em análise pela nossa equipe. Assim que for aprovado, seu negócio aparece no
-              diretório e você libera novidades, vagas e divulgação.
-            </p>
+            <>
+              <p className="mt-2 text-barro-700">
+                A maioria dos cadastros entra no ar na hora — o seu caiu numa verificação automática e vai ser olhado por
+                uma pessoa, normalmente em até 2 dias úteis. Enquanto isso, complete o perfil abaixo: tudo que você salvar
+                já vale quando ele for liberado.
+              </p>
+              <p className="mt-2 text-sm text-barro-600">
+                Acha que foi engano?{' '}
+                <Link href="/ajuda/contato?assunto=cadastro" className="font-semibold text-casca-700 underline">
+                  Fale com o suporte
+                </Link>
+                .
+              </p>
+            </>
           ) : (
             <>
               <p className="mt-2 text-barro-700">Seu cadastro não foi aprovado desta vez.</p>
@@ -132,6 +147,8 @@ export default async function PainelNegocio() {
     buscarDesempenhoSemanal(negocio.id),
     buscarClientesConectados(negocio.id),
   ])
+  const [usoPlano, planos] = await Promise.all([buscarUsoPlano(negocio.id), listarPlanos()])
+  const cuponsTotal = cupons?.length ?? 0
 
   const notasMedia = mediaAvaliacoes?.length
     ? (mediaAvaliacoes.reduce((acc, a) => acc + a.nota, 0) / mediaAvaliacoes.length).toFixed(1)
@@ -143,6 +160,22 @@ export default async function PainelNegocio() {
   const urlPublica = `${protocolo}://${host}/negocio/${negocio.id}`
 
   const categorias = await buscarCategorias()
+
+  const checklist = montarChecklistNegocio({
+    tipo_perfil: negocio.tipo_perfil ?? 'estabelecimento',
+    descricao: negocio.descricao,
+    categoria_id: negocio.categoria_id,
+    whatsapp: negocio.whatsapp,
+    bairro: negocio.bairro,
+    endereco: negocio.endereco,
+    area_atendimento: negocio.area_atendimento ?? null,
+    horario_funcionamento: negocio.horario_funcionamento,
+    foto_capa_url: negocio.foto_capa_url,
+    galeria: negocio.galeria,
+    total_produtos: produtos?.length ?? 0,
+    total_posts: posts?.length ?? 0,
+    total_cupons: cuponsTotal,
+  })
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -176,6 +209,18 @@ export default async function PainelNegocio() {
         <AlternadorAbertoAgora negocioId={negocio.id} valorInicial={negocio.aberto_agora} />
       </div>
 
+      <ChecklistNegocio itens={checklist} urlPublica={urlPublica} />
+
+      {usoPlano && (
+        <section aria-label="Uso do plano" className="mt-6 rounded-casca border border-barro-100 bg-white p-5">
+          <ResumoUsoPlano
+            uso={usoPlano}
+            nomePlano={planos.find((p) => p.id === usoPlano.plano)?.nome ?? usoPlano.plano}
+            compacto
+          />
+        </section>
+      )}
+
       <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:mt-6">
         <div className="rounded-xl border border-barro-100 bg-white p-4">
           <Star className="h-5 w-5 text-casca-500" />
@@ -191,18 +236,24 @@ export default async function PainelNegocio() {
 
       <div className="mt-8">
         <h2 className="font-display text-lg font-semibold text-barro-900">Seu desempenho</h2>
-        <p className="text-sm text-barro-500">Últimos 7 dias, comparado com os 7 dias anteriores.</p>
+        <p className="text-sm text-barro-500">
+          Últimos 7 dias, comparado com os 7 dias anteriores. Visualização = pessoa diferente abrindo seu perfil (no
+          máximo 1 a cada 6h, sem contar você nem robôs); clique = toque no botão de WhatsApp.
+        </p>
         <div className="mt-4">
           <DesempenhoSemanal desempenho={desempenho} />
         </div>
       </div>
 
-      <div className="mt-8 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <div id="ofertas" className="mt-8 scroll-mt-20 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
         <h2 className="font-display text-lg font-semibold text-barro-900">Oferta relâmpago</h2>
         <p className="text-sm text-barro-500">Cria escassez de verdade — quem favoritou seu perfil recebe um aviso.</p>
         <div className="mt-4">
           <ListaCupons cupons={(cupons as any) ?? []} negocioId={negocio.id} />
           <FormularioCriarCupom negocioId={negocio.id} />
+          <div className="mt-5 border-t border-barro-100 pt-4">
+            <ValidarCupom />
+          </div>
         </div>
       </div>
 
@@ -219,21 +270,16 @@ export default async function PainelNegocio() {
 
       <CartaoDivulgacao urlPublica={urlPublica} nomeNegocio={negocio.nome} />
 
-      <CartaoDestaque
-        negocioId={negocio.id}
-        nomeNegocio={negocio.nome}
-        destaqueAtivo={negocio.destaque_ativo}
-        destaqueExpiraEm={negocio.destaque_expira_em}
-      />
+      <CartaoDestaque destaqueAtivo={negocio.destaque_ativo} destaqueExpiraEm={negocio.destaque_expira_em} />
 
-      <div className="mt-8 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <div id="informacoes" className="mt-8 scroll-mt-20 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
         <h2 className="font-display text-lg font-semibold text-barro-900">Informações do negócio</h2>
         <div className="mt-4">
           <FormularioEditarNegocio negocio={negocio as any} categorias={categorias as any} />
         </div>
       </div>
 
-      <div className="mt-8 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <div id="catalogo" className="mt-8 scroll-mt-20 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
         <h2 className="font-display text-lg font-semibold text-barro-900">Catálogo de produtos e serviços</h2>
         <p className="text-sm text-barro-500">Quem já vê o preço chega mais decidido a fechar.</p>
         <div className="mt-4">
@@ -244,7 +290,7 @@ export default async function PainelNegocio() {
         </div>
       </div>
 
-      <div className="mt-8 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <div id="novidade" className="mt-8 scroll-mt-20 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
         <h2 className="font-display text-lg font-semibold text-barro-900">Publicar novidade</h2>
         <div className="mt-4">
           <FormularioCriarPost negocioId={negocio.id} />

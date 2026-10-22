@@ -1,11 +1,12 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
 import { AcoesReivindicacao } from '@/components/painel/acoes-reivindicacao'
 import { ShieldCheck } from 'lucide-react'
 import { requireAdminOrRedirect } from '@/lib/auth/require-admin'
 
 export default async function PainelReivindicacoes() {
   await requireAdminOrRedirect()
-  const supabase = createClient()
+  // service role: telefone do dono é coluna privada (0016); acesso já validado como admin
+  const supabase = createServiceClient()
   const { data: solicitacoes, error } = await supabase
     .from('solicitacoes_reivindicacao')
     .select(

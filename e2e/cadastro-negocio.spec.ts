@@ -3,10 +3,9 @@ import { criarUsuarioTeste, removerUsuarioTeste } from './helpers/usuarios-teste
 import { loginPelaUI } from './helpers/ui'
 import { clienteAdmin } from './helpers/supabase-admin'
 
-// Sem isso, cada rodada deixa um negócio "[TESTE-E2E]" órfão em produção:
-// o usuário é removido no finally, mas o negócio criado por ele não —
-// e negocios.reivindicado_por não tem "on delete cascade", então a linha fica
-// pra sempre com dono inexistente. Chamado no finally de cada teste que cadastra.
+// Sem isso, cada rodada deixa um negócio "[TESTE-E2E]" órfão no banco: o
+// usuário é removido no finally e (desde a 0016) reivindicado_por vira null,
+// mas o negócio continua. Chamado no finally de cada teste que cadastra.
 async function removerNegocioDoUsuario(usuarioId: string) {
   const admin = clienteAdmin()
   try {
@@ -17,7 +16,7 @@ async function removerNegocioDoUsuario(usuarioId: string) {
 }
 
 test.describe('Cadastro de negócio — modalidade de atendimento (Fase 0)', () => {
-  test('profissional cadastra negócio escolhendo modalidades e vê "em análise" no painel', async ({ page }) => {
+  test('profissional cadastra negócio e ele entra no ar na hora, com checklist de configuração', async ({ page }) => {
     const usuario = await criarUsuarioTeste('profissional')
     try {
       await loginPelaUI(page, usuario.email, usuario.senha)
@@ -27,15 +26,15 @@ test.describe('Cadastro de negócio — modalidade de atendimento (Fase 0)', () 
       await page.locator('#categoria_id').selectOption({ index: 1 })
       await page.getByLabel('Bairro').fill('Centro')
 
-      // modalidades: loja física + vai até o cliente (duas ao mesmo tempo)
-      await page.getByText('Loja física', { exact: true }).click()
+      // "Loja física" já vem marcada pra ponto comercial; soma "vai até o cliente"
       await page.getByText('Vai até o cliente', { exact: true }).click()
 
       await page.getByLabel(/whatsapp/i).fill('21999999999')
-      await page.getByRole('button', { name: /enviar cadastro/i }).click()
+      await page.getByRole('button', { name: /criar meu perfil/i }).click()
 
-      await expect(page).toHaveURL('/painel/negocio')
-      await expect(page.getByText(/está em análise/i)).toBeVisible()
+      await expect(page).toHaveURL(/\/painel\/negocio/)
+      // autoaprovação (migration 0017): sem fila manual, já mostra o checklist
+      await expect(page.getByText(/seu perfil está \d+% pronto/i)).toBeVisible()
     } finally {
       await removerNegocioDoUsuario(usuario.id)
       await removerUsuarioTeste(usuario.id)
@@ -49,8 +48,10 @@ test.describe('Cadastro de negócio — modalidade de atendimento (Fase 0)', () 
       await page.goto('/painel/negocio/cadastrar')
       await page.getByLabel(/nome do negócio/i).fill('[TESTE-E2E] Sem modalidade')
       await page.locator('#categoria_id').selectOption({ index: 1 })
+      // desmarca a modalidade que vem pré-selecionada
+      await page.getByText('Loja física', { exact: true }).click()
       await page.getByLabel(/whatsapp/i).fill('21999999999')
-      await page.getByRole('button', { name: /enviar cadastro/i }).click()
+      await page.getByRole('button', { name: /criar meu perfil/i }).click()
 
       await expect(page.getByText(/escolha ao menos uma forma de atendimento/i)).toBeVisible()
       await expect(page).toHaveURL(/\/painel\/negocio\/cadastrar/)
@@ -70,10 +71,11 @@ test.describe('Cadastro de negócio — modalidade de atendimento (Fase 0)', () 
       await page.getByText('Serviço digital', { exact: true }).click()
       await page.getByLabel(/whatsapp/i).fill('21999999999')
       // sem preencher endereço de propósito
-      await page.getByRole('button', { name: /enviar cadastro/i }).click()
+      await page.getByRole('button', { name: /criar meu perfil/i }).click()
 
-      await expect(page).toHaveURL('/painel/negocio')
-      await expect(page.getByText(/está em análise/i)).toBeVisible()
+      await expect(page).toHaveURL(/\/painel\/negocio/)
+      // autoaprovação (migration 0017): sem fila manual, já mostra o checklist
+      await expect(page.getByText(/seu perfil está \d+% pronto/i)).toBeVisible()
     } finally {
       await removerNegocioDoUsuario(usuario.id)
       await removerUsuarioTeste(usuario.id)

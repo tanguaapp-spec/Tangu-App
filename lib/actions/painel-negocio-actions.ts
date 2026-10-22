@@ -1,28 +1,53 @@
 'use server'
 
+import { traduzirErroBanco } from '@/lib/planos/limites'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { enviarNotificacaoParaPerfis, enviarNotificacaoParaAdmins } from '@/lib/push/enviar-notificacao'
-import { enviarImagem, extensaoDoArquivo } from '@/lib/storage/imagens'
+import { enviarNotificacaoParaAdmins } from '@/lib/push/enviar-notificacao'
+import { notificar } from '@/lib/notificacoes/notificar'
+import { enviarImagem } from '@/lib/storage/imagens'
 import { z } from 'zod'
+import { lerPrecoCentavos } from '@/lib/admin/configuracoes'
+import { dentroDoLimite } from '@/lib/seguranca/rate-limit'
+import { normalizarInstagram, normalizarSite, normalizarTelefoneBR } from '@/lib/utils'
 import type { ModalidadeAtendimento } from '@/lib/types/database'
 
 const MODALIDADES_VALIDAS = ['loja_fisica', 'atende_em_casa', 'atende_domicilio', 'servico_digital'] as const
 
 const schemaCadastroNegocio = z.object({
+  tipoPerfil: z.enum(['estabelecimento', 'autonomo']).catch('estabelecimento'),
   nome: z.string().trim().min(2, 'Nome muito curto.').max(120, 'Nome muito longo.'),
   categoriaId: z.string().uuid('Escolha uma categoria.'),
-  descricao: z.string().max(2000).optional(),
-  endereco: z.string().max(200).optional(),
-  bairro: z.string().max(100).optional(),
+  descricao: z.string().trim().max(2000, 'Descrição muito longa (máximo 2000 caracteres).').optional(),
+  endereco: z.string().trim().max(200).optional(),
+  bairro: z.string().trim().max(100).optional(),
+  areaAtendimento: z.string().trim().max(200).optional(),
   telefone: z.string().max(30).optional(),
-  whatsapp: z.string().trim().min(8, 'Informe um WhatsApp válido.').max(30),
-  instagram: z.string().max(60).optional(),
+  whatsapp: z.string().trim().min(1, 'Informe o WhatsApp com DDD.').max(30),
+  instagram: z.string().max(80).optional(),
   site: z.string().max(200).optional(),
   modalidadesAtendimento: z
     .array(z.enum(MODALIDADES_VALIDAS))
     .min(1, 'Escolha ao menos uma forma de atendimento.'),
 })
+
+/** Normaliza contatos; devolve mensagem de erro amigável se algum for inválido. */
+function normalizarContatos(bruto: {
+  whatsapp?: string | null
+  telefone?: string | null
+  instagram?: string | null
+  site?: string | null
+}) {
+  const whatsapp = bruto.whatsapp ? normalizarTelefoneBR(bruto.whatsapp) : null
+  if (bruto.whatsapp && !whatsapp) return { erro: 'WhatsApp inválido. Use DDD + número, ex.: (21) 99999-9999.' }
+  const telefone = bruto.telefone ? normalizarTelefoneBR(bruto.telefone) : null
+  if (bruto.telefone && !telefone) return { erro: 'Telefone fixo inválido. Use DDD + número.' }
+  const instagram = bruto.instagram ? normalizarInstagram(bruto.instagram) : null
+  if (bruto.instagram && !instagram) return { erro: 'Instagram inválido. Informe só o @usuario.' }
+  const site = bruto.site ? normalizarSite(bruto.site) : null
+  if (bruto.site && !site) return { erro: 'Site inválido. Informe um endereço como seusite.com.br.' }
+  return { whatsapp, telefone, instagram, site }
+}
 
 const schemaProduto = z.object({
   nome: z.string().trim().min(1, 'Informe o nome do produto/serviço.').max(120, 'Nome muito longo.'),
@@ -39,8 +64,18 @@ const schemaPost = z.object({
 const schemaCupom = z.object({
   titulo: z.string().trim().min(2, 'Dê um nome pra oferta.').max(120, 'Título muito longo.'),
   descontoTexto: z.string().trim().min(1, 'Descreva o desconto (ex: "20% off", "Leve 2 pague 1").').max(60),
+  condicoes: z.string().trim().max(500, 'Condições muito longas (máximo 500 caracteres).').optional(),
+  // ISO com fuso, convertido no navegador (datetime-local não tem fuso)
+  iniciaEm: z.string().refine((v) => !Number.isNaN(Date.parse(v)), 'Data de início inválida.').optional(),
   expiraEm: z.string().refine((v) => !Number.isNaN(Date.parse(v)), 'Escolha quando a oferta expira.'),
+  limiteResgates: z.number().int().min(1, 'Limite precisa ser pelo menos 1.').max(100000).optional(),
+  precoOriginal: z.number().int().positive().optional(),
+  precoPromocional: z.number().int().nonnegative().optional(),
 })
+
+function centavos(valor: FormDataEntryValue | null): number | undefined {
+  return String(valor ?? '').trim() ? lerPrecoCentavos(valor) : undefined
+}
 
 const schemaRespostaAvaliacao = z.object({
   resposta: z.string().trim().min(1, 'Escreva uma resposta.').max(1000, 'Resposta muito longa (máximo 1000 caracteres).'),
@@ -66,20 +101,29 @@ export async function cadastrarNegocio(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { erro: 'Você precisa entrar para cadastrar um negócio.' }
 
+  const texto = (campo: string) => ((formData.get(campo) as string) || '').trim() || undefined
   const validado = schemaCadastroNegocio.safeParse({
+    tipoPerfil: formData.get('tipo_perfil'),
     nome: formData.get('nome') as string,
     categoriaId: formData.get('categoria_id') as string,
-    descricao: (formData.get('descricao') as string) || undefined,
-    endereco: (formData.get('endereco') as string) || undefined,
-    bairro: (formData.get('bairro') as string) || undefined,
-    telefone: (formData.get('telefone') as string) || undefined,
-    whatsapp: formData.get('whatsapp') as string,
-    instagram: (formData.get('instagram') as string) || undefined,
-    site: (formData.get('site') as string) || undefined,
+    descricao: texto('descricao'),
+    endereco: texto('endereco'),
+    bairro: texto('bairro'),
+    areaAtendimento: texto('area_atendimento'),
+    telefone: texto('telefone'),
+    whatsapp: (formData.get('whatsapp') as string) ?? '',
+    instagram: texto('instagram'),
+    site: texto('site'),
     modalidadesAtendimento: formData.getAll('modalidades_atendimento').map(String),
   })
   if (!validado.success) return { erro: validado.error.issues[0].message }
   const dados = validado.data
+  const contatos = normalizarContatos(dados)
+  if ('erro' in contatos) return { erro: contatos.erro }
+
+  if (!(await dentroDoLimite(`cadastro-negocio:${user.id}`, 5, 24 * 60 * 60))) {
+    return { erro: 'Muitas tentativas de cadastro hoje. Tente de novo amanhã ou fale com o suporte.' }
+  }
 
   const { data: existente } = await supabase
     .from('negocios')
@@ -91,41 +135,49 @@ export async function cadastrarNegocio(formData: FormData) {
     return { erro: 'Você já tem um negócio cadastrado neste perfil.' }
   }
 
+  const autonomo = dados.tipoPerfil === 'autonomo'
+  // status_cadastro é decidido pelo banco (trigger negocios_status_inicial,
+  // migration 0017): aprovado na hora, ou pendente se alguma regra de risco disparar.
   const { data: negocio, error } = await supabase
     .from('negocios')
     .insert({
+      tipo_perfil: dados.tipoPerfil,
       nome: dados.nome,
       categoria_id: dados.categoriaId,
       descricao: dados.descricao || null,
-      endereco: dados.endereco || null,
+      endereco: autonomo ? null : dados.endereco || null,
       bairro: dados.bairro || null,
-      telefone: dados.telefone || null,
-      whatsapp: dados.whatsapp,
-      instagram: dados.instagram || null,
-      site: dados.site || null,
+      area_atendimento: autonomo ? dados.areaAtendimento || null : null,
+      telefone: contatos.telefone,
+      whatsapp: contatos.whatsapp,
+      instagram: contatos.instagram,
+      site: contatos.site,
       modalidades_atendimento: dados.modalidadesAtendimento,
       origem: 'cadastro_manual',
       status_cadastro: 'pendente',
       reivindicado_por: user.id,
       reivindicado_em: new Date().toISOString(),
     })
-    .select('id')
+    .select('id, status_cadastro')
     .single()
 
-  if (error) return { erro: error.message }
+  if (error) {
+    console.error('Falha ao cadastrar negócio:', error.message)
+    return { erro: traduzirErroBanco(error) }
+  }
 
-  // Quem cadastra um negócio passa a ser profissional (se ainda não for).
-  await supabase.from('perfis').update({ papel: 'profissional' }).eq('id', user.id).neq('papel', 'admin')
-
-  enviarNotificacaoParaAdmins({
-    title: 'Novo cadastro pra revisar',
-    body: `${dados.nome} acabou de se cadastrar e está esperando aprovação.`,
-    url: '/painel/admin/negocios-pendentes',
-    tag: 'cadastro-pendente',
-  }).catch((err) => console.error('Falha ao notificar admins:', err))
+  if (negocio.status_cadastro === 'pendente') {
+    enviarNotificacaoParaAdmins({
+      title: 'Cadastro sinalizado pra revisão',
+      body: `${dados.nome} caiu numa regra automática e espera revisão.`,
+      url: '/painel/admin/negocios-pendentes',
+      tag: 'cadastro-pendente',
+    }).catch((err) => console.error('Falha ao notificar admins:', err))
+  }
 
   revalidatePath('/painel/negocio')
-  return { erro: null, negocioId: negocio.id }
+  revalidatePath('/buscar')
+  return { erro: null, negocioId: negocio.id, status: negocio.status_cadastro }
 }
 
 // ---------------------------------------------------------------------
@@ -138,11 +190,11 @@ export async function atualizarNegocio(negocioId: string, formData: FormData) {
 
   const horarioFuncionamento: Record<string, string> = {}
   for (const dia of DIAS_SEMANA) {
-    const valor = (formData.get(`horario_${dia}`) as string)?.trim()
+    const valor = (formData.get(`horario_${dia}`) as string)?.trim().slice(0, 40)
     if (valor) horarioFuncionamento[dia] = valor
   }
 
-  const formasPagamento = formData.getAll('formas_pagamento').map(String).filter(Boolean)
+  const formasPagamento = formData.getAll('formas_pagamento').map(String).filter(Boolean).slice(0, 10)
 
   const modalidadesEnviadas = formData.getAll('modalidades_atendimento').map(String)
   const modalidadesValidas = modalidadesEnviadas.filter((m): m is ModalidadeAtendimento =>
@@ -152,16 +204,34 @@ export async function atualizarNegocio(negocioId: string, formData: FormData) {
     return { erro: 'Escolha ao menos uma forma de atendimento.' }
   }
 
+  const texto = (campo: string, max: number) => ((formData.get(campo) as string) || '').trim().slice(0, max) || null
+  const nome = texto('nome', 120)
+  if (!nome || nome.length < 2) return { erro: 'Informe o nome do negócio.' }
+  const tipoPerfil = formData.get('tipo_perfil') === 'autonomo' ? 'autonomo' : 'estabelecimento'
+  const categoriaId = texto('categoria_id', 36)
+  if (categoriaId && !z.string().uuid().safeParse(categoriaId).success) return { erro: 'Categoria inválida.' }
+
+  const contatos = normalizarContatos({
+    whatsapp: texto('whatsapp', 30),
+    telefone: texto('telefone', 30),
+    instagram: texto('instagram', 80),
+    site: texto('site', 200),
+  })
+  if ('erro' in contatos) return { erro: contatos.erro }
+
   const atualizacoes: Record<string, unknown> = {
-    nome: (formData.get('nome') as string)?.trim() || undefined,
-    categoria_id: (formData.get('categoria_id') as string) || null,
-    descricao: (formData.get('descricao') as string) || null,
-    whatsapp: (formData.get('whatsapp') as string) || null,
-    telefone: (formData.get('telefone') as string) || null,
-    instagram: (formData.get('instagram') as string) || null,
-    site: (formData.get('site') as string) || null,
-    endereco: (formData.get('endereco') as string) || null,
-    bairro: (formData.get('bairro') as string) || null,
+    nome,
+    tipo_perfil: tipoPerfil,
+    categoria_id: categoriaId,
+    descricao: texto('descricao', 2000),
+    whatsapp: contatos.whatsapp,
+    telefone: contatos.telefone,
+    instagram: contatos.instagram,
+    site: contatos.site,
+    // autônomo nunca tem endereço público
+    endereco: tipoPerfil === 'autonomo' ? null : texto('endereco', 200),
+    area_atendimento: tipoPerfil === 'autonomo' ? texto('area_atendimento', 200) : null,
+    bairro: texto('bairro', 100),
     horario_funcionamento: Object.keys(horarioFuncionamento).length ? horarioFuncionamento : null,
     formas_pagamento: formasPagamento.length ? formasPagamento : null,
     modalidades_atendimento: modalidadesValidas,
@@ -169,23 +239,19 @@ export async function atualizarNegocio(negocioId: string, formData: FormData) {
 
   const capa = formData.get('foto_capa') as File | null
   if (capa && capa.size > 0) {
-    const { url, erro } = await enviarImagem(supabase, capa, `negocios/${negocioId}/capa-${Date.now()}.${extensaoDoArquivo(capa)}`)
+    const { url, erro } = await enviarImagem(supabase, capa, `negocios/${negocioId}/capa`)
     if (erro) return { erro }
     if (url) atualizacoes.foto_capa_url = url
   }
 
   const novasFotos = formData.getAll('galeria_novas') as File[]
-  const fotosValidas = novasFotos.filter((f) => f && f.size > 0)
+  const fotosValidas = novasFotos.filter((f) => f && f.size > 0).slice(0, 10)
   if (fotosValidas.length) {
     const { data: atual } = await supabase.from('negocios').select('galeria').eq('id', negocioId).single()
     const galeriaAtual: string[] = (atual?.galeria as string[]) ?? []
     const urlsNovas: string[] = []
-    for (const [i, foto] of fotosValidas.entries()) {
-      const { url, erro } = await enviarImagem(
-        supabase,
-        foto,
-        `negocios/${negocioId}/galeria-${Date.now()}-${i}.${extensaoDoArquivo(foto)}`
-      )
+    for (const foto of fotosValidas) {
+      const { url, erro } = await enviarImagem(supabase, foto, `negocios/${negocioId}/galeria`)
       if (erro) return { erro }
       if (url) urlsNovas.push(url)
     }
@@ -198,7 +264,10 @@ export async function atualizarNegocio(negocioId: string, formData: FormData) {
     .eq('id', negocioId)
     .eq('reivindicado_por', user.id)
 
-  if (error) return { erro: error.message }
+  if (error) {
+    console.error('Falha ao atualizar negócio:', error.message)
+    return { erro: traduzirErroBanco(error) }
+  }
 
   revalidatePath('/painel/negocio')
   revalidatePath(`/negocio/${negocioId}`)
@@ -219,7 +288,7 @@ export async function removerFotoGaleria(negocioId: string, url: string) {
     .eq('id', negocioId)
     .eq('reivindicado_por', user.id)
 
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   revalidatePath('/painel/negocio')
   revalidatePath(`/negocio/${negocioId}`)
@@ -237,7 +306,7 @@ export async function alternarAbertoAgora(negocioId: string, valor: boolean) {
     .eq('id', negocioId)
     .eq('reivindicado_por', user.id)
 
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   revalidatePath('/painel/negocio')
   revalidatePath(`/negocio/${negocioId}`)
@@ -256,7 +325,7 @@ export async function reenviarCadastroNegocio(negocioId: string) {
     .eq('reivindicado_por', user.id)
     .eq('status_cadastro', 'rejeitado')
 
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   revalidatePath('/painel/negocio')
   return { erro: null }
@@ -273,7 +342,7 @@ export async function alternarNegocioAtivo(negocioId: string, valor: boolean) {
     .eq('id', negocioId)
     .eq('reivindicado_por', user.id)
 
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   revalidatePath('/painel/negocio')
   revalidatePath(`/negocio/${negocioId}`)
@@ -304,7 +373,7 @@ export async function criarPost(negocioId: string, formData: FormData) {
     conteudo: conteudo || null,
   })
 
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   // avisa quem favoritou o negócio
   const [{ data: negocio }, { data: favoritos }] = await Promise.all([
@@ -312,15 +381,16 @@ export async function criarPost(negocioId: string, formData: FormData) {
     supabase.from('favoritos').select('perfil_id').eq('negocio_id', negocioId),
   ])
   if (negocio && favoritos && favoritos.length > 0) {
-    enviarNotificacaoParaPerfis(
+    await notificar(
       favoritos.map((f) => f.perfil_id),
       {
-        title: negocio.nome,
-        body: `${tipo === 'promocao' ? 'Nova promoção' : 'Novidade'}: ${titulo}`,
+        tipo: 'novidade',
+        titulo: negocio.nome,
+        corpo: `${tipo === 'promocao' ? 'Nova promoção' : 'Novidade'}: ${titulo}`,
         url: `/negocio/${negocioId}`,
-        tag: `post-${negocioId}`,
-      }
-    ).catch((err) => console.error('Falha ao notificar favoritos:', err))
+      },
+      { categoria: 'novidades_favoritos' }
+    )
   }
 
   revalidatePath('/painel/negocio')
@@ -355,7 +425,7 @@ export async function criarProduto(negocioId: string, formData: FormData) {
     preco_a_partir_de: formData.get('preco_a_partir_de') === 'on',
   })
 
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   revalidatePath('/painel/negocio')
   revalidatePath(`/negocio/${negocioId}`)
@@ -369,7 +439,7 @@ export async function removerProduto(produtoId: string, negocioId: string) {
 
   const { error } = await supabase.from('produtos_servicos').delete().eq('id', produtoId)
 
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   revalidatePath('/painel/negocio')
   revalidatePath(`/negocio/${negocioId}`)
@@ -418,7 +488,7 @@ export async function criarVagaProfissional(negocioId: string, formData: FormDat
     publicado_por: user.id,
   })
 
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   revalidatePath('/painel/negocio')
   revalidatePath('/vagas')
@@ -436,7 +506,7 @@ export async function encerrarVagaPropria(vagaId: string) {
     .eq('id', vagaId)
     .eq('publicado_por', user.id)
 
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   revalidatePath('/painel/negocio')
   revalidatePath('/vagas')
@@ -451,16 +521,29 @@ export async function criarCupom(negocioId: string, formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { erro: 'Não autenticado.' }
 
+  const limite = String(formData.get('limite_resgates') ?? '').trim()
   const validado = schemaCupom.safeParse({
     titulo: formData.get('titulo') as string,
     descontoTexto: formData.get('desconto_texto') as string,
-    expiraEm: formData.get('expira_em') as string,
+    condicoes: ((formData.get('condicoes') as string) || '').trim() || undefined,
+    iniciaEm: (formData.get('inicia_em_iso') as string) || undefined,
+    expiraEm: (formData.get('expira_em_iso') as string) || (formData.get('expira_em') as string),
+    limiteResgates: limite ? Number(limite) : undefined,
+    precoOriginal: centavos(formData.get('preco_original')),
+    precoPromocional: centavos(formData.get('preco_promocional')),
   })
   if (!validado.success) return { erro: validado.error.issues[0].message }
   const dados = validado.data
 
-  if (new Date(dados.expiraEm).getTime() <= Date.now()) {
-    return { erro: 'A data de expiração precisa ser no futuro.' }
+  const inicio = dados.iniciaEm ? new Date(dados.iniciaEm) : new Date()
+  if (new Date(dados.expiraEm).getTime() <= Math.max(Date.now(), inicio.getTime())) {
+    return { erro: 'O fim da oferta precisa ser depois do início (e no futuro).' }
+  }
+  if ((dados.precoOriginal === undefined) !== (dados.precoPromocional === undefined)) {
+    return { erro: 'Pra mostrar "de/por", preencha os dois preços — ou deixe os dois em branco.' }
+  }
+  if (dados.precoOriginal !== undefined && dados.precoPromocional !== undefined && dados.precoPromocional >= dados.precoOriginal) {
+    return { erro: 'O preço promocional precisa ser menor que o preço normal.' }
   }
 
   const { data: negocio } = await supabase
@@ -475,22 +558,28 @@ export async function criarCupom(negocioId: string, formData: FormData) {
     negocio_id: negocioId,
     titulo: dados.titulo,
     desconto_texto: dados.descontoTexto,
+    condicoes: dados.condicoes ?? null,
+    inicia_em: inicio.toISOString(),
     expira_em: new Date(dados.expiraEm).toISOString(),
+    limite_resgates: dados.limiteResgates ?? null,
+    preco_original_centavos: dados.precoOriginal ?? null,
+    preco_promocional_centavos: dados.precoPromocional ?? null,
   })
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   // avisa quem favoritou — escassez real, então vale a pena notificar
   const { data: favoritos } = await supabase.from('favoritos').select('perfil_id').eq('negocio_id', negocioId)
   if (favoritos && favoritos.length > 0) {
-    enviarNotificacaoParaPerfis(
+    await notificar(
       favoritos.map((f) => f.perfil_id),
       {
-        title: `Oferta relâmpago: ${negocio.nome}`,
-        body: `${dados.titulo} — ${dados.descontoTexto}`,
+        tipo: 'oferta',
+        titulo: `Oferta: ${negocio.nome}`,
+        corpo: `${dados.titulo} — ${dados.descontoTexto}`,
         url: `/negocio/${negocioId}`,
-        tag: `cupom-${negocioId}`,
-      }
-    ).catch((err) => console.error('Falha ao notificar favoritos sobre cupom:', err))
+      },
+      { categoria: 'ofertas_favoritos' }
+    )
   }
 
   revalidatePath('/painel/negocio')
@@ -504,7 +593,7 @@ export async function encerrarCupom(cupomId: string, negocioId: string) {
   if (!user) return { erro: 'Não autenticado.' }
 
   const { error } = await supabase.from('cupons').update({ ativo: false }).eq('id', cupomId)
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   revalidatePath('/painel/negocio')
   revalidatePath(`/negocio/${negocioId}`)
@@ -551,10 +640,10 @@ export async function adicionarCarimbo(negocioId: string, perfilId: string) {
       .from('cartoes_fidelidade')
       .update({ carimbos: cartaoAtual.carimbos + 1, atualizado_em: new Date().toISOString() })
       .eq('id', cartaoAtual.id)
-    if (error) return { erro: error.message }
+    if (error) return { erro: traduzirErroBanco(error) }
   } else {
     const { error } = await admin.from('cartoes_fidelidade').insert({ negocio_id: negocioId, perfil_id: perfilId, carimbos: 1 })
-    if (error) return { erro: error.message }
+    if (error) return { erro: traduzirErroBanco(error) }
   }
 
   revalidatePath('/painel/negocio')
@@ -587,7 +676,7 @@ export async function confirmarResgateFidelidade(negocioId: string, perfilId: st
     .from('cartoes_fidelidade')
     .update({ carimbos: 0, completos: cartao.completos + 1, atualizado_em: new Date().toISOString() })
     .eq('id', cartao.id)
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   revalidatePath('/painel/negocio')
   return { erro: null }
@@ -618,9 +707,29 @@ export async function responderAvaliacao(avaliacaoId: string, resposta: string) 
     .update({ resposta_profissional: validado.data.resposta, respondido_em: new Date().toISOString() })
     .eq('id', avaliacaoId)
 
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
 
   revalidatePath('/painel/negocio')
   revalidatePath(`/negocio/${avaliacao.negocio_id}`)
   return { erro: null }
+}
+
+/** Dono confirma no balcão o código que o cliente mostrou. Uso único. */
+export async function validarCodigoCupom(formData: FormData) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Não autenticado.' }
+
+  const codigo = String(formData.get('codigo') ?? '').trim().toUpperCase()
+  if (!/^[A-Z0-9]{6,12}$/.test(codigo)) return { erro: 'Código inválido. Confira as letras e números.' }
+  if (!(await dentroDoLimite(`validar-cupom:${user.id}`, 60, 60 * 60))) return { erro: 'Muitas tentativas. Aguarde um pouco.' }
+
+  const { data, error } = await supabase.rpc('validar_codigo_cupom', { p_codigo: codigo })
+  if (error) return { erro: traduzirErroBanco(error) }
+  const r = data as { resultado: string; titulo?: string; desconto?: string; usado_em?: string }
+  if (r.resultado === 'ok') return { erro: null, mensagem: `Cupom válido: ${r.titulo} — ${r.desconto}. Marcado como usado.` }
+  if (r.resultado === 'ja_usado') {
+    return { erro: `Esse código já foi usado em ${new Date(r.usado_em!).toLocaleString('pt-BR')}.` }
+  }
+  return { erro: 'Código não encontrado entre os cupons do seu negócio.' }
 }

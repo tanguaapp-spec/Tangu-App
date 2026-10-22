@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
+import type { Perfil } from '@/lib/types/database'
 import { redirect } from 'next/navigation'
 import { User } from 'lucide-react'
 import { FormularioPerfil } from '@/components/perfil/formulario-perfil'
@@ -6,29 +7,33 @@ import { SelosContribuicao } from '@/components/perfil/selos-contribuicao'
 import { CartaoIndicacao } from '@/components/perfil/cartao-indicacao'
 import { SaldoLaranjas } from '@/components/perfil/saldo-laranjas'
 import { CartoesFidelidade } from '@/components/perfil/cartoes-fidelidade'
+import { PreferenciasComunicacao } from '@/components/perfil/preferencias-comunicacao'
+import { PrivacidadeDados } from '@/components/perfil/privacidade-dados'
+import Link from 'next/link'
 import { buscarSaldoLaranjas } from '@/lib/gamificacao/pontos'
 import { buscarCartoesFidelidadeDoUsuario } from '@/lib/queries/negocios'
 
 export const dynamic = 'force-dynamic'
 
-export default async function PaginaPerfil() {
+export default async function PaginaPerfil({ searchParams }: { searchParams: { senha?: string } }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/entrar')
 
-  const { data: perfil } = await supabase.from('perfis').select('*').eq('id', user.id).single()
+  const { data: perfil } = await supabase.rpc('meu_perfil').maybeSingle<Perfil>()
   if (!perfil) redirect('/entrar')
 
   const [{ count: totalAvaliacoes }, { count: totalFavoritos }, { count: totalIndicados }, saldoLaranjas, cartoesFidelidade] =
     await Promise.all([
       supabase.from('avaliacoes').select('*', { count: 'exact', head: true }).eq('autor_id', user.id),
       supabase.from('favoritos').select('*', { count: 'exact', head: true }).eq('perfil_id', user.id),
-      supabase.from('perfis').select('*', { count: 'exact', head: true }).eq('convidado_por', user.id),
+      createServiceClient().from('perfis').select('id', { count: 'exact', head: true }).eq('convidado_por', user.id),
       buscarSaldoLaranjas(user.id),
       buscarCartoesFidelidadeDoUsuario(user.id),
     ])
 
   const primeiroNome = perfil.nome_completo?.split(' ')[0] || 'você'
+  const { data: negocioProprio } = await supabase.from('negocios').select('id').eq('reivindicado_por', user.id).maybeSingle()
 
   return (
     <div className="mx-auto max-w-3xl pb-10">
@@ -70,7 +75,50 @@ export default async function PaginaPerfil() {
         </div>
       )}
 
+      <nav aria-label="Atalhos da conta" className="mb-6 grid grid-cols-3 gap-2 text-center text-sm">
+        {[
+          ['/notificacoes', 'Notificações'],
+          ['/orcamentos', 'Meus orçamentos'],
+          ['/ajuda/chamados', 'Meus chamados'],
+        ].map(([href, rotulo]) => (
+          <Link key={href} href={href} className="rounded-xl border border-barro-100 bg-white px-2 py-3 font-medium text-barro-800 hover:border-casca-300">
+            {rotulo}
+          </Link>
+        ))}
+      </nav>
+
+      {searchParams.senha === 'alterada' && (
+        <p role="status" className="mb-4 rounded-xl bg-mata-50 p-3 text-sm text-mata-800">
+          Senha alterada com sucesso.
+        </p>
+      )}
+
       <FormularioPerfil perfil={perfil} />
+
+      <section id="comunicacao" aria-labelledby="titulo-comunicacao" className="mt-6 scroll-mt-20 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+        <h2 id="titulo-comunicacao" className="font-display text-lg font-semibold text-barro-900">
+          Comunicação
+        </h2>
+        <p className="mb-3 text-sm text-barro-600">
+          Escolha os avisos que quer receber.{' '}
+          <Link href="/notificacoes" className="underline">
+            Ver minhas notificações
+          </Link>
+        </p>
+        <PreferenciasComunicacao
+          preferencias={(perfil as Perfil & { preferencias_notificacao?: Record<string, boolean> }).preferencias_notificacao ?? null}
+          resumoDiario={perfil.notificacoes_resumo_diario ?? true}
+        />
+      </section>
+
+      <section id="privacidade" aria-labelledby="titulo-privacidade" className="mt-6 scroll-mt-20 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+        <h2 id="titulo-privacidade" className="font-display text-lg font-semibold text-barro-900">
+          Privacidade e dados
+        </h2>
+        <div className="mt-3">
+          <PrivacidadeDados temNegocio={!!negocioProprio} />
+        </div>
+      </section>
       </div>
     </div>
   )

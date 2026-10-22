@@ -43,3 +43,11 @@ janela resetar (~1h) antes de rodar esses testes específicos de novo.
 - `helpers/ui.ts` — ações repetidas pela UI (login).
 - `*.spec.ts` — um arquivo por fluxo. Novos specs entram conforme cada fase (A/B/C) do roadmap
   de retenção é implementada.
+
+## ⚠️ A partir da rodada SaaS (migrations 0016–0019)
+
+`saas-self-service.spec.ts` cria e exclui contas, negócios e chamados. Rode a suíte contra um
+**projeto Supabase de staging** com as migrations aplicadas (aponte `NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` do `.env` para ele), não contra
+produção. As regras de banco (RLS, limites de plano, resgate de cupom, orçamentos) já têm cobertura
+sem rede em `supabase/tests/` (`npm run test:db`).

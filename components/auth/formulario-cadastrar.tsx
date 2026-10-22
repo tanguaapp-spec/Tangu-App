@@ -66,7 +66,7 @@ export function FormularioCadastrar({
 
       <Campo name="nomeCompleto" id="nomeCompleto" rotulo="Nome completo" placeholder="Seu nome" required />
       <Campo type="email" name="email" id="email" rotulo="E-mail" placeholder="voce@email.com" required />
-      <Campo type="password" name="senha" id="senha" rotulo="Senha" placeholder="Mínimo 6 caracteres" minLength={6} required />
+      <Campo type="password" name="senha" id="senha" rotulo="Senha" placeholder="Mínimo 8 caracteres" minLength={8} autoComplete="new-password" required />
 
       <label htmlFor="aceite-termos" className="flex items-start gap-2 text-sm text-barro-600">
         <input

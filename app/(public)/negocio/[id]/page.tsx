@@ -1,5 +1,6 @@
 import { buscarNegocioPorId, isFavorito, buscarCupomAtivo, buscarCartaoFidelidade } from '@/lib/queries/negocios'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -17,12 +18,12 @@ import {
 } from 'lucide-react'
 import { SeloVerificado, Selo } from '@/components/ui/selo'
 import { SelosModalidade } from '@/components/negocio/selos-modalidade'
-import { formatarPrecoBRL } from '@/lib/utils'
+import { formatarPrecoBRL, urlSegura } from '@/lib/utils'
 import { BotaoReivindicar } from '@/components/negocio/botao-reivindicar'
 import { BotaoFavoritar } from '@/components/negocio/botao-favoritar'
 import { BotaoWhatsapp } from '@/components/negocio/botao-whatsapp'
 import { FormularioAvaliacao } from '@/components/negocio/formulario-avaliacao'
-import { registrarEventoPerfil } from '@/lib/actions/negocio-actions'
+import { registrarEventoPerfil } from '@/lib/metricas/eventos-perfil'
 import { CupomBanner } from '@/components/negocio/cupom-banner'
 import { SeloRespondeRapido, negocioEstaAtivo } from '@/components/negocio/selo-responde-rapido'
 import { BotaoDenunciar } from '@/components/moderacao/botao-denunciar'
@@ -40,14 +41,66 @@ const diasSemana: Record<string, string> = {
 
 export const dynamic = 'force-dynamic'
 
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tangua-app.vercel.app').replace(/\/+$/, '')
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const negocio = await buscarNegocioPorId(params.id)
+  if (!negocio) return { title: 'Negócio não encontrado', robots: { index: false } }
+  const descricao =
+    negocio.descricao?.slice(0, 155) ??
+    `${negocio.categoria?.nome ?? 'Negócio local'}${negocio.bairro ? ` em ${negocio.bairro}` : ''}, Tanguá-RJ. Contato direto pelo WhatsApp.`
+  return {
+    title: `${negocio.nome}${negocio.categoria ? ` — ${negocio.categoria.nome}` : ''}`,
+    description: descricao,
+    alternates: { canonical: `/negocio/${negocio.id}` },
+    openGraph: {
+      type: 'profile',
+      title: negocio.nome,
+      description: descricao,
+      url: `${SITE}/negocio/${negocio.id}`,
+      images: negocio.foto_capa_url ? [{ url: negocio.foto_capa_url, alt: negocio.nome }] : undefined,
+    },
+  }
+}
+
+/** Dados estruturados só com o que o dono informou — nada inventado. */
+function jsonLdNegocio(negocio: NonNullable<Awaited<ReturnType<typeof buscarNegocioPorId>>>, notaMedia: number | null, totalAvaliacoes: number) {
+  const autonomo = negocio.tipo_perfil === 'autonomo'
+  const dados: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: negocio.nome,
+    url: `${SITE}/negocio/${negocio.id}`,
+  }
+  if (negocio.descricao) dados.description = negocio.descricao
+  if (negocio.foto_capa_url) dados.image = negocio.foto_capa_url
+  if (negocio.telefone || negocio.whatsapp) dados.telephone = `+55${negocio.telefone ?? negocio.whatsapp}`
+  if (!autonomo && negocio.endereco) {
+    dados.address = {
+      '@type': 'PostalAddress',
+      streetAddress: negocio.endereco,
+      addressLocality: 'Tanguá',
+      addressRegion: 'RJ',
+      addressCountry: 'BR',
+    }
+  } else {
+    dados.areaServed = negocio.area_atendimento || 'Tanguá, RJ'
+  }
+  const sameAs = [urlSegura(negocio.site), negocio.instagram ? `https://instagram.com/${negocio.instagram.replace('@', '')}` : null].filter(Boolean)
+  if (sameAs.length) dados.sameAs = sameAs
+  if (notaMedia !== null && totalAvaliacoes > 0) {
+    dados.aggregateRating = { '@type': 'AggregateRating', ratingValue: notaMedia.toFixed(1), reviewCount: totalAvaliacoes }
+  }
+  return dados
+}
+
 export default async function PaginaNegocio({ params }: { params: { id: string } }) {
   const negocio = await buscarNegocioPorId(params.id)
   if (!negocio) notFound()
 
-  registrarEventoPerfil(params.id, 'visualizacao').catch(() => {})
-
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  await registrarEventoPerfil(params.id, 'visualizacao', { usuarioId: user?.id ?? null, donoId: negocio.reivindicado_por })
   const isFav = await isFavorito(params.id)
 
   const { data: avaliacoes } = await supabase
@@ -79,6 +132,10 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
     .eq('negocio_id', params.id)
 
   const cupomAtivo = await buscarCupomAtivo(params.id)
+  const { data: meuResgate } =
+    cupomAtivo && user
+      ? await supabase.from('cupom_resgates').select('codigo').eq('cupom_id', cupomAtivo.id).eq('perfil_id', user.id).maybeSingle()
+      : { data: null }
   const cartaoFidelidade = user ? await buscarCartaoFidelidade(params.id, user.id) : null
 
   const headerList = headers()
@@ -86,8 +143,14 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
   const protocolo = headerList.get('x-forwarded-proto') ?? (host.includes('localhost') ? 'http' : 'https')
   const urlPublica = `${protocolo}://${host}/negocio/${params.id}`
 
+  const notas = (avaliacoes ?? []).map((a: { nota: number }) => a.nota)
+  const notaMedia = notas.length ? notas.reduce((s: number, n: number) => s + n, 0) / notas.length : null
+  // "<" escapado: o JSON vai dentro de <script> e não pode fechar a tag
+  const jsonLd = JSON.stringify(jsonLdNegocio(negocio, notaMedia, notas.length)).replace(/</g, '\\u003c')
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Link
         href="/buscar"
         className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-barro-600 transition-colors hover:text-casca-600"
@@ -142,14 +205,19 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
 
           <SelosModalidade modalidades={negocio.modalidades_atendimento} className="mt-2" />
 
-          {cupomAtivo && <CupomBanner cupom={cupomAtivo} />}
+          {cupomAtivo && <CupomBanner cupom={cupomAtivo} logado={!!user} codigoExistente={meuResgate?.codigo ?? null} />}
 
           {negocio.descricao && <p className="mt-4 text-barro-700">{negocio.descricao}</p>}
 
           <div className="mt-5 flex flex-col gap-2 text-barro-700">
-            {negocio.endereco && (
+            {negocio.tipo_perfil !== 'autonomo' && negocio.endereco && (
               <span className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-barro-400" /> {negocio.endereco}
+              </span>
+            )}
+            {negocio.tipo_perfil === 'autonomo' && negocio.area_atendimento && (
+              <span className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-barro-400" /> Atende: {negocio.area_atendimento}
               </span>
             )}
             {!negocio.endereco &&
@@ -310,6 +378,14 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
                 <MessageCircle className="h-5 w-5" /> Chamar no WhatsApp
               </BotaoWhatsapp>
             )}
+            {negocio.reivindicado_por && negocio.reivindicado_por !== user?.id && (
+              <Link
+                href={`/orcamentos/novo?negocio=${negocio.id}`}
+                className="mt-2 flex items-center justify-center gap-2 rounded-xl border border-barro-300 py-2.5 font-semibold text-barro-800 transition-colors hover:bg-barro-50"
+              >
+                Pedir orçamento
+              </Link>
+            )}
             <div className="mt-3 flex flex-col gap-2 text-sm">
               {negocio.instagram && (
                 <a
@@ -324,9 +400,9 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
                   @{negocio.instagram.replace('@', '')}
                 </a>
               )}
-              {negocio.site && (
+              {urlSegura(negocio.site) && (
                 <a
-                  href={negocio.site}
+                  href={urlSegura(negocio.site)!}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2.5 text-barro-700 hover:text-casca-600"
@@ -360,6 +436,10 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
           )}
 
           {!negocio.reivindicado_por && <BotaoReivindicar negocioId={negocio.id} />}
+
+          <div className="px-1">
+            <BotaoDenunciar tipoConteudo="negocio" conteudoId={negocio.id} negocioId={negocio.id} logado={!!user} />
+          </div>
         </aside>
       </div>
     </div>

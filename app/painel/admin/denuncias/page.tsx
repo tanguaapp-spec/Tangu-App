@@ -10,6 +10,8 @@ const rotulosTipo: Record<string, string> = {
   avaliacao: 'Avaliação',
   aviso: 'Aviso/pergunta do mural',
   resposta_pergunta: 'Resposta de negócio a pergunta',
+  negocio: 'Perfil de negócio (remover = suspender)',
+  post: 'Novidade de negócio',
 }
 
 export default async function PainelDenuncias() {

@@ -1,13 +1,29 @@
 import Link from 'next/link'
-import { ArrowRight, Briefcase, Megaphone, Sparkles, Store, Users } from 'lucide-react'
+import { ArrowRight, Briefcase, Megaphone, Sparkles, Store } from 'lucide-react'
 import { BuscaRapida } from '@/components/busca-rapida'
 import { MotivoGomo } from '@/components/motivo-gomo'
 import { Laranja3D } from '@/components/laranja-3d'
-import { Revelar } from '@/components/ui/revelar'
 import { CardAchadoDoDia } from '@/components/negocio/card-achado-do-dia'
 import { CardNegocioMini } from '@/components/negocio/card-negocio-mini'
 import { iconeCategoria } from '@/lib/ui/icone-categoria'
 import { buscarAchadoDoDia, buscarNegociosVitrine } from '@/lib/queries/negocios'
+import {
+  negociosPopulares,
+  novidadesRecentes,
+  ofertasVigentes,
+  ordemSecoesHome,
+  profissionaisAutonomos,
+  proximosEventos,
+  type SecaoHome,
+} from '@/lib/queries/home'
+import {
+  SecaoAnuncie,
+  SecaoEventos,
+  SecaoNovidades,
+  SecaoOfertas,
+  SecaoPopulares,
+  SecaoProfissionais,
+} from '@/components/home/secoes-home'
 
 export const revalidate = 60
 
@@ -64,7 +80,24 @@ const coresPilar = {
 
 export default async function PaginaInicial() {
   const achadoDoDia = await buscarAchadoDoDia()
-  const pertoDeVoce = await buscarNegociosVitrine(4, achadoDoDia?.id)
+  const [pertoDeVoce, ordem, ofertas, novidades, populares, profissionais, eventos] = await Promise.all([
+    buscarNegociosVitrine(4, achadoDoDia?.id),
+    ordemSecoesHome(),
+    ofertasVigentes(),
+    novidadesRecentes(),
+    negociosPopulares(),
+    profissionaisAutonomos(),
+    proximosEventos(),
+  ])
+
+  const secoes: Record<SecaoHome, React.ReactNode> = {
+    ofertas: <SecaoOfertas key="ofertas" ofertas={ofertas} />,
+    novidades: <SecaoNovidades key="novidades" novidades={novidades} />,
+    populares: <SecaoPopulares key="populares" negocios={populares} />,
+    profissionais: <SecaoProfissionais key="profissionais" profissionais={profissionais} />,
+    eventos: <SecaoEventos key="eventos" eventos={eventos} />,
+    anuncie: <SecaoAnuncie key="anuncie" />,
+  }
 
   return (
     <>
@@ -175,7 +208,7 @@ export default async function PaginaInicial() {
       {/* PERTO DE VOCÊ */}
       {pertoDeVoce.length > 0 && (
         <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
-          <h2 className="font-display text-xl font-semibold text-barro-900">Perto de você</h2>
+          <h2 className="font-display text-xl font-semibold text-barro-900">Em destaque no diretório</h2>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {pertoDeVoce.map((negocio) => (
               <CardNegocioMini key={negocio.id} negocio={negocio} />
@@ -183,6 +216,8 @@ export default async function PaginaInicial() {
           </div>
         </section>
       )}
+
+      {ordem.map((secao) => secoes[secao])}
 
       {/* TRÊS PILARES */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
@@ -210,28 +245,6 @@ export default async function PaginaInicial() {
         </div>
       </section>
 
-      {/* CTA PROFISSIONAL */}
-      <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
-        <Revelar className="relative overflow-hidden rounded-casca bg-mata-700 px-8 py-12 text-white sm:px-14">
-          <MotivoGomo className="pointer-events-none absolute -bottom-16 -right-16 h-64 w-64 text-white" />
-          <div className="relative max-w-xl">
-            <Users className="h-8 w-8 text-mata-200" />
-            <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-balance leading-tight sm:text-4xl">
-              Tem um negócio em Tanguá? Apareça pra cidade toda.
-            </h2>
-            <p className="mt-3 text-mata-100">
-              Reivindique seu perfil gratuitamente, atualize seus dados e poste suas
-              novidades direto pro feed de quem está por perto.
-            </p>
-            <Link
-              href="/cadastrar?papel=profissional"
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-casca-700 px-6 py-3 font-semibold text-white transition-all hover:gap-3 hover:bg-casca-800"
-            >
-              Cadastrar meu negócio <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </Revelar>
-      </section>
     </>
   )
 }

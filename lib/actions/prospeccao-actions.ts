@@ -1,6 +1,7 @@
 'use server'
 
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { verificarAdmin } from '@/lib/auth/require-admin'
+import { createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import {
   TIPOS_BUSCA,
@@ -10,22 +11,7 @@ import {
   extrairBairro,
 } from '@/lib/integracao/google-places'
 
-async function requireAdmin() {
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) return { erro: 'Não autenticado.' as const }
-
-  const { data: perfil } = await supabase.from('perfis').select('papel').eq('id', user.id).single()
-
-  if (!perfil || perfil.papel !== 'admin') {
-    return { erro: 'Acesso negado (admin).' as const }
-  }
-
-  return { user } as const
-}
+const requireAdmin = verificarAdmin
 
 /** Roda `tarefas` em paralelo, no máximo `concorrencia` por vez — sem isso,
  * ~20 categorias x dezenas de lugares sequenciais estouraria o limite de

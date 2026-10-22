@@ -16,6 +16,12 @@ import {
   Flag,
   Sparkles,
   Radar,
+  CreditCard,
+  Inbox,
+  LifeBuoy,
+  Settings,
+  ScrollText,
+  Layers,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -29,17 +35,28 @@ type LinkPainel = { href: string; rotulo: string; icone: LucideIcon }
 // pode passar componentes como prop pra um Client Component — só dados
 // serializáveis. Por isso o layout (server) manda só o `papel`, uma
 // string, e a gente decide a lista aqui.
-const LINKS_PROFISSIONAL: LinkPainel[] = [{ href: '/painel/negocio', rotulo: 'Meu negócio', icone: Store }]
+const LINKS_PROFISSIONAL: LinkPainel[] = [
+  { href: '/painel/negocio', rotulo: 'Meu negócio', icone: Store },
+  { href: '/painel/negocio/orcamentos', rotulo: 'Pedidos de orçamento', icone: Inbox },
+  { href: '/painel/negocio/assinatura', rotulo: 'Plano e assinatura', icone: CreditCard },
+  { href: '/ajuda', rotulo: 'Ajuda e suporte', icone: LifeBuoy },
+]
 const LINKS_ADMIN: LinkPainel[] = [
   { href: '/painel/admin', rotulo: 'Visão geral', icone: LayoutDashboard },
-  { href: '/painel/admin/negocios-pendentes', rotulo: 'Cadastros pendentes', icone: Store },
-  { href: '/painel/admin/negocios', rotulo: 'Negócios (destaque)', icone: Sparkles },
+  { href: '/painel/admin/negocios-pendentes', rotulo: 'Cadastros sinalizados', icone: Store },
+  { href: '/painel/admin/negocios', rotulo: 'Negócios', icone: Sparkles },
   { href: '/painel/admin/reivindicacoes', rotulo: 'Reivindicações', icone: ShieldCheck },
   { href: '/painel/admin/denuncias', rotulo: 'Denúncias', icone: Flag },
   { href: '/painel/admin/vagas', rotulo: 'Vagas', icone: Briefcase },
   { href: '/painel/admin/avisos', rotulo: 'Avisos da cidade', icone: Megaphone },
   { href: '/painel/admin/prospeccao', rotulo: 'Prospecção (Google Maps)', icone: Radar },
   { href: '/painel/admin/logs', rotulo: 'Logs de erro', icone: AlertTriangle },
+  { href: '/painel/admin/suporte', rotulo: 'Chamados de suporte', icone: LifeBuoy },
+  { href: '/painel/admin/assinaturas', rotulo: 'Assinaturas e pagamentos', icone: CreditCard },
+  { href: '/painel/admin/planos', rotulo: 'Planos e limites', icone: Layers },
+  { href: '/painel/admin/configuracoes', rotulo: 'Configurações', icone: Settings },
+  { href: '/painel/admin/auditoria', rotulo: 'Auditoria', icone: ScrollText },
+  { href: '/painel/negocio', rotulo: 'Meu negócio', icone: Store },
 ]
 
 export function NavPainel({

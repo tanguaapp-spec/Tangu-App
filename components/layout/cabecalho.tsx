@@ -63,8 +63,8 @@ export function Cabecalho() {
       setUser(user)
 
       if (user) {
-        const { data } = await supabase.from('perfis').select('*').eq('id', user.id).single()
-        setPerfil(data)
+        const { data } = await supabase.rpc('meu_perfil').maybeSingle()
+        setPerfil(data as Perfil | null)
       }
     }
 
@@ -73,7 +73,7 @@ export function Cabecalho() {
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null)
       if (session?.user) {
-        supabase.from('perfis').select('*').eq('id', session.user.id).single().then(({ data }) => setPerfil(data))
+        supabase.rpc('meu_perfil').maybeSingle().then(({ data }) => setPerfil(data as Perfil | null))
       } else {
         setPerfil(null)
       }

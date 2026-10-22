@@ -1,27 +1,15 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { traduzirErroBanco } from '@/lib/planos/limites'
+import { notificar } from '@/lib/notificacoes/notificar'
+import { verificarAdmin } from '@/lib/auth/require-admin'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { dentroDoLimite } from '@/lib/seguranca/rate-limit'
 import { z } from 'zod'
 import type { TipoConteudoDenuncia } from '@/lib/types/database'
 
-async function requireAdmin() {
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) return { erro: 'Não autenticado.' as const }
-
-  const { data: perfil } = await supabase.from('perfis').select('papel').eq('id', user.id).single()
-
-  if (!perfil || perfil.papel !== 'admin') {
-    return { erro: 'Acesso negado (admin).' as const }
-  }
-
-  return { supabase, user } as const
-}
+const requireAdmin = verificarAdmin
 
 const schemaDenuncia = z.object({
   motivo: z.string().trim().min(1, 'Conte pra gente o que há de errado.').max(500, 'Motivo muito longo (máximo 500 caracteres).'),
@@ -47,6 +35,11 @@ export async function denunciarConteudo(
     return { erro: 'Você precisa entrar para denunciar um conteúdo.' }
   }
 
+  const TIPOS_VALIDOS: TipoConteudoDenuncia[] = ['avaliacao', 'aviso', 'resposta_pergunta', 'negocio', 'post']
+  if (!TIPOS_VALIDOS.includes(tipoConteudo) || !/^[0-9a-f-]{36}$/i.test(String(conteudoId))) {
+    return { erro: 'Conteúdo inválido.' }
+  }
+
   const validado = schemaDenuncia.safeParse({ motivo })
   if (!validado.success) {
     return { erro: validado.error.issues[0].message }
@@ -69,7 +62,7 @@ export async function denunciarConteudo(
     if (error.code === '23505') {
       return { erro: 'Você já denunciou este conteúdo.' }
     }
-    return { erro: error.message }
+    return { erro: traduzirErroBanco(error) }
   }
 
   return { erro: null }
@@ -96,12 +89,45 @@ export async function revisarDenuncia(denunciaId: string, acao: 'remover' | 'arq
   if (erroBusca || !denuncia) return { erro: 'Denúncia não encontrada.' }
 
   if (acao === 'remover') {
+    // descobre o autor ANTES de remover, pra avisar com o motivo
+    const admin = createServiceClient()
+    let autorId: string | null = null
+    let descricao = 'Um conteúdo seu'
     if (denuncia.tipo_conteudo === 'avaliacao') {
+      const { data } = await admin.from('avaliacoes').select('autor_id').eq('id', denuncia.conteudo_id).maybeSingle()
+      autorId = data?.autor_id ?? null
+      descricao = 'Uma avaliação sua'
       await supabase.from('avaliacoes').delete().eq('id', denuncia.conteudo_id)
     } else if (denuncia.tipo_conteudo === 'aviso') {
+      const { data } = await admin.from('avisos_cidade').select('publicado_por').eq('id', denuncia.conteudo_id).maybeSingle()
+      autorId = data?.publicado_por ?? null
+      descricao = 'Uma publicação sua no mural'
       await supabase.from('avisos_cidade').update({ ativo: false }).eq('id', denuncia.conteudo_id)
     } else if (denuncia.tipo_conteudo === 'resposta_pergunta') {
+      const { data } = await admin.from('respostas_pergunta').select('autor_id').eq('id', denuncia.conteudo_id).maybeSingle()
+      autorId = data?.autor_id ?? null
+      descricao = 'Uma indicação sua no mural'
       await supabase.from('respostas_pergunta').delete().eq('id', denuncia.conteudo_id)
+    } else if (denuncia.tipo_conteudo === 'post') {
+      const { data } = await admin.from('posts_negocio').select('autor_id').eq('id', denuncia.conteudo_id).maybeSingle()
+      autorId = data?.autor_id ?? null
+      descricao = 'Uma novidade do seu negócio'
+      await supabase.from('posts_negocio').update({ ativo: false }).eq('id', denuncia.conteudo_id)
+    } else if (denuncia.tipo_conteudo === 'negocio') {
+      // perfil inteiro: suspende (reversível), nunca apaga
+      const { data } = await admin.from('negocios').select('reivindicado_por').eq('id', denuncia.conteudo_id).maybeSingle()
+      autorId = data?.reivindicado_por ?? null
+      descricao = 'O perfil do seu negócio'
+      await supabase.from('negocios').update({ ativo: false }).eq('id', denuncia.conteudo_id)
+    }
+
+    if (autorId) {
+      await notificar([autorId], {
+        tipo: 'moderacao',
+        titulo: `${descricao} foi removido(a) pela moderação`,
+        corpo: `Motivo informado na denúncia: "${denuncia.motivo.slice(0, 200)}". Se você discorda, responda pelo suporte.`,
+        url: '/ajuda/contato?assunto=publicacao',
+      })
     }
   }
 
@@ -114,7 +140,12 @@ export async function revisarDenuncia(denunciaId: string, acao: 'remover' | 'arq
     })
     .eq('id', denunciaId)
 
-  if (error) return { erro: error.message }
+  if (error) return { erro: traduzirErroBanco(error) }
+
+  await createServiceClient()
+    .from('registros_auditoria')
+    .insert({ ator_id: user.id, acao: `denuncia.${acao}`, entidade: denuncia.tipo_conteudo, entidade_id: denuncia.conteudo_id, dados: { denuncia: denunciaId, motivo: denuncia.motivo } })
+    .then(() => undefined, () => undefined)
 
   revalidatePath('/painel/admin/denuncias')
   revalidatePath('/mural')

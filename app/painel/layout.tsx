@@ -8,11 +8,11 @@ export default async function LayoutPainel({ children }: { children: React.React
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/entrar')
 
-  const { data: perfil } = await supabase.from('perfis').select('papel').eq('id', user.id).single()
+  const { data: papel } = await supabase.rpc('meu_papel')
 
   return (
     <div className="flex min-h-screen flex-col bg-feira sm:flex-row">
-      <NavPainel papel={perfil?.papel} acaoSair={sair} />
+      <NavPainel papel={papel} acaoSair={sair} />
       <main className="flex-1 p-6 sm:p-10">{children}</main>
     </div>
   )

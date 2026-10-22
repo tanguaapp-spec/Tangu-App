@@ -137,3 +137,8 @@
       tem configurada hoje): resumo semanal automático por WhatsApp (precisaria de WhatsApp
       Business API tipo Twilio/Meta) e geração automática de arte de divulgação dentro do app
       (precisaria de API de geração de imagem com credenciais próprias no projeto).
+
+## Etapa 8 — Rodada SaaS self-service (out/2026)
+- Diagnóstico: `docs/AUDITORIA-2026-10.md` (inclui brecha crítica de escalada para admin no cadastro).
+- Migrations 0016–0019 + testes de RLS com PGlite (`npm run test:db`).
+- Como publicar: `docs/DEPLOY.md`. O que falta: `docs/PENDENCIAS.md`.

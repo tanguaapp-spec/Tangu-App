@@ -1,28 +1,18 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { verificarAdmin } from '@/lib/auth/require-admin'
+
 import { revalidatePath } from 'next/cache'
-import { enviarNotificacaoParaPerfis, enviarNotificacaoParaTodosInscritos } from '@/lib/push/enviar-notificacao'
+import { createServiceClient } from '@/lib/supabase/server'
+import { notificar } from '@/lib/notificacoes/notificar'
 
-async function requireAdmin() {
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+const requireAdmin = verificarAdmin
 
-  if (!user) return { erro: 'Não autenticado.' as const }
-
-  const { data: perfil } = await supabase
-    .from('perfis')
-    .select('papel')
-    .eq('id', user.id)
-    .single()
-
-  if (!perfil || perfil.papel !== 'admin') {
-    return { erro: 'Acesso negado (admin).' as const }
-  }
-
-  return { supabase, user } as const
+async function auditar(atorId: string, acao: string, entidade: string, entidadeId: string, dados: Record<string, unknown> = {}) {
+  await createServiceClient()
+    .from('registros_auditoria')
+    .insert({ ator_id: atorId, acao, entidade, entidade_id: entidadeId, dados })
+    .then(() => undefined, () => undefined)
 }
 
 export async function aprovarReivindicacao(
@@ -59,13 +49,14 @@ export async function aprovarReivindicacao(
     .eq('status', 'pendente')
 
   if (errorSolic) return { erro: errorSolic.message }
+  await auditar(user.id, 'reivindicacao.aprovar', 'negocio', negocioId, { solicitacao: solicitacaoId, novo_dono: solicitanteId })
 
-  enviarNotificacaoParaPerfis([solicitanteId], {
-    title: 'Reivindicação aprovada! 🎉',
-    body: `Agora você já pode gerenciar o perfil de ${negocio?.nome} no Tanguá App.`,
+  await notificar([solicitanteId], {
+    tipo: 'reivindicacao',
+    titulo: 'Reivindicação aprovada! 🎉',
+    corpo: `Agora você já pode gerenciar o perfil de ${negocio?.nome} no Tanguá App.`,
     url: '/painel/negocio',
-    tag: 'reivindicacao-aprovada',
-  }).catch((err) => console.error('Falha ao notificar solicitante:', err))
+  })
 
   revalidatePath('/painel/admin/reivindicacoes')
   return { erro: null }
@@ -87,6 +78,7 @@ export async function rejeitarReivindicacao(solicitacaoId: string) {
     .eq('id', solicitacaoId)
 
   if (error) return { erro: error.message }
+  await auditar(user.id, 'reivindicacao.rejeitar', 'solicitacao', solicitacaoId)
 
   revalidatePath('/painel/admin/reivindicacoes')
   return { erro: null }
@@ -96,25 +88,28 @@ export async function aprovarNegocioPendente(negocioId: string) {
   const auth = await requireAdmin()
   if ('erro' in auth) return { erro: auth.erro }
 
-  const { supabase } = auth
+  const { supabase, user } = auth
 
+  // "verificado" é selo de verificação real (documento/visita) — aprovar a
+  // revisão automática não concede o selo.
   const { data: negocio, error } = await supabase
     .from('negocios')
-    .update({ status_cadastro: 'aprovado', ativo: true, verificado: true })
+    .update({ status_cadastro: 'aprovado', ativo: true, motivo_moderacao: null })
     .eq('id', negocioId)
     .eq('status_cadastro', 'pendente')
     .select('nome, reivindicado_por')
     .single()
 
   if (error) return { erro: error.message }
+  await auditar(user.id, 'negocio.aprovar', 'negocio', negocioId)
 
   if (negocio?.reivindicado_por) {
-    enviarNotificacaoParaPerfis([negocio.reivindicado_por], {
-      title: 'Seu negócio foi aprovado! 🎉',
-      body: `${negocio.nome} já está visível no diretório do Tanguá App.`,
+    await notificar([negocio.reivindicado_por], {
+      tipo: 'moderacao',
+      titulo: 'Seu negócio foi liberado! 🎉',
+      corpo: `${negocio.nome} já está visível no diretório do Tanguá App.`,
       url: '/painel/negocio',
-      tag: 'cadastro-aprovado',
-    }).catch((err) => console.error('Falha ao notificar profissional:', err))
+    })
   }
 
   revalidatePath('/painel/admin/negocios-pendentes')
@@ -126,15 +121,30 @@ export async function rejeitarNegocioPendente(negocioId: string, motivo: string)
   const auth = await requireAdmin()
   if ('erro' in auth) return { erro: auth.erro }
 
-  const { supabase } = auth
+  const { supabase, user } = auth
 
-  const { error } = await supabase
+  const motivoLimpo = (motivo ?? '').trim().slice(0, 500)
+  if (!motivoLimpo) return { erro: 'Informe o motivo — ele aparece pro dono do negócio corrigir.' }
+
+  const { data: negocio, error } = await supabase
     .from('negocios')
-    .update({ status_cadastro: 'rejeitado', ativo: false, motivo_rejeicao: motivo || null })
+    .update({ status_cadastro: 'rejeitado', ativo: false, motivo_rejeicao: motivoLimpo })
     .eq('id', negocioId)
     .eq('status_cadastro', 'pendente')
+    .select('nome, reivindicado_por')
+    .single()
 
   if (error) return { erro: error.message }
+  await auditar(user.id, 'negocio.rejeitar', 'negocio', negocioId, { motivo: motivoLimpo })
+
+  if (negocio?.reivindicado_por) {
+    await notificar([negocio.reivindicado_por], {
+      tipo: 'moderacao',
+      titulo: 'Seu cadastro precisa de ajuste',
+      corpo: `${negocio.nome}: ${motivoLimpo}`,
+      url: '/painel/negocio',
+    })
+  }
 
   revalidatePath('/painel/admin/negocios-pendentes')
   return { erro: null }
@@ -149,7 +159,7 @@ export async function alternarDestaque(negocioId: string, ativo: boolean, dias?:
   const auth = await requireAdmin()
   if ('erro' in auth) return { erro: auth.erro }
 
-  const { supabase } = auth
+  const { supabase, user } = auth
 
   const destaqueExpiraEm =
     ativo && dias ? new Date(Date.now() + dias * 24 * 60 * 60 * 1000).toISOString() : ativo ? null : null
@@ -160,6 +170,8 @@ export async function alternarDestaque(negocioId: string, ativo: boolean, dias?:
     .eq('id', negocioId)
 
   if (error) return { erro: error.message }
+
+  await auditar(user.id, ativo ? 'destaque.ativar_manual' : 'destaque.desativar_manual', 'negocio', negocioId, { dias: dias ?? null })
 
   revalidatePath('/painel/admin/negocios')
   revalidatePath('/buscar')
@@ -238,12 +250,14 @@ export async function criarAviso(formData: FormData) {
     utilidade_publica: 'Utilidade pública',
     achados_perdidos: 'Achados e perdidos',
   }
-  enviarNotificacaoParaTodosInscritos({
-    title: `${rotulosTipo[tipo] || 'Novidade'} no mural de Tanguá`,
-    body: titulo,
-    url: '/mural',
-    tag: 'mural',
-  }).catch((err) => console.error('Falha ao notificar mural:', err))
+  // mural vai pra todo mundo com push ativo (respeitando quem desligou "mural");
+  // não grava no sino do app de cada usuário pra não multiplicar linhas.
+  const { data: inscritos } = await createServiceClient().from('push_subscriptions').select('perfil_id')
+  await notificar(
+    (inscritos ?? []).map((i) => i.perfil_id),
+    { tipo: 'mural', titulo: `${rotulosTipo[tipo] || 'Novidade'} no mural de Tanguá`, corpo: titulo, url: '/mural' },
+    { categoria: 'mural', noApp: false }
+  )
 
   revalidatePath('/painel/admin/avisos')
   revalidatePath('/mural')

@@ -94,11 +94,11 @@ export async function enviarNotificacaoParaAdmins(payload: PayloadNotificacao) {
   if (!garantirVapidConfigurado()) return
 
   const supabase = createServiceClient()
-  const { data: admins, error } = await supabase.from('perfis').select('id').eq('papel', 'admin')
+  const { data: admins, error } = await supabase.from('administradores_plataforma').select('perfil_id')
 
   if (error || !admins || admins.length === 0) return
   await enviarNotificacaoParaPerfis(
-    admins.map((a) => a.id),
+    admins.map((a) => a.perfil_id),
     payload
   )
 }

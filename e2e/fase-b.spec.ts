@@ -15,7 +15,7 @@ test.describe('Fase B — motor de vendas & social enxuto', () => {
     await expect(page.getByRole('heading', { name: 'Oferta relâmpago' })).toBeVisible()
     await page.getByLabel('Título da oferta').fill('Oferta de teste E2E')
     await page.getByLabel('Desconto').fill('15% off')
-    await page.getByRole('button', { name: /publicar oferta relâmpago/i }).click()
+    await page.getByRole('button', { name: /^publicar oferta$/i }).click()
 
     await expect(page.getByText('Oferta de teste E2E').first()).toBeVisible({ timeout: 15000 })
 

@@ -18,6 +18,8 @@ export const Campo = forwardRef<HTMLInputElement, CampoProps>(
         <input
           ref={ref}
           id={id}
+          aria-invalid={erro ? true : undefined}
+          aria-describedby={erro && id ? `${id}-erro` : undefined}
           className={cn(
             'w-full rounded-xl border border-barro-300 bg-white px-4 py-2.5 text-barro-900',
             'placeholder:text-barro-300',
@@ -28,7 +30,11 @@ export const Campo = forwardRef<HTMLInputElement, CampoProps>(
           )}
           {...props}
         />
-        {erro && <span className="text-sm text-red-600">{erro}</span>}
+        {erro && (
+          <span id={id ? `${id}-erro` : undefined} role="alert" className="text-sm text-red-600">
+            {erro}
+          </span>
+        )}
       </div>
     )
   }
@@ -52,6 +58,8 @@ export const AreaTexto = forwardRef<HTMLTextAreaElement, AreaTextoProps>(
         <textarea
           ref={ref}
           id={id}
+          aria-invalid={erro ? true : undefined}
+          aria-describedby={erro && id ? `${id}-erro` : undefined}
           className={cn(
             'w-full rounded-xl border border-barro-300 bg-white px-4 py-2.5 text-barro-900',
             'placeholder:text-barro-300 min-h-[120px] resize-y',
@@ -62,7 +70,11 @@ export const AreaTexto = forwardRef<HTMLTextAreaElement, AreaTextoProps>(
           )}
           {...props}
         />
-        {erro && <span className="text-sm text-red-600">{erro}</span>}
+        {erro && (
+          <span id={id ? `${id}-erro` : undefined} role="alert" className="text-sm text-red-600">
+            {erro}
+          </span>
+        )}
       </div>
     )
   }

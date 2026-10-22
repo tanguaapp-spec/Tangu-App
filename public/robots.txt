@@ -1,4 +1,17 @@
 User-agent: *
 Allow: /
+Disallow: /painel/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /perfil
+Disallow: /notificacoes
+Disallow: /favoritos
+Disallow: /bem-vindo
+Disallow: /ajuda/chamados
+Disallow: /ajuda/contato
+Disallow: /entrar
+Disallow: /cadastrar
+Disallow: /esqueci-senha
+Disallow: /redefinir-senha
 
 Sitemap: https://tangua-app.vercel.app/sitemap.xml

@@ -6,7 +6,7 @@ export type TipoAviso = 'aviso' | 'evento' | 'utilidade_publica' | 'achados_perd
 export type ModalidadeAtendimento = 'loja_fisica' | 'atende_em_casa' | 'atende_domicilio' | 'servico_digital'
 export type TipoEventoPerfil = 'visualizacao' | 'favorito' | 'clique_whatsapp'
 export type TipoReacaoAviso = 'gostei' | 'parabens' | 'obrigado'
-export type TipoConteudoDenuncia = 'avaliacao' | 'aviso' | 'resposta_pergunta'
+export type TipoConteudoDenuncia = 'avaliacao' | 'aviso' | 'resposta_pergunta' | 'negocio' | 'post'
 export type StatusDenuncia = 'pendente' | 'removido' | 'arquivado'
 export type StatusProspeccao = 'novo' | 'contactado' | 'convidado' | 'convertido' | 'ignorado'
 
@@ -21,6 +21,8 @@ export type Perfil = {
   notificacoes_resumo_diario: boolean
   codigo_convite: string | null
   convidado_por: string | null
+  categorias_interesse: string[]
+  onboarding_concluido_em: string | null
   criado_em: string
   atualizado_em: string
 }
@@ -64,6 +66,9 @@ export type Negocio = {
   aberto_agora: boolean | null
   status_cadastro: StatusReivindicacao
   motivo_rejeicao: string | null
+  motivo_moderacao: string | null
+  tipo_perfil: 'estabelecimento' | 'autonomo'
+  area_atendimento: string | null
   ativo: boolean
   criado_em: string
   atualizado_em: string
@@ -163,6 +168,12 @@ export type Cupom = {
   negocio_id: string
   titulo: string
   desconto_texto: string
+  condicoes: string | null
+  inicia_em: string
+  limite_resgates: number | null
+  resgates_count: number
+  preco_original_centavos: number | null
+  preco_promocional_centavos: number | null
   expira_em: string
   ativo: boolean
   criado_em: string

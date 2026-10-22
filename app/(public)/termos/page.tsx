@@ -8,7 +8,7 @@ export const metadata = {
 
 export const revalidate = 3600
 
-const ATUALIZADO_EM = '13 de agosto de 2026'
+const ATUALIZADO_EM = '22 de outubro de 2026'
 
 export default function PaginaTermos() {
   return (
@@ -58,7 +58,8 @@ export default function PaginaTermos() {
         <section>
           <h2>3. Cadastro de negócio</h2>
           <ul>
-            <li>Todo cadastro feito diretamente por um profissional passa por análise da nossa equipe antes de aparecer no diretório.</li>
+            <li>O cadastro feito pelo próprio profissional entra no ar na hora. Verificações automáticas podem segurar um cadastro para revisão humana (por exemplo, termos sinalizados ou volume incomum de cadastros).</li>
+            <li>Profissional autônomo não precisa informar endereço residencial; basta a área onde atende.</li>
             <li>Você é responsável pela veracidade dos dados do seu negócio (endereço, contato, horário, fotos, preços).</li>
             <li>A &ldquo;forma de atendimento&rdquo; (loja física, atende em casa, vai até o cliente ou serviço digital) deve refletir a realidade do seu negócio.</li>
             <li>Reivindicar um perfil já existente (importado do Google) exige comprovar que você é o responsável pelo negócio.</li>
@@ -72,7 +73,8 @@ export default function PaginaTermos() {
             <li>Avaliações devem refletir uma experiência real com o negócio avaliado.</li>
             <li>É proibido publicar conteúdo ofensivo, discriminatório, falso, ilegal ou que viole direitos de terceiros — em avaliações, perguntas no mural ou qualquer outro campo de texto/imagem.</li>
             <li>Qualquer usuário pode denunciar conteúdo que viole estas regras; nossa equipe analisa e pode remover o conteúdo e, em caso de reincidência, suspender a conta responsável.</li>
-            <li>O profissional pode responder publicamente a avaliações do seu negócio.</li>
+            <li>O profissional pode responder publicamente a avaliações do seu negócio, mas não pode alterar a nota nem o texto de quem avaliou.</li>
+            <li>Quando um conteúdo seu for removido pela moderação, você recebe um aviso com o motivo e pode contestar pela central de ajuda.</li>
           </ul>
         </section>
 
@@ -82,17 +84,23 @@ export default function PaginaTermos() {
             &ldquo;Laranjas&rdquo; são pontos de reconhecimento dentro do app (sem conversão em dinheiro), ganhos ao
             avaliar, favoritar, completar o perfil ou indicar vizinhos. O cartão fidelidade e os cupons de cada
             negócio são configurados e cumpridos diretamente pelo profissional — o Tanguá App registra o
-            progresso, mas a validação do prêmio é combinada entre você e o profissional.
+            progresso, mas a validação do prêmio é combinada entre você e o profissional. Cupons com código
+            valem uma única vez e só dentro do prazo e das condições informadas pelo negócio, que é o
+            responsável por honrá-los.
           </p>
         </section>
 
         <section>
-          <h2>6. Destaque pago</h2>
-          <p>
-            Profissionais podem solicitar destaque no diretório mediante contato comercial pelo WhatsApp. A
-            ativação é feita manualmente pela nossa equipe após a confirmação do pagamento, combinado
-            diretamente com o profissional.
-          </p>
+          <h2>6. Planos pagos</h2>
+          <ul>
+            <li>O plano Gratuito não tem custo. Planos pagos têm cobrança mensal recorrente pelo Mercado Pago, nos valores e limites exibidos em <Link href="/planos" className="font-medium text-casca-600 hover:underline">Planos</Link> no momento da contratação.</li>
+            <li>O plano só é liberado depois que o Mercado Pago confirma a cobrança.</li>
+            <li>Você pode trocar de plano ou cancelar a qualquer momento pelo painel, sem multa. Ao cancelar, o plano vale até o fim do período já pago.</li>
+            <li>Se uma cobrança for recusada, os recursos pagos continuam por um período de tolerância informado no painel; depois o negócio volta ao Gratuito.</li>
+            <li>Ao voltar ao Gratuito nada é apagado; apenas a criação de novos itens acima do limite fica bloqueada.</li>
+            <li>O plano Destaque coloca o negócio em posição de destaque, sinalizada como tal. Planos pagos não garantem vendas nem resultados.</li>
+            <li>Mudanças de preço valem só para novas contratações.</li>
+          </ul>
         </section>
 
         <section>
@@ -108,8 +116,8 @@ export default function PaginaTermos() {
           <h2>8. Suspensão e encerramento de conta</h2>
           <p>
             Podemos suspender ou encerrar contas que violem estes termos, usem o app para fins fraudulentos, ou
-            publiquem conteúdo denunciado e confirmado como abusivo. Você pode encerrar sua conta a qualquer
-            momento entrando em contato pelo WhatsApp no rodapé do app.
+            publiquem conteúdo denunciado e confirmado como abusivo. Você pode excluir sua conta a qualquer
+            momento em Meu perfil → Privacidade e dados; a assinatura, se houver, é cancelada junto.
           </p>
         </section>
 
