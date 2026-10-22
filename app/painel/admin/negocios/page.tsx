@@ -57,7 +57,7 @@ export default async function PainelNegocios({
           {negocios.map((n: any) => (
             <div
               key={n.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-casca border border-barro-100 bg-white p-4 shadow-feira"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-casca border border-barro-100 bg-superficie p-4 shadow-feira"
             >
               <div>
                 <Link href={`/negocio/${n.id}`} target="_blank" className="font-semibold text-barro-900 hover:underline">

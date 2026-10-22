@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { ArrowRight, Briefcase, Megaphone, Sparkles, Store } from 'lucide-react'
 import { BuscaRapida } from '@/components/busca-rapida'
 import { MotivoGomo } from '@/components/motivo-gomo'
-import { Laranja3D } from '@/components/laranja-3d'
+import { LogoTangua } from '@/components/marca/logo-tangua'
 import { CardAchadoDoDia } from '@/components/negocio/card-achado-do-dia'
 import { CardNegocioMini } from '@/components/negocio/card-negocio-mini'
 import { iconeCategoria } from '@/lib/ui/icone-categoria'
@@ -102,19 +102,19 @@ export default async function PaginaInicial() {
   return (
     <>
       {/* HERO — mobile: painel escuro compacto, cara de app (aba "Início") */}
-      <section className="relative overflow-hidden rounded-b-[28px] bg-barro-900 px-4 pb-6 pt-3 text-white lg:hidden">
+      <section className="relative overflow-hidden rounded-b-[28px] bg-serra-escuro px-4 pb-6 pt-3 text-white lg:hidden">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-14 -top-20 h-56 w-56 rounded-full bg-casca-500 opacity-25 blur-3xl"
+          className="pointer-events-none absolute -right-14 -top-20 h-56 w-56 rounded-full bg-mata-400 opacity-20 blur-3xl"
         />
         <div className="relative">
-          <p className="entrada-lista text-xs font-semibold uppercase tracking-wide text-barro-300" style={{ '--i': 0 } as React.CSSProperties}>
+          <p className="entrada-lista text-xs font-semibold uppercase tracking-wide text-white/70" style={{ '--i': 0 } as React.CSSProperties}>
             Tanguá, RJ
           </p>
           <h1 className="entrada-lista mt-1 font-display text-2xl font-bold" style={{ '--i': 1 } as React.CSSProperties}>
-            {saudacao()}! <span aria-hidden="true">🍊</span>
+            {saudacao()}!
           </h1>
-          <p className="entrada-lista mt-1 text-sm text-barro-200" style={{ '--i': 2 } as React.CSSProperties}>
+          <p className="entrada-lista mt-1 text-sm text-white/80" style={{ '--i': 2 } as React.CSSProperties}>
             O que você precisa encontrar hoje?
           </p>
           <div className="entrada-lista mt-4" style={{ '--i': 3 } as React.CSSProperties}>
@@ -123,55 +123,42 @@ export default async function PaginaInicial() {
         </div>
       </section>
 
-      {/* HERO — desktop/tablet: versão completa com mascote */}
-      <section className="relative hidden overflow-hidden textura-papel lg:block">
-        <MotivoGomo className="pointer-events-none absolute -right-24 -top-24 h-[420px] w-[420px] text-casca-500 sm:-right-10" />
-        <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-6">
-          <div>
-            <span
-              className="entrada-lista inline-flex items-center gap-1.5 rounded-full bg-casca-100 px-3 py-1 text-sm font-semibold text-casca-700"
-              style={{ '--i': 0 } as React.CSSProperties}
-            >
-              🍊 Feito por e para quem é de Tanguá
-            </span>
-
-            <h1
-              className="entrada-lista mt-5 max-w-2xl text-balance font-display text-4xl font-bold leading-[1.05] tracking-tight text-barro-900 sm:text-6xl"
-              style={{ '--i': 1 } as React.CSSProperties}
-            >
-              Tudo da nossa cidade,{' '}
-              <span className="italic font-medium text-casca-500">num só lugar.</span>
-            </h1>
-
-            <p
-              className="entrada-lista mt-5 max-w-xl text-lg text-barro-700"
-              style={{ '--i': 2 } as React.CSSProperties}
-            >
-              Encontre profissionais e comércios locais, fique de olho nas vagas de emprego
-              e acompanhe os avisos da cidade — tudo conectado, tudo de Tanguá.
-            </p>
-
-            <div className="entrada-lista mt-8" style={{ '--i': 3 } as React.CSSProperties}>
-              <BuscaRapida />
+      {/* HERO — desktop/tablet: bloco verde da marca */}
+      <section className="mx-auto hidden max-w-6xl px-4 pt-8 sm:px-6 lg:block">
+        <div className="relative overflow-hidden rounded-[32px] bg-serra px-12 py-14 text-white">
+          <MotivoGomo className="pointer-events-none absolute -right-28 -top-28 h-[440px] w-[440px] text-white opacity-[0.06]" />
+          <div className="relative grid grid-cols-[1.25fr_0.75fr] items-center gap-10">
+            <div>
+              <p className="entrada-lista text-sm font-semibold text-white/75" style={{ '--i': 0 } as React.CSSProperties}>
+                Tanguá · RJ
+              </p>
+              <h1
+                className="entrada-lista mt-3 max-w-2xl text-balance font-display text-6xl font-bold leading-[1.02]"
+                style={{ '--i': 1 } as React.CSSProperties}
+              >
+                Tudo de Tanguá, perto de você.
+              </h1>
+              <p className="entrada-lista mt-5 max-w-xl text-lg text-white/85" style={{ '--i': 2 } as React.CSSProperties}>
+                Comércios, profissionais, ofertas e o que acontece na cidade. Fale direto no WhatsApp, sem
+                intermediário.
+              </p>
+              <div className="entrada-lista mt-8" style={{ '--i': 3 } as React.CSSProperties}>
+                <BuscaRapida />
+              </div>
             </div>
-          </div>
-
-          {/* mascote: a laranja de Tanguá */}
-          <div
-            className="entrada-lista order-first lg:order-last"
-            style={{ '--i': 1 } as React.CSSProperties}
-          >
-            <Laranja3D className="mx-auto w-48 sm:w-64 lg:w-full" />
+            <div className="entrada-lista flex justify-center" style={{ '--i': 1 } as React.CSSProperties}>
+              <LogoTangua variante="sobre-escuro" className="h-64 w-64 drop-shadow-[0_18px_30px_rgba(0,0,0,0.25)]" />
+            </div>
           </div>
         </div>
       </section>
 
       {/* CATEGORIAS — pílulas de atalho, compartilhadas pelas duas versões do hero */}
-      <section className="mx-auto max-w-6xl px-4 pt-4 sm:px-6 lg:pt-0">
+      <section className="mx-auto max-w-6xl px-4 pt-4 sm:px-6 lg:pt-6">
         <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible">
           <Link
             href="/buscar"
-            className="shrink-0 rounded-full bg-casca-500 px-4 py-1.5 text-sm font-semibold text-white shadow-sm"
+            className="shrink-0 rounded-full bg-laranja px-4 py-1.5 text-sm font-semibold text-tinta shadow-sm"
           >
             Tudo
           </Link>
@@ -181,7 +168,7 @@ export default async function PaginaInicial() {
               <Link
                 key={cat.slug}
                 href={`/buscar?categoria=${cat.slug}`}
-                className="flex shrink-0 items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-sm text-barro-700 shadow-sm transition-colors hover:bg-casca-50 hover:text-casca-700"
+                className="flex shrink-0 items-center gap-1.5 rounded-full bg-superficie px-4 py-1.5 text-sm text-barro-700 shadow-sm transition-colors hover:bg-casca-50 hover:text-casca-700"
               >
                 <Icone className="h-3.5 w-3.5" />
                 {cat.nome}
@@ -228,7 +215,7 @@ export default async function PaginaInicial() {
               <Link
                 key={p.href}
                 href={p.href}
-                className="entrada-lista group rounded-casca border border-barro-100 bg-white p-6 shadow-feira transition-all hover:-translate-y-1.5 hover:shadow-feira-lg"
+                className="entrada-lista group rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira transition-all hover:-translate-y-1.5 hover:shadow-feira-lg"
                 style={{ '--i': i } as React.CSSProperties}
               >
                 <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${cores.bg} ${cores.texto} transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6`}>

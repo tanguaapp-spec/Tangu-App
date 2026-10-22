@@ -31,10 +31,10 @@ export default function PaginaAjuda({ searchParams }: { searchParams: { q?: stri
             name="q"
             defaultValue={termo}
             placeholder="Ex.: esqueci a senha, cancelar plano, WhatsApp"
-            className="w-full rounded-xl border border-barro-300 bg-white py-2.5 pl-9 pr-3 text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
+            className="w-full rounded-xl border border-barro-300 bg-superficie py-2.5 pl-9 pr-3 text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
           />
         </div>
-        <button className="rounded-xl bg-casca-700 px-4 font-semibold text-white hover:bg-casca-800">Buscar</button>
+        <button className="rounded-xl bg-laranja px-4 font-semibold text-tinta hover:bg-laranja-claro">Buscar</button>
       </form>
 
       {termo && (
@@ -45,7 +45,7 @@ export default function PaginaAjuda({ searchParams }: { searchParams: { q?: stri
           <ul className="mt-2 space-y-2">
             {resultados.map((a) => (
               <li key={a.slug}>
-                <Link href={`/ajuda/${a.slug}`} className="block rounded-xl border border-barro-100 bg-white p-4 hover:border-casca-300">
+                <Link href={`/ajuda/${a.slug}`} className="block rounded-xl border border-barro-100 bg-superficie p-4 hover:border-casca-300">
                   <span className="font-semibold text-barro-900">{a.titulo}</span>
                   <span className="mt-0.5 block text-sm text-barro-600">{a.resumo}</span>
                 </Link>
@@ -83,14 +83,14 @@ export default function PaginaAjuda({ searchParams }: { searchParams: { q?: stri
         ))}
       </div>
 
-      <section className="mt-10 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <section className="mt-10 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         <div className="flex items-start gap-3">
           <MessageSquare className="mt-1 h-6 w-6 shrink-0 text-mata-600" aria-hidden="true" />
           <div>
             <h2 className="font-display text-lg font-semibold text-barro-900">Não achou o que precisava?</h2>
             <p className="mt-1 text-sm text-barro-600">Abra um chamado — você acompanha a resposta por aqui e recebe um aviso no app.</p>
             <div className="mt-3 flex flex-wrap gap-3 text-sm">
-              <Link href="/ajuda/contato" className="rounded-lg bg-mata-600 px-3 py-1.5 font-semibold text-white hover:bg-mata-700">
+              <Link href="/ajuda/contato" className="rounded-lg bg-serra px-3 py-1.5 font-semibold text-white hover:bg-serra">
                 Falar com o suporte
               </Link>
               <Link href="/ajuda/chamados" className="rounded-lg border border-barro-300 px-3 py-1.5 font-semibold text-barro-800 hover:bg-barro-50">

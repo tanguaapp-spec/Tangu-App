@@ -33,7 +33,7 @@ export const dynamic = 'force-dynamic'
 export default async function PainelNegocio() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/entrar')
+  if (!user) redirect('/entrar?next=/painel/negocio')
 
   const { data: negocio } = await supabase
     .from('negocios')
@@ -43,7 +43,7 @@ export default async function PainelNegocio() {
 
   if (!negocio) {
     return (
-      <div className="mx-auto max-w-lg rounded-casca border border-barro-100 bg-white p-8 text-center shadow-feira">
+      <div className="mx-auto max-w-lg rounded-casca border border-barro-100 bg-superficie p-8 text-center shadow-feira">
         <Store className="mx-auto h-10 w-10 text-barro-300" />
         <h1 className="mt-3 font-display text-xl font-semibold text-barro-900">
           Você ainda não tem um negócio cadastrado
@@ -99,7 +99,7 @@ export default async function PainelNegocio() {
             <>
               <p className="mt-2 text-barro-700">Seu cadastro não foi aprovado desta vez.</p>
               {negocio.motivo_rejeicao && (
-                <p className="mt-2 rounded-lg bg-white/70 p-3 text-sm text-barro-700">
+                <p className="mt-2 rounded-lg bg-superficie/70 p-3 text-sm text-barro-700">
                   <span className="font-medium">Motivo:</span> {negocio.motivo_rejeicao}
                 </p>
               )}
@@ -112,7 +112,7 @@ export default async function PainelNegocio() {
           )}
         </div>
 
-        <div className="mt-6 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+        <div className="mt-6 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
           <h2 className="font-display text-lg font-semibold text-barro-900">Enquanto isso, complete seu perfil</h2>
           <div className="mt-4">
             <FormularioEditarNegocio negocio={negocio as any} categorias={(await buscarCategorias()) as any} />
@@ -180,10 +180,10 @@ export default async function PainelNegocio() {
   return (
     <div className="mx-auto max-w-3xl">
       {/* cabeçalho — mobile: painel escuro compacto, cara de app */}
-      <div className="relative overflow-hidden rounded-[28px] bg-barro-900 px-5 py-5 text-white lg:hidden">
+      <div className="relative overflow-hidden rounded-[28px] bg-serra-escuro px-5 py-5 text-white lg:hidden">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-14 -top-20 h-56 w-56 rounded-full bg-casca-500 opacity-25 blur-3xl"
+          className="pointer-events-none absolute -right-14 -top-20 h-56 w-56 rounded-full bg-mata-400 opacity-20 blur-3xl"
         />
         <div className="relative flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
@@ -191,7 +191,7 @@ export default async function PainelNegocio() {
               <h1 className="truncate font-display text-2xl font-bold">{negocio.nome}</h1>
               {negocio.verificado && <Selo tom="verde">Verificado</Selo>}
             </div>
-            <p className="text-sm text-barro-200">Gerencie as informações e novidades do seu negócio.</p>
+            <p className="text-sm text-white/80">Gerencie as informações e novidades do seu negócio.</p>
           </div>
           <AlternadorAbertoAgora negocioId={negocio.id} valorInicial={negocio.aberto_agora} />
         </div>
@@ -212,7 +212,7 @@ export default async function PainelNegocio() {
       <ChecklistNegocio itens={checklist} urlPublica={urlPublica} />
 
       {usoPlano && (
-        <section aria-label="Uso do plano" className="mt-6 rounded-casca border border-barro-100 bg-white p-5">
+        <section aria-label="Uso do plano" className="mt-6 rounded-casca border border-barro-100 bg-superficie p-5">
           <ResumoUsoPlano
             uso={usoPlano}
             nomePlano={planos.find((p) => p.id === usoPlano.plano)?.nome ?? usoPlano.plano}
@@ -222,12 +222,12 @@ export default async function PainelNegocio() {
       )}
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:mt-6">
-        <div className="rounded-xl border border-barro-100 bg-white p-4">
+        <div className="rounded-xl border border-barro-100 bg-superficie p-4">
           <Star className="h-5 w-5 text-casca-500" />
           <p className="mt-2 text-2xl font-semibold text-barro-900">{notasMedia}</p>
           <p className="text-sm text-barro-500">Nota média ({totalAvaliacoes ?? 0} avaliações)</p>
         </div>
-        <div className="rounded-xl border border-barro-100 bg-white p-4">
+        <div className="rounded-xl border border-barro-100 bg-superficie p-4">
           <Star className="h-5 w-5 text-casca-500" />
           <p className="mt-2 text-2xl font-semibold text-barro-900">{negocio.nota_google?.toFixed(1) ?? '—'}</p>
           <p className="text-sm text-barro-500">Nota no Google</p>
@@ -245,7 +245,7 @@ export default async function PainelNegocio() {
         </div>
       </div>
 
-      <div id="ofertas" className="mt-8 scroll-mt-20 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <div id="ofertas" className="mt-8 scroll-mt-20 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         <h2 className="font-display text-lg font-semibold text-barro-900">Oferta relâmpago</h2>
         <p className="text-sm text-barro-500">Cria escassez de verdade — quem favoritou seu perfil recebe um aviso.</p>
         <div className="mt-4">
@@ -257,7 +257,7 @@ export default async function PainelNegocio() {
         </div>
       </div>
 
-      <div className="mt-8 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <div className="mt-8 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         <h2 className="font-display text-lg font-semibold text-barro-900">Cartão fidelidade</h2>
         <p className="text-sm text-barro-500">
           Carimbe o cartão de quem já favoritou ou avaliou seu perfil — a cada 10 carimbos a pessoa completa e você
@@ -272,14 +272,14 @@ export default async function PainelNegocio() {
 
       <CartaoDestaque destaqueAtivo={negocio.destaque_ativo} destaqueExpiraEm={negocio.destaque_expira_em} />
 
-      <div id="informacoes" className="mt-8 scroll-mt-20 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <div id="informacoes" className="mt-8 scroll-mt-20 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         <h2 className="font-display text-lg font-semibold text-barro-900">Informações do negócio</h2>
         <div className="mt-4">
           <FormularioEditarNegocio negocio={negocio as any} categorias={categorias as any} />
         </div>
       </div>
 
-      <div id="catalogo" className="mt-8 scroll-mt-20 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <div id="catalogo" className="mt-8 scroll-mt-20 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         <h2 className="font-display text-lg font-semibold text-barro-900">Catálogo de produtos e serviços</h2>
         <p className="text-sm text-barro-500">Quem já vê o preço chega mais decidido a fechar.</p>
         <div className="mt-4">
@@ -290,7 +290,7 @@ export default async function PainelNegocio() {
         </div>
       </div>
 
-      <div id="novidade" className="mt-8 scroll-mt-20 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <div id="novidade" className="mt-8 scroll-mt-20 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         <h2 className="font-display text-lg font-semibold text-barro-900">Publicar novidade</h2>
         <div className="mt-4">
           <FormularioCriarPost negocioId={negocio.id} />
@@ -302,7 +302,7 @@ export default async function PainelNegocio() {
           <h2 className="font-display text-lg font-semibold text-barro-900">Seus posts</h2>
           <div className="mt-3 space-y-2">
             {posts.map((post) => (
-              <div key={post.id} className="rounded-xl border border-barro-100 bg-white p-4">
+              <div key={post.id} className="rounded-xl border border-barro-100 bg-superficie p-4">
                 <p className="font-medium text-barro-900">{post.titulo}</p>
                 <p className="text-sm text-barro-500">
                   {post.visualizacoes} visualizações · {post.cliques_contato} cliques
@@ -313,7 +313,7 @@ export default async function PainelNegocio() {
         </div>
       )}
 
-      <div className="mt-8 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <div className="mt-8 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         <h2 className="font-display text-lg font-semibold text-barro-900">Avaliações da comunidade</h2>
         <p className="text-sm text-barro-500">Responder mostra que você se importa — 82% dos consumidores preferem negócios que respondem.</p>
         <div className="mt-4">
@@ -321,7 +321,7 @@ export default async function PainelNegocio() {
         </div>
       </div>
 
-      <div className="mt-8 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <div className="mt-8 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         <h2 className="font-display text-lg font-semibold text-barro-900">Publicar vaga do seu negócio</h2>
         <p className="text-sm text-barro-500">Está contratando? Publique direto pro mural de vagas da cidade.</p>
         <div className="mt-4">
@@ -334,7 +334,7 @@ export default async function PainelNegocio() {
           <h2 className="font-display text-lg font-semibold text-barro-900">Suas vagas</h2>
           <div className="mt-3 space-y-2">
             {vagasProprias.map((v) => (
-              <div key={v.id} className="flex items-center justify-between rounded-xl border border-barro-100 bg-white p-4">
+              <div key={v.id} className="flex items-center justify-between rounded-xl border border-barro-100 bg-superficie p-4">
                 <div>
                   <p className="font-medium text-barro-900">{v.titulo}</p>
                   <p className="text-sm text-barro-500">{v.area}</p>

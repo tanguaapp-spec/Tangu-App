@@ -29,7 +29,7 @@ export default async function PaginaMeusOrcamentos() {
           <h1 className="font-display text-3xl font-semibold tracking-tight text-barro-900">Meus orçamentos</h1>
           <p className="text-barro-600">Descreva o que precisa e receba respostas de quem faz, aqui mesmo no app.</p>
         </div>
-        <Link href="/orcamentos/novo" className="rounded-lg bg-casca-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-casca-800">
+        <Link href="/orcamentos/novo" className="rounded-lg bg-laranja px-3 py-1.5 text-sm font-semibold text-tinta hover:bg-laranja-claro">
           Pedir orçamento
         </Link>
       </div>
@@ -46,7 +46,7 @@ export default async function PaginaMeusOrcamentos() {
             const expirado = new Date(p.expira_em) < new Date()
             return (
               <li key={p.id}>
-                <Link href={`/orcamentos/${p.id}`} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-barro-100 bg-white p-4 hover:border-casca-300">
+                <Link href={`/orcamentos/${p.id}`} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-barro-100 bg-superficie p-4 hover:border-casca-300">
                   <span>
                     <span className="block font-semibold text-barro-900">{p.titulo}</span>
                     <span className="text-xs text-barro-500">{new Date(p.criado_em).toLocaleDateString('pt-BR')}</span>

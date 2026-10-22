@@ -58,7 +58,7 @@ export default async function PaginaOrcamentosRecebidos() {
               <li key={p.id}>
                 <Link
                   href={`/painel/negocio/orcamentos/${p.id}`}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-barro-100 bg-white p-4 hover:border-casca-300"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-barro-100 bg-superficie p-4 hover:border-casca-300"
                 >
                   <span>
                     <span className="flex items-center gap-2 font-semibold text-barro-900">

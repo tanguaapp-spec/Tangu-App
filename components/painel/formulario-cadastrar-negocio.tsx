@@ -61,7 +61,7 @@ export function FormularioCadastrarNegocio({ categorias }: { categorias: Categor
               key={t.valor}
               className={cn(
                 'flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors',
-                tipo === t.valor ? 'border-casca-500 bg-casca-50 ring-2 ring-casca-100' : 'border-barro-200 bg-white hover:bg-barro-50'
+                tipo === t.valor ? 'border-casca-500 bg-casca-50 ring-2 ring-casca-100' : 'border-barro-200 bg-superficie hover:bg-barro-50'
               )}
             >
               <input
@@ -102,7 +102,7 @@ export function FormularioCadastrarNegocio({ categorias }: { categorias: Categor
           id="categoria_id"
           name="categoria_id"
           required
-          className="w-full rounded-xl border border-barro-300 bg-white px-4 py-2.5 text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
+          className="w-full rounded-xl border border-barro-300 bg-superficie px-4 py-2.5 text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
         >
           <option value="">Selecione...</option>
           {categorias.map((c) => (

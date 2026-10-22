@@ -47,7 +47,7 @@ export function FormularioChamado({ categoriaInicial, paginaOrigem }: { categori
           id="categoria"
           name="categoria"
           defaultValue={categoriaInicial}
-          className="w-full rounded-xl border border-barro-300 bg-white px-4 py-2.5 text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
+          className="w-full rounded-xl border border-barro-300 bg-superficie px-4 py-2.5 text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
         >
           {Object.entries(CATEGORIAS_CHAMADO).map(([valor, rotulo]) => (
             <option key={valor} value={valor}>

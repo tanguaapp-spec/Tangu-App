@@ -6,7 +6,7 @@ import { NavPainel } from '@/components/painel/nav-painel'
 export default async function LayoutPainel({ children }: { children: React.ReactNode }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/entrar')
+  if (!user) redirect('/entrar?next=/painel/negocio')
 
   const { data: papel } = await supabase.rpc('meu_papel')
 

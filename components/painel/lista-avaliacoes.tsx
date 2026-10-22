@@ -33,7 +33,7 @@ function ItemAvaliacao({ avaliacao }: { avaliacao: AvaliacaoComAutor }) {
   }
 
   return (
-    <div className="rounded-xl border border-barro-100 bg-white p-4">
+    <div className="rounded-xl border border-barro-100 bg-superficie p-4">
       <div className="flex items-center justify-between">
         <span className="font-medium text-barro-800">{avaliacao.autor?.nome_completo ?? 'Morador'}</span>
         <span className="flex items-center gap-1 text-casca-500">

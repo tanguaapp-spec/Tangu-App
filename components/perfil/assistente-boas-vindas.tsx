@@ -44,7 +44,7 @@ export function AssistenteBoasVindas({ categorias, bairroAtual }: { categorias: 
                 key={c.id}
                 className={cn(
                   'cursor-pointer rounded-full border px-3 py-1.5 text-sm font-medium transition-colors focus-within:ring-2 focus-within:ring-casca-300',
-                  ativa ? 'border-casca-500 bg-casca-50 text-casca-800' : 'border-barro-200 bg-white text-barro-700'
+                  ativa ? 'border-casca-500 bg-casca-50 text-casca-800' : 'border-barro-200 bg-superficie text-barro-700'
                 )}
               >
                 <input type="checkbox" name="categorias" value={c.id} checked={ativa} onChange={() => alternar(c.id)} className="sr-only" />
@@ -66,7 +66,7 @@ export function AssistenteBoasVindas({ categorias, bairroAtual }: { categorias: 
           defaultValue={bairroAtual ?? ''}
           maxLength={100}
           placeholder="Centro, Duques, Vila Cortes…"
-          className="mt-2 w-full max-w-sm rounded-xl border border-barro-300 bg-white px-4 py-2.5"
+          className="mt-2 w-full max-w-sm rounded-xl border border-barro-300 bg-superficie px-4 py-2.5"
         />
       </div>
 

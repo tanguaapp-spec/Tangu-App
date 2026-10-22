@@ -38,7 +38,7 @@ export default async function PaginaNovoOrcamento({ searchParams }: { searchPara
       </Link>
       <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-barro-900">Pedir orçamento</h1>
       <p className="mt-1 text-barro-600">É grátis. As respostas chegam aqui e você recebe um aviso.</p>
-      <div className="mt-6 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <div className="mt-6 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         <FormularioPedido categorias={categorias} negocioEscolhido={negocio} />
       </div>
     </div>

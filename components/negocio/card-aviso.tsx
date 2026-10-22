@@ -24,12 +24,13 @@ const rotulosPorTipo = {
   pergunta: 'Pergunta pra cidade',
 }
 
+// fundos de marca fixos (não invertem no escuro) + cor do ícone por cima
 const corPorTipo = {
-  aviso: 'bg-barro-800',
-  evento: 'bg-casca-500',
-  utilidade_publica: 'bg-mata-600',
-  achados_perdidos: 'bg-barro-600',
-  pergunta: 'bg-mata-500',
+  aviso: 'bg-serra text-white',
+  evento: 'bg-laranja text-tinta',
+  utilidade_publica: 'bg-serra-escuro text-white',
+  achados_perdidos: 'bg-barro-700 text-barro-50',
+  pergunta: 'bg-serra text-white',
 }
 
 interface Props {
@@ -46,12 +47,12 @@ export function CardAviso({ aviso, indice = 0, contagensReacao = {}, minhaReacao
 
   return (
     <div
-      className="entrada-lista rounded-casca border border-barro-100 bg-white p-5 shadow-feira transition-all duration-300 hover:-translate-y-1 hover:shadow-feira-lg"
+      className="entrada-lista rounded-casca border border-barro-100 bg-superficie p-5 shadow-feira transition-all duration-300 hover:-translate-y-1 hover:shadow-feira-lg"
       style={{ '--i': Math.min(indice, 8) } as React.CSSProperties}
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white ${corPorTipo[aviso.tipo]}`}>
+          <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${corPorTipo[aviso.tipo]}`}>
             <Icone className="h-4 w-4" />
           </span>
           <span className="text-xs font-bold uppercase tracking-wide text-barro-500">{rotulosPorTipo[aviso.tipo]}</span>

@@ -72,7 +72,7 @@ export default function PaginaFerramentas() {
         {ferramentas.map((f) => {
           const cores = coresFerramenta[f.cor]
           return (
-            <div key={f.slug} className="rounded-casca border border-barro-100 bg-white p-6 shadow-feira sm:p-8">
+            <div key={f.slug} className="rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira sm:p-8">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${cores.bg} ${cores.texto}`}>

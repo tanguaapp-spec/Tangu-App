@@ -9,8 +9,7 @@ está simulado no código.
 |---|---|---|
 | Migrations 0016–0019 em produção | Aplicar no SQL Editor, na ordem (`docs/DEPLOY.md`) | dono |
 | Conferir admins após a 0016 | Rodar `supabase/verificacao/pos-migracao.sql` bloco 1 | dono |
-| Planos pagos no ar | Conta/aplicação no Mercado Pago, `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET`, webhook configurado | dono |
-| Teste ponta a ponta de cobrança | Ciclo completo em sandbox do MP (nunca rodado — sem credenciais) | dev + dono |
+| Teste ponta a ponta de cobrança | Credenciais de produção **validadas em 22/10/2026** (`npx tsx scripts/testar-mercadopago.ts`: token, criar/ler/cancelar assinatura, HMAC, rota publicada). Falta 1 pagamento real aprovado chegando pelo webhook (ver docs/PAGAMENTOS.md, "Primeira cobrança real") | dono |
 | `NEXT_PUBLIC_SITE_URL`, `CRON_SECRET`, `METRICAS_SAL` na Vercel | Cadastrar | dono |
 | Redirect URL `/auth/callback` no Supabase Auth | Cadastrar | dono |
 | Ambiente de staging | Segundo projeto Supabase pra rodar E2E sem tocar produção | dono |
@@ -19,9 +18,9 @@ está simulado no código.
 
 ## Não implementado (próximas rodadas, por prioridade)
 
-1. **Redesign visual amplo** (verde profundo + laranja, tipografia). Esta rodada manteve o design
-   system existente (paleta casca/mata/barro, Fraunces/Inter) e aplicou-o às telas novas. Vale uma
-   rodada dedicada de UI com protótipo antes de mexer em todas as páginas.
+1. ~~Redesign visual~~ — feito (identidade "Tanguá", claro/escuro; `docs/MARCA.md`). Falta só
+   revisar com dados reais as telas logadas (painel, admin, perfil), que a auditoria automática não
+   alcança sem um banco de staging.
 2. **Membros por negócio** (gerente/colaborador com papéis). Hoje: um dono por negócio, um negócio
    por conta.
 3. **Edição/arquivamento de produtos e posts** (hoje: criar e remover produto; posts só criar).

@@ -46,7 +46,7 @@ export function DesempenhoSemanal({
   return (
     <div className="grid gap-4 sm:grid-cols-3">
       {cartoes.map((c) => (
-        <div key={c.titulo} className="rounded-xl border border-barro-100 bg-white p-4">
+        <div key={c.titulo} className="rounded-xl border border-barro-100 bg-superficie p-4">
           <c.icone className={`h-5 w-5 ${c.cor}`} />
           <p className="mt-2 text-2xl font-semibold text-barro-900">{c.dado.atual}</p>
           <p className="text-sm text-barro-500">{c.titulo} (7 dias)</p>

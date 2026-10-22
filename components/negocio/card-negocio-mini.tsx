@@ -17,7 +17,7 @@ export function CardNegocioMini({ negocio }: { negocio: Negocio }) {
       href={`/negocio/${negocio.id}`}
       className="rounded-2xl bg-barro-50 p-3 transition-transform active:scale-[0.97]"
     >
-      <span className="flex h-14 items-center justify-center rounded-xl bg-barro-900 text-white">
+      <span className="flex h-14 items-center justify-center rounded-xl bg-serra-escuro text-white">
         <Icone className="h-5 w-5" strokeWidth={2.2} />
       </span>
       <span className="mt-2 block truncate text-[13px] font-semibold text-barro-900">{negocio.nome}</span>

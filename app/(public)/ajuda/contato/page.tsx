@@ -26,7 +26,7 @@ export default async function PaginaContato({ searchParams }: { searchParams: { 
         </Link>
       </p>
 
-      <div className="mt-6 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <div className="mt-6 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         {user ? (
           <FormularioChamado
             categoriaInicial={categoriaDoAssunto(searchParams.assunto)}

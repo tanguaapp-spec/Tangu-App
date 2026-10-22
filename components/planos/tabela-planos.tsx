@@ -31,7 +31,7 @@ export function TabelaPlanos({
             key={plano.id}
             aria-labelledby={`plano-${plano.id}`}
             className={cn(
-              'flex flex-col rounded-casca border bg-white p-6 shadow-feira',
+              'flex flex-col rounded-casca border bg-superficie p-6 shadow-feira',
               atual ? 'border-mata-500 ring-2 ring-mata-200' : destaque ? 'border-casca-300' : 'border-barro-100'
             )}
           >

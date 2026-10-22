@@ -7,13 +7,13 @@ export async function CartaoDivulgacao({ urlPublica, nomeNegocio }: { urlPublica
   const qrCodeDataUrl = await QRCode.toDataURL(urlPublica, {
     margin: 1,
     width: 220,
-    color: { dark: '#7c2d12', light: '#ffffff' },
+    color: { dark: '#0E4D3A', light: '#ffffff' },
   })
 
   const mensagemCompartilhamento = `Conheça o ${nomeNegocio} no Tanguá App! ${urlPublica}`
 
   return (
-    <div className="mt-8 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+    <div className="mt-8 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
       <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-barro-900">
         <Share2 className="h-5 w-5 text-casca-500" />
         Divulgue seu negócio
@@ -60,7 +60,7 @@ export async function CartaoDivulgacao({ urlPublica, nomeNegocio }: { urlPublica
             >
               <button
                 type="button"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-mata-500 px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-mata-600"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-serra px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-serra"
               >
                 Compartilhar no WhatsApp
               </button>

@@ -6,9 +6,9 @@ export function CartaoIndicacao({ codigoConvite, totalIndicados }: { codigoConvi
   const mensagem = `Entra no Tanguá App! É o app da nossa cidade — profissionais, vagas e avisos de Tanguá num só lugar. ${urlConvite}`
 
   return (
-    <div className="rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+    <div className="rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
       <h2 className="flex items-center gap-2.5 font-display text-lg font-semibold text-barro-900">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-mata-600 text-white">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-serra text-white">
           <Users className="h-4 w-4" />
         </span>
         Indique um vizinho
@@ -27,7 +27,7 @@ export function CartaoIndicacao({ codigoConvite, totalIndicados }: { codigoConvi
           <a href={`https://wa.me/?text=${encodeURIComponent(mensagem)}`} target="_blank" rel="noopener noreferrer">
             <button
               type="button"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-mata-500 px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-mata-600"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-serra px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-serra"
             >
               Compartilhar no WhatsApp
             </button>

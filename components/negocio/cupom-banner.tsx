@@ -17,7 +17,7 @@ export function CupomBanner({ cupom, logado, codigoExistente }: { cupom: Cupom; 
         <div className="min-w-0 flex-1">
           <p className="font-semibold text-casca-800">
             {cupom.titulo} — {cupom.desconto_texto}
-            {pct !== null && <span className="ml-2 rounded-full bg-casca-700 px-2 py-0.5 text-xs font-bold text-white">-{pct}%</span>}
+            {pct !== null && <span className="ml-2 rounded-full bg-laranja px-2 py-0.5 text-xs font-bold text-tinta">-{pct}%</span>}
           </p>
           {cupom.preco_original_centavos !== null && cupom.preco_promocional_centavos !== null && (
             <p className="text-sm text-barro-700">

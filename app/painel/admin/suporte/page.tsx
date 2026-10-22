@@ -42,7 +42,7 @@ export default async function PaginaAdminSuporte({ searchParams }: { searchParam
             key={f}
             href={`?filtro=${f}`}
             aria-current={f === filtro ? 'page' : undefined}
-            className={cn('rounded-full px-3 py-1 text-sm font-medium', f === filtro ? 'bg-casca-100 text-casca-800' : 'bg-white text-barro-600')}
+            className={cn('rounded-full px-3 py-1 text-sm font-medium', f === filtro ? 'bg-casca-100 text-casca-800' : 'bg-superficie text-barro-600')}
           >
             {rotulo}
           </Link>
@@ -57,7 +57,7 @@ export default async function PaginaAdminSuporte({ searchParams }: { searchParam
             <li key={c.id}>
               <Link
                 href={`/painel/admin/suporte/${c.id}`}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-barro-100 bg-white p-4 hover:border-casca-300"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-barro-100 bg-superficie p-4 hover:border-casca-300"
               >
                 <span>
                   <span className="block font-semibold text-barro-900">{c.assunto}</span>

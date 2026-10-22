@@ -16,7 +16,7 @@ function Cartao({ rotulo, valor, detalhe, href, alerta }: { rotulo: string; valo
       {detalhe && <p className="mt-1 text-xs text-barro-400">{detalhe}</p>}
     </>
   )
-  const classe = cn('rounded-xl border bg-white p-4', alerta ? 'border-red-200' : 'border-barro-100')
+  const classe = cn('rounded-xl border bg-superficie p-4', alerta ? 'border-red-200' : 'border-barro-100')
   return href ? (
     <Link href={href} className={cn(classe, 'transition-shadow hover:shadow-feira')}>
       {conteudo}
@@ -61,7 +61,7 @@ export default async function PainelAdminVisaoGeral({ searchParams }: { searchPa
           <h1 className="font-display text-3xl font-semibold tracking-tight text-barro-900">Visão geral</h1>
           <p className="text-barro-600">Operação do Tanguá App — números calculados direto do banco.</p>
         </div>
-        <nav aria-label="Período" className="flex gap-1 rounded-xl bg-white p-1 shadow-sm">
+        <nav aria-label="Período" className="flex gap-1 rounded-xl bg-superficie p-1 shadow-sm">
           {PERIODOS.map((p) => (
             <Link
               key={p}
@@ -104,7 +104,7 @@ export default async function PainelAdminVisaoGeral({ searchParams }: { searchPa
       </Secao>
 
       {Object.keys(receita.porPlano).length > 0 && (
-        <div className="mt-3 overflow-x-auto rounded-xl border border-barro-100 bg-white p-4">
+        <div className="mt-3 overflow-x-auto rounded-xl border border-barro-100 bg-superficie p-4">
           <table className="w-full text-left text-sm">
             <caption className="mb-2 text-left font-medium text-barro-700">Assinaturas por plano e situação</caption>
             <thead className="text-barro-500">
@@ -143,7 +143,7 @@ export default async function PainelAdminVisaoGeral({ searchParams }: { searchPa
         />
       </Secao>
 
-      <section className="mt-6 rounded-xl border border-barro-100 bg-white p-4" aria-label="Integrações">
+      <section className="mt-6 rounded-xl border border-barro-100 bg-superficie p-4" aria-label="Integrações">
         <h3 className="font-semibold text-barro-800">Integrações configuradas</h3>
         <ul className="mt-2 space-y-1.5 text-sm">
           {integracoes.map(([nome, ok, detalhe]) => (
@@ -162,7 +162,7 @@ export default async function PainelAdminVisaoGeral({ searchParams }: { searchPa
       </section>
 
       {saude.errosRecentes.length > 0 && (
-        <section className="mt-6 rounded-xl border border-red-100 bg-white p-4" aria-label="Erros recentes">
+        <section className="mt-6 rounded-xl border border-red-100 bg-superficie p-4" aria-label="Erros recentes">
           <h3 className="flex items-center gap-2 font-semibold text-barro-800">
             <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" /> Erros recentes
           </h3>

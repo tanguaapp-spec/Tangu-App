@@ -12,7 +12,7 @@ export default function CarregandoMural() {
       </div>
       <div className="mt-8 grid gap-5 sm:grid-cols-2">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-casca border border-barro-100 bg-white p-5">
+          <div key={i} className="rounded-casca border border-barro-100 bg-superficie p-5">
             <div className="flex items-center gap-2">
               <Skeleton className="h-9 w-9 rounded-xl" />
               <Skeleton className="h-4 w-20" />

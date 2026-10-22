@@ -26,13 +26,13 @@ export default async function PaginaMeusChamados() {
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h1 className="font-display text-3xl font-semibold tracking-tight text-barro-900">Meus chamados</h1>
-        <Link href="/ajuda/contato" className="rounded-lg bg-casca-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-casca-800">
+        <Link href="/ajuda/contato" className="rounded-lg bg-laranja px-3 py-1.5 text-sm font-semibold text-tinta hover:bg-laranja-claro">
           Novo chamado
         </Link>
       </div>
 
       {!chamados || chamados.length === 0 ? (
-        <p className="mt-8 rounded-xl bg-white p-6 text-center text-barro-600">
+        <p className="mt-8 rounded-xl bg-superficie p-6 text-center text-barro-600">
           Você ainda não abriu nenhum chamado.{' '}
           <Link href="/ajuda" className="font-semibold text-casca-700 underline">
             Veja a central de ajuda
@@ -43,7 +43,7 @@ export default async function PaginaMeusChamados() {
         <ul className="mt-6 space-y-2">
           {chamados.map((c) => (
             <li key={c.id}>
-              <Link href={`/ajuda/chamados/${c.id}`} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-barro-100 bg-white p-4 hover:border-casca-300">
+              <Link href={`/ajuda/chamados/${c.id}`} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-barro-100 bg-superficie p-4 hover:border-casca-300">
                 <span>
                   <span className="block font-semibold text-barro-900">{c.assunto}</span>
                   <span className="text-xs text-barro-500">

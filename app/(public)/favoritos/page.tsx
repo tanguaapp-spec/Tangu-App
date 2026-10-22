@@ -11,7 +11,7 @@ export default async function PaginaFavoritos() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    redirect('/entrar')
+    redirect('/entrar?next=/favoritos')
   }
 
   const favoritos = await buscarFavoritosUsuario()

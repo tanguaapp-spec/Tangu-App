@@ -1,10 +1,12 @@
+@import './tema.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-display: 'Fraunces', serif;
-  --font-body: 'Inter', sans-serif;
+  --font-display: 'Familjen Grotesk', system-ui, sans-serif;
+  --font-body: 'Figtree', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
@@ -14,13 +16,23 @@
   }
 
   body {
-    background-color: #FBF4E9;
-    color: #2E2219;
+    background-color: rgb(var(--fundo));
+    color: rgb(var(--barro-900));
+  }
+
+  /* títulos na fonte da marca, com o leve aperto de letra da identidade */
+  .font-display {
+    letter-spacing: -0.02em;
+  }
+
+  /* troca de tema sem transição piscando em tudo */
+  html.trocando-tema *, html.trocando-tema *::before, html.trocando-tema *::after {
+    transition: none !important;
   }
 
   /* foco visível para navegação por teclado — acessibilidade */
   :focus-visible {
-    outline: 3px solid #EF7A1A;
+    outline: 3px solid rgb(var(--laranja));
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -39,7 +51,7 @@
   /* textura sutil de "papel de feira" usada em seções de destaque */
   .textura-papel {
     background-image:
-      radial-gradient(circle at 1px 1px, rgba(74, 55, 42, 0.04) 1px, transparent 0);
+      radial-gradient(circle at 1px 1px, rgb(var(--barro-900) / 0.05) 1px, transparent 0);
     background-size: 18px 18px;
   }
 
@@ -55,8 +67,8 @@
     height: 4px;
     background: repeating-linear-gradient(
       90deg,
-      #EF7A1A 0px,
-      #EF7A1A 12px,
+      rgb(var(--laranja)) 0px,
+      rgb(var(--laranja)) 12px,
       transparent 12px,
       transparent 20px
     );

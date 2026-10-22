@@ -3,7 +3,7 @@ import { FormularioEntrar } from '@/components/auth/formulario-entrar'
 
 export default function PaginaEntrar({ searchParams }: { searchParams: { erro?: string; next?: string } }) {
   return (
-    <div className="rounded-casca border border-barro-100 bg-white p-8 shadow-feira-lg">
+    <div className="rounded-casca border border-barro-100 bg-superficie p-8 shadow-feira-lg">
       <h1 className="font-display text-2xl font-semibold text-barro-900">Entrar</h1>
       <p className="mt-1 text-sm text-barro-600">Acesse sua conta para favoritar, avaliar e gerenciar seu negócio.</p>
 

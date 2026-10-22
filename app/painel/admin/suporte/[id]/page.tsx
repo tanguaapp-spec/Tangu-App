@@ -45,7 +45,7 @@ export default async function PaginaAdminChamado({ params }: { params: { id: str
         <Selo tom={STATUS_CHAMADO[chamado.status]?.tom ?? 'neutro'}>{STATUS_CHAMADO[chamado.status]?.rotulo ?? chamado.status}</Selo>
       </div>
 
-      <dl className="mt-4 grid gap-2 rounded-xl border border-barro-100 bg-white p-4 text-sm sm:grid-cols-2">
+      <dl className="mt-4 grid gap-2 rounded-xl border border-barro-100 bg-superficie p-4 text-sm sm:grid-cols-2">
         <div>
           <dt className="text-barro-500">Pessoa</dt>
           <dd className="text-barro-900">
@@ -91,7 +91,7 @@ export default async function PaginaAdminChamado({ params }: { params: { id: str
         <ConversaChamado mensagens={(mensagens ?? []) as MensagemChamado[]} visaoSuporte />
       </div>
 
-      <section className="mt-6 rounded-casca border border-barro-100 bg-white p-5" aria-label="Responder">
+      <section className="mt-6 rounded-casca border border-barro-100 bg-superficie p-5" aria-label="Responder">
         <FormularioAcao acao={responder} rotuloBotao="Enviar">
           <label htmlFor="corpo" className="text-sm font-medium text-barro-800">
             Resposta (a pessoa recebe aviso no app)

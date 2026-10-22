@@ -11,11 +11,11 @@ export function CardNegocio({ negocio, indice = 0 }: { negocio: Negocio; indice?
   const IconeCategoria = iconeCategoria(negocio.categoria?.icone)
   return (
     <div
-      className="entrada-lista group relative overflow-hidden rounded-casca border border-barro-100 bg-white shadow-feira transition-all duration-300 hover:-translate-y-1.5 hover:shadow-feira-lg"
+      className="entrada-lista group relative overflow-hidden rounded-casca border border-barro-100 bg-superficie shadow-feira transition-all duration-300 hover:-translate-y-1.5 hover:shadow-feira-lg"
       style={{ '--i': Math.min(indice, 8) } as React.CSSProperties}
     >
       {negocio.destaque_ativo && (
-        <span className="absolute left-3 top-3 z-10 rounded-full bg-casca-700 px-2.5 py-1 text-xs font-bold text-white">
+        <span className="absolute left-3 top-3 z-10 rounded-full bg-laranja px-2.5 py-1 text-xs font-bold text-tinta">
           Destaque
         </span>
       )}
@@ -77,7 +77,7 @@ export function CardNegocio({ negocio, indice = 0 }: { negocio: Negocio; indice?
             negocioId={negocio.id}
             whatsapp={negocio.whatsapp}
             mensagem="Olá! Vi seu perfil no Tanguá App."
-            className="group/wpp mt-4 flex items-center justify-center gap-2 rounded-xl bg-mata-500 py-2.5 text-sm font-semibold text-white transition-all hover:bg-mata-600 active:scale-[0.97]"
+            className="group/wpp mt-4 flex items-center justify-center gap-2 rounded-xl bg-serra py-2.5 text-sm font-semibold text-white transition-all hover:bg-serra active:scale-[0.97]"
           >
             <MessageCircle className="h-4 w-4 transition-transform group-hover/wpp:rotate-12" />
             Chamar no WhatsApp

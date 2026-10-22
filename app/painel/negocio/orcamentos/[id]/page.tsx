@@ -51,7 +51,7 @@ export default async function PaginaPedidoRecebido({ params }: { params: { id: s
         {primeiroNome}
         {pedido.bairro ? ` · ${pedido.bairro}` : ''} · {new Date(pedido.criado_em).toLocaleDateString('pt-BR')}
       </p>
-      <p className="mt-4 whitespace-pre-wrap rounded-xl bg-white p-4 text-barro-800">{pedido.descricao}</p>
+      <p className="mt-4 whitespace-pre-wrap rounded-xl bg-superficie p-4 text-barro-800">{pedido.descricao}</p>
 
       {(minhas ?? []).length > 0 && (
         <section className="mt-6" aria-label="Suas respostas">
@@ -72,7 +72,7 @@ export default async function PaginaPedidoRecebido({ params }: { params: { id: s
       )}
 
       {aberto ? (
-        <section className="mt-6 rounded-casca border border-barro-100 bg-white p-5" aria-label="Responder">
+        <section className="mt-6 rounded-casca border border-barro-100 bg-superficie p-5" aria-label="Responder">
           <FormularioAcao acao={responder} rotuloBotao="Enviar resposta">
             <label htmlFor="mensagem" className="text-sm font-medium text-barro-800">
               Sua resposta

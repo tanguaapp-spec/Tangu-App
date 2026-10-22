@@ -74,6 +74,25 @@ Relatório de cada execução vai para `registros_auditoria` (`cron.assinaturas`
   clientes: ciclo completo em sandbox (assinar → aprovar → recusar → cancelar), conferindo
   `/painel/admin/assinaturas`.
 
+## Diagnóstico
+
+`npx tsx scripts/testar-mercadopago.ts` — valida o token, cria uma assinatura **pendente** de R$ 1,00
+(nada é cobrado), lê, **cancela na hora**, confere o HMAC com o segredo do `.env` e que a rota do
+webhook está publicada e recusa requisição forjada. Rodado com sucesso em 22/10/2026 com as
+credenciais de produção (conta MLB).
+
+## Primeira cobrança real (fazer uma vez antes de divulgar)
+
+1. Mercado Pago → Suas integrações → Webhooks → **Simular notificação** (evento *Planos e
+   assinaturas*). Em /painel/admin/assinaturas#webhooks deve aparecer "assinatura HMAC: válida".
+   Se aparecer "inválida", o segredo na Vercel está diferente do painel do MP.
+2. Em /painel/admin/planos, crie temporariamente um plano `teste` de R$ 1,00 (ativo).
+3. Com uma conta de lojista sua, assine esse plano pagando com Pix/cartão de verdade.
+4. Confira: assinatura passa a **ativa** sozinha (webhook), pagamento aparece em "Histórico", o
+   painel do proprietário mostra a receita confirmada.
+5. Cancele pelo painel do lojista, confira "cancelada", desative o plano `teste` e, se quiser,
+   estorne o R$ 1,00 pelo painel do Mercado Pago (o estorno também deve chegar pelo webhook).
+
 ## Pontos para confirmar com o Mercado Pago na sua conta
 
 - Se `payment.external_reference` herda o da assinatura (o código também procura pelo

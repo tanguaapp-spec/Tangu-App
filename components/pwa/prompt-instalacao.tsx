@@ -72,23 +72,24 @@ export function PromptInstalacao() {
 
   return (
     <div className="fixed inset-x-3 bottom-[calc(76px+env(safe-area-inset-bottom))] z-30 md:hidden">
-      <div className="flex items-center gap-3 rounded-2xl bg-barro-900 p-3.5 text-white shadow-feira-lg">
-        <LogoTangua className="h-10 w-10 shrink-0" />
+      <div className="flex items-center gap-3 rounded-2xl bg-serra-escuro p-3.5 text-white shadow-feira-lg">
+        <LogoTangua variante="sobre-escuro" className="h-10 w-10 shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold">Instale o Tanguá App</p>
           {mostrarIOS ? (
-            <p className="mt-0.5 flex items-center gap-1 text-xs text-barro-200">
-              Toque em <Share className="h-3 w-3 shrink-0" /> e depois em &ldquo;Adicionar à Tela de Início&rdquo;
+            <p className="mt-0.5 text-xs text-white/80">
+              Toque em <Share className="inline h-3 w-3 align-[-1px]" aria-label="Compartilhar" /> e depois em
+              &ldquo;Adicionar à Tela de Início&rdquo;
             </p>
           ) : (
-            <p className="mt-0.5 text-xs text-barro-200">Acesso rápido, direto da tela inicial</p>
+            <p className="mt-0.5 text-xs text-white/80">Acesso rápido, direto da tela inicial</p>
           )}
         </div>
         {!mostrarIOS && (
           <button
             type="button"
             onClick={instalar}
-            className="flex shrink-0 items-center gap-1.5 rounded-xl bg-casca-500 px-3 py-2 text-xs font-semibold"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl bg-laranja px-3 py-2 text-xs font-semibold text-tinta"
           >
             <Download className="h-3.5 w-3.5" /> Instalar
           </button>
@@ -97,7 +98,7 @@ export function PromptInstalacao() {
           type="button"
           onClick={dispensar}
           aria-label="Dispensar"
-          className="shrink-0 rounded-full p-1.5 text-barro-300 hover:bg-white/10"
+          className="shrink-0 rounded-full p-1.5 text-white/70 hover:bg-white/10"
         >
           <X className="h-4 w-4" />
         </button>

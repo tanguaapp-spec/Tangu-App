@@ -8,7 +8,7 @@ import { ArrowLeft, Store } from 'lucide-react'
 export default async function CadastrarNegocioPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/entrar')
+  if (!user) redirect('/entrar?next=/painel/negocio/cadastrar')
 
   const { data: existente } = await supabase
     .from('negocios')
@@ -39,7 +39,7 @@ export default async function CadastrarNegocioPage() {
         </div>
       </div>
 
-      <div className="mt-6 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <div className="mt-6 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         <FormularioCadastrarNegocio categorias={categorias as any} />
       </div>
     </div>

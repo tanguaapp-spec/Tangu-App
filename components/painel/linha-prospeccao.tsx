@@ -38,7 +38,7 @@ export function LinhaProspeccao({ prospeccao }: { prospeccao: ProspeccaoNegocio 
   const mensagemConvite = `Olá! Aqui é da equipe do Tanguá App 🍊. Vi o "${prospeccao.nome}" no Google Maps e queria convidar vocês a criarem um perfil gratuito no nosso diretório de profissionais e comércios de Tanguá. Posso te contar mais?`
 
   return (
-    <div className="rounded-casca border border-barro-100 bg-white p-4 shadow-feira">
+    <div className="rounded-casca border border-barro-100 bg-superficie p-4 shadow-feira">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">

@@ -25,7 +25,8 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { LogoTangua } from '@/components/marca/logo-tangua'
+import { MarcaTangua } from '@/components/marca/logo-tangua'
+import { SeletorTema } from '@/components/tema/seletor-tema'
 import type { PapelUsuario } from '@/lib/types/database'
 
 type LinkPainel = { href: string; rotulo: string; icone: LucideIcon }
@@ -91,10 +92,10 @@ export function NavPainel({
   return (
     <>
       {/* barra mobile — some no desktop */}
-      <header className="flex items-center justify-between border-b border-barro-100 bg-white px-4 py-3 sm:hidden">
+      <header className="flex items-center justify-between border-b border-barro-100 bg-superficie px-4 py-3 sm:hidden">
         <Link href="/" className="flex items-center gap-2">
-          <LogoTangua className="h-8 w-8" />
-          <span className="font-display text-lg font-semibold text-barro-900">Painel</span>
+          <MarcaTangua tamanho="sm" className="text-mata-700" />
+          <span className="rounded-full border border-barro-200 px-2 py-0.5 text-xs font-semibold text-barro-600">painel</span>
         </Link>
         <button
           aria-label={aberto ? 'Fechar menu' : 'Abrir menu'}
@@ -107,8 +108,11 @@ export function NavPainel({
 
       {/* menu mobile — slide-down */}
       {aberto && (
-        <nav className="flex flex-col gap-1 border-b border-barro-100 bg-white px-4 py-3 sm:hidden">
+        <nav className="flex flex-col gap-1 border-b border-barro-100 bg-superficie px-4 py-3 sm:hidden">
           {links.map((link) => itemNav(link, () => setAberto(false)))}
+          <div className="py-2">
+            <SeletorTema />
+          </div>
           <form action={acaoSair}>
             <button className="mt-1 flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-barro-500 hover:bg-barro-100 hover:text-red-600">
               <LogOut className="h-4 w-4" /> Sair
@@ -118,13 +122,17 @@ export function NavPainel({
       )}
 
       {/* barra lateral — só no desktop */}
-      <aside className="relative hidden w-64 shrink-0 border-r border-barro-100 bg-white p-5 sm:block">
+      <aside className="relative hidden w-64 shrink-0 border-r border-barro-100 bg-superficie p-5 sm:block">
         <Link href="/" className="flex items-center gap-2">
-          <LogoTangua className="h-8 w-8" />
-          <span className="font-display text-lg font-semibold text-barro-900">Painel</span>
+          <MarcaTangua tamanho="sm" className="text-mata-700" />
+          <span className="rounded-full border border-barro-200 px-2 py-0.5 text-xs font-semibold text-barro-600">painel</span>
         </Link>
 
         <nav className="mt-8 flex flex-col gap-1">{links.map((link) => itemNav(link))}</nav>
+
+        <div className="mt-6">
+          <SeletorTema />
+        </div>
 
         <form action={acaoSair} className="absolute bottom-5 left-5">
           <button className="flex items-center gap-2 text-sm text-barro-500 hover:text-red-600">

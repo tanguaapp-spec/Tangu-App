@@ -9,10 +9,10 @@ interface BotaoProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantes = {
-  // casca-700 (não casca-500) por contraste: texto branco em casca-500 fica em 2.81:1,
-  // abaixo do mínimo AA (4.5:1) do WCAG. casca-700 passa com folga (5.46:1).
-  primario: 'bg-casca-700 text-white hover:bg-casca-800 active:bg-casca-900 shadow-feira',
-  secundario: 'bg-mata-500 text-white hover:bg-mata-600 active:bg-mata-700',
+  // laranja da marca com texto TINTA (branco no laranja fica em ~3:1, reprova
+  // no WCAG). Contraste dos dois temas coberto em lib/tema/paleta.test.ts.
+  primario: 'bg-laranja text-tinta hover:bg-laranja-claro active:bg-laranja shadow-feira',
+  secundario: 'bg-serra text-white hover:bg-serra-escuro active:bg-serra-escuro',
   fantasma: 'bg-transparent text-barro-800 hover:bg-barro-100 border border-barro-300',
   perigo: 'bg-red-600 text-white hover:bg-red-700',
 }

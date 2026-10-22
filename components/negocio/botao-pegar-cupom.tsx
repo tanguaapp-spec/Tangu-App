@@ -30,7 +30,7 @@ export function BotaoPegarCupom({
 
   if (codigo) {
     return (
-      <div className="flex flex-wrap items-center gap-4 rounded-xl bg-white p-3" role="status">
+      <div className="flex flex-wrap items-center gap-4 rounded-xl bg-superficie p-3" role="status">
         {/* data: URL gerada no navegador — next/image não otimiza isso */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {qr && <img src={qr} alt={`QR do cupom ${codigo}`} width={96} height={96} className="rounded" />}

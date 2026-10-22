@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function CarregandoPerfil() {
   return (
     <div className="mx-auto max-w-3xl pb-10">
-      <div className="rounded-b-[28px] bg-barro-900 px-4 pb-6 pt-3 sm:px-6">
+      <div className="rounded-b-[28px] bg-serra-escuro px-4 pb-6 pt-3 sm:px-6">
         <div className="flex items-center gap-3">
           <Skeleton className="h-14 w-14 rounded-2xl bg-white/15" />
           <div className="space-y-2">

@@ -30,7 +30,7 @@ export default async function PaginaBemVindo() {
         </Link>{' '}
         agora mesmo.
       </p>
-      <div className="mt-8 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <div className="mt-8 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         <AssistenteBoasVindas categorias={categorias as Categoria[]} bairroAtual={perfil?.bairro ?? null} />
       </div>
       <p className="mt-6 text-sm text-barro-600">

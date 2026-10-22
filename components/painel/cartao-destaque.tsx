@@ -33,7 +33,7 @@ export function CartaoDestaque({
           </p>
           <Link
             href="/painel/negocio/assinatura"
-            className="mt-4 inline-flex rounded-lg bg-casca-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-casca-800"
+            className="mt-4 inline-flex rounded-lg bg-laranja px-3 py-1.5 text-sm font-semibold text-tinta hover:bg-laranja-claro"
           >
             Ver planos
           </Link>

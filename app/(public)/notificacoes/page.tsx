@@ -52,7 +52,7 @@ export default async function PaginaNotificacoes() {
           <p className="mt-2">Nada por aqui ainda. Favorite negócios pra saber das novidades e ofertas deles.</p>
         </div>
       ) : (
-        <ul className="mt-6 divide-y divide-barro-100 rounded-xl border border-barro-100 bg-white">
+        <ul className="mt-6 divide-y divide-barro-100 rounded-xl border border-barro-100 bg-superficie">
           {notificacoes.map((n) => {
             const conteudo = (
               <>

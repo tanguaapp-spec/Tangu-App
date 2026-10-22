@@ -167,7 +167,7 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
           </div>
         )}
         <div className="absolute right-3 top-3 flex gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-feira">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-superficie/90 shadow-feira">
             <BotaoCompartilhar
               titulo={negocio.nome}
               texto={`Confira ${negocio.nome} no Tanguá App`}
@@ -178,7 +178,7 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
             />
           </span>
           {user && (
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-feira">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-superficie/90 shadow-feira">
               <BotaoFavoritar negocioId={params.id} initialIsFavorito={isFav} />
             </span>
           )}
@@ -285,7 +285,7 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
           {produtos && produtos.length > 0 && (
             <div className="mt-8">
               <h3 className="font-display text-xl font-semibold text-barro-900">Catálogo</h3>
-              <div className="mt-3 divide-y divide-barro-100 rounded-xl border border-barro-100 bg-white">
+              <div className="mt-3 divide-y divide-barro-100 rounded-xl border border-barro-100 bg-superficie">
                 {produtos.map((produto) => (
                   <div key={produto.id} className="flex items-start justify-between gap-3 p-4">
                     <div>
@@ -309,7 +309,7 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
               <h3 className="font-display text-xl font-semibold text-barro-900">Novidades</h3>
               <div className="mt-3 space-y-3">
                 {posts.map((post) => (
-                  <div key={post.id} className="rounded-xl border border-barro-100 bg-white p-4">
+                  <div key={post.id} className="rounded-xl border border-barro-100 bg-superficie p-4">
                     <Selo tom={post.tipo === 'promocao' ? 'laranja' : 'verde'}>
                       {post.tipo === 'promocao' ? 'Promoção' : post.tipo === 'vaga_propria' ? 'Vaga' : 'Novidade'}
                     </Selo>
@@ -332,7 +332,7 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
             ) : (
               <div className="mt-3 space-y-3">
                 {avaliacoes.map((av: any) => (
-                  <div key={av.id} className="rounded-xl border border-barro-100 bg-white p-4">
+                  <div key={av.id} className="rounded-xl border border-barro-100 bg-superficie p-4">
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-barro-800">{av.autor?.nome_completo}</span>
                       <span className="flex items-center gap-1 text-casca-500">
@@ -367,13 +367,13 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
 
         {/* Sidebar de contato */}
         <aside className="space-y-3">
-          <div className="rounded-casca border border-barro-100 bg-white p-5 shadow-feira">
+          <div className="rounded-casca border border-barro-100 bg-superficie p-5 shadow-feira">
             {negocio.whatsapp && (
               <BotaoWhatsapp
                 negocioId={negocio.id}
                 whatsapp={negocio.whatsapp}
                 mensagem="Olá! Vi seu perfil no Tanguá App."
-                className="flex items-center justify-center gap-2 rounded-xl bg-mata-500 py-3 font-semibold text-white transition-colors hover:bg-mata-600"
+                className="flex items-center justify-center gap-2 rounded-xl bg-serra py-3 font-semibold text-white transition-colors hover:bg-serra"
               >
                 <MessageCircle className="h-5 w-5" /> Chamar no WhatsApp
               </BotaoWhatsapp>
@@ -417,7 +417,7 @@ export default async function PaginaNegocio({ params }: { params: { id: string }
           </div>
 
           {cartaoFidelidade && (
-            <div className="rounded-casca border border-barro-100 bg-white p-4 shadow-feira">
+            <div className="rounded-casca border border-barro-100 bg-superficie p-4 shadow-feira">
               <p className="text-sm font-semibold text-barro-800">Seu cartão fidelidade</p>
               <div className="mt-2 flex gap-1">
                 {Array.from({ length: cartaoFidelidade.meta }).map((_, i) => (

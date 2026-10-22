@@ -45,7 +45,7 @@ export function CartaoFerramentaParceira({ categoriaSlug }: { categoriaSlug: str
 
   if (!sugestao) {
     return (
-      <div className="mt-8 rounded-casca border border-dashed border-barro-200 bg-white p-5 text-center">
+      <div className="mt-8 rounded-casca border border-dashed border-barro-200 bg-superficie p-5 text-center">
         <p className="text-sm text-barro-500">
           Temos outras ferramentas que podem ajudar seu negócio a crescer.{' '}
           <Link href="/ferramentas" className="font-medium text-casca-600 hover:underline">

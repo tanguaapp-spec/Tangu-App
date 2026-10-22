@@ -31,7 +31,7 @@ export function BotaoFavoritar({ negocioId, initialIsFavorito }: Props) {
       aria-pressed={isFavorito}
       title={isFavorito ? 'Remover dos favoritos' : 'Favoritar'}
       data-testid="botao-favoritar"
-      className="p-2 rounded-full hover:bg-white/50 transition-colors"
+      className="p-2 rounded-full hover:bg-superficie/50 transition-colors"
     >
       <Heart
         className={`w-5 h-5 ${

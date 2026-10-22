@@ -33,7 +33,7 @@ export function ResponderChamado({ chamadoId, fechado }: { chamadoId: string; fe
         <label htmlFor="corpo" className="text-sm font-medium text-barro-800">
           Responder
         </label>
-        <textarea id="corpo" name="corpo" required maxLength={4000} rows={3} className="w-full rounded-xl border border-barro-300 bg-white px-4 py-2.5 text-barro-900" />
+        <textarea id="corpo" name="corpo" required maxLength={4000} rows={3} className="w-full rounded-xl border border-barro-300 bg-superficie px-4 py-2.5 text-barro-900" />
         {erro && (
           <p role="alert" className="text-sm text-red-600">
             {erro}

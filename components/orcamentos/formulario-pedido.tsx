@@ -51,7 +51,7 @@ export function FormularioPedido({
               id="categoria_id"
               name="categoria_id"
               required
-              className="w-full rounded-xl border border-barro-300 bg-white px-4 py-2.5 text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
+              className="w-full rounded-xl border border-barro-300 bg-superficie px-4 py-2.5 text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
             >
               <option value="">Selecione...</option>
               {categorias.map((c) => (

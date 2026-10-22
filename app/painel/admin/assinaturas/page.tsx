@@ -56,7 +56,7 @@ export default async function PaginaAdminAssinaturas() {
         <h2 id="t-assinaturas" className="font-display text-lg font-semibold text-barro-900">
           Assinaturas (últimas 100)
         </h2>
-        <div className="mt-2 overflow-x-auto rounded-xl border border-barro-100 bg-white">
+        <div className="mt-2 overflow-x-auto rounded-xl border border-barro-100 bg-superficie">
           <table className="w-full text-left text-sm">
             <thead className="bg-barro-50 text-barro-600">
               <tr>
@@ -97,7 +97,7 @@ export default async function PaginaAdminAssinaturas() {
         <h2 id="t-pagamentos" className="font-display text-lg font-semibold text-barro-900">
           Pagamentos (últimos 100)
         </h2>
-        <div className="mt-2 overflow-x-auto rounded-xl border border-barro-100 bg-white">
+        <div className="mt-2 overflow-x-auto rounded-xl border border-barro-100 bg-superficie">
           <table className="w-full text-left text-sm">
             <thead className="bg-barro-50 text-barro-600">
               <tr>
@@ -137,7 +137,7 @@ export default async function PaginaAdminAssinaturas() {
           Webhooks recebidos (últimos 50)
         </h2>
         <p className="text-sm text-barro-500">Falhas são reprocessadas pelo cron diário (até 5 tentativas). Assinatura inválida = ignorado e registrado.</p>
-        <div className="mt-2 overflow-x-auto rounded-xl border border-barro-100 bg-white">
+        <div className="mt-2 overflow-x-auto rounded-xl border border-barro-100 bg-superficie">
           <table className="w-full text-left text-sm">
             <thead className="bg-barro-50 text-barro-600">
               <tr>

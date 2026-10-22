@@ -8,7 +8,8 @@ import { Botao } from '@/components/ui/botao'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { SinoNotificacoes } from '@/components/notificacoes/sino-notificacoes'
-import { LogoTangua } from '@/components/marca/logo-tangua'
+import { MarcaTangua } from '@/components/marca/logo-tangua'
+import { SeletorTema } from '@/components/tema/seletor-tema'
 import type { Perfil } from '@/lib/types/database'
 
 const linksNav = [
@@ -92,21 +93,21 @@ export function Cabecalho() {
   return (
     <header
       className={cn(
-        'casca-divisor sticky top-0 z-50 overflow-hidden border-b border-black/10 bg-barro-900 transition-transform duration-300 md:translate-y-0 md:overflow-visible md:border-barro-100 md:bg-feira/95 md:backdrop-blur-sm',
+        'sticky top-0 z-50 overflow-hidden border-b border-black/10 bg-serra-escuro transition-transform duration-300 md:translate-y-0 md:overflow-visible md:border-barro-100 md:bg-feira/95 md:backdrop-blur-sm',
         escondido ? '-translate-y-full' : 'translate-y-0'
       )}
     >
       {/* brilho decorativo — só no cabeçalho escuro do mobile */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-10 -top-16 h-40 w-40 rounded-full bg-casca-500 opacity-25 blur-2xl md:hidden"
+        className="pointer-events-none absolute -right-10 -top-16 h-40 w-40 rounded-full bg-mata-400 opacity-20 blur-2xl md:hidden"
       />
       <div className="relative mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
         <Link href="/" className="group flex items-center gap-2">
-          <LogoTangua className="h-9 w-9 transition-transform group-hover:rotate-12" />
-          <span className="font-display text-xl font-semibold text-white md:text-barro-900">
-            Tanguá <span className="text-casca-400 md:text-casca-500">App</span>
-          </span>
+          {/* fundo verde no celular, claro/escuro no desktop: cada um com a variante certa */}
+          <MarcaTangua variante="sobre-escuro" className="text-white md:hidden" />
+          <MarcaTangua className="hidden text-mata-700 md:inline-flex" />
+          <span className="sr-only">Tanguá App — página inicial</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -129,6 +130,7 @@ export function Cabecalho() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
+          <SeletorTema compacto className="text-barro-700 hover:bg-barro-100" />
           {user ? (
             <>
               <SinoNotificacoes logado={!!user} />
@@ -167,6 +169,7 @@ export function Cabecalho() {
         </div>
 
         <div className="flex items-center gap-1 md:hidden">
+          <SeletorTema compacto className="text-white hover:bg-white/10" />
           {user && <SinoNotificacoes logado={!!user} tema="escuro" />}
           <button
             aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}

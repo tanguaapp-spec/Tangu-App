@@ -44,7 +44,7 @@ export function FormularioAvaliacao({ negocioId }: Props) {
   }
 
   return (
-    <form onSubmit={handleEnviar} className="mt-6 rounded-xl border border-barro-100 bg-white p-4">
+    <form onSubmit={handleEnviar} className="mt-6 rounded-xl border border-barro-100 bg-superficie p-4">
       <h4 className="font-semibold text-barro-900 mb-3">Deixe sua avaliação</h4>
 
       <div className="flex gap-1 mb-4">

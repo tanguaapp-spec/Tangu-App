@@ -6,7 +6,7 @@ import type { Plano } from '@/lib/queries/planos'
 
 export const dynamic = 'force-dynamic'
 
-const campo = 'w-full rounded-lg border border-barro-300 bg-white px-3 py-1.5 text-sm'
+const campo = 'w-full rounded-lg border border-barro-300 bg-superficie px-3 py-1.5 text-sm'
 
 function FormPlano({ plano }: { plano?: Plano }) {
   const novo = !plano
@@ -87,14 +87,14 @@ export default async function PaginaAdminPlanos() {
 
       <div className="mt-6 space-y-6">
         {planos.map((p) => (
-          <section key={p.id} className="rounded-casca border border-barro-100 bg-white p-5" aria-label={`Plano ${p.nome}`}>
+          <section key={p.id} className="rounded-casca border border-barro-100 bg-superficie p-5" aria-label={`Plano ${p.nome}`}>
             <h2 className="mb-3 font-display text-lg font-semibold text-barro-900">
               {p.nome} {!p.ativo && <span className="text-sm font-normal text-barro-500">(inativo)</span>}
             </h2>
             <FormPlano plano={p} />
           </section>
         ))}
-        <section className="rounded-casca border border-dashed border-barro-300 bg-white p-5" aria-label="Novo plano">
+        <section className="rounded-casca border border-dashed border-barro-300 bg-superficie p-5" aria-label="Novo plano">
           <h2 className="mb-3 font-display text-lg font-semibold text-barro-900">Novo plano</h2>
           <FormPlano />
         </section>

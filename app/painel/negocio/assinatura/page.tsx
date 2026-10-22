@@ -111,7 +111,7 @@ export default async function PaginaAssinatura({ searchParams }: { searchParams:
       )}
 
       {uso && (
-        <section className="mt-6 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+        <section className="mt-6 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
           <h2 className="font-display text-lg font-semibold text-barro-900">Seu consumo</h2>
           <div className="mt-3">
             <ResumoUsoPlano uso={uso} nomePlano={nomePlano(planoEfetivo)} />
@@ -160,7 +160,7 @@ export default async function PaginaAssinatura({ searchParams }: { searchParams:
       </section>
 
       {assinatura && assinatura.status !== 'cancelada' && (
-        <section className="mt-8 rounded-casca border border-barro-100 bg-white p-6">
+        <section className="mt-8 rounded-casca border border-barro-100 bg-superficie p-6">
           <h2 className="font-display text-lg font-semibold text-barro-900">Cancelamento</h2>
           <p className="mt-1 text-sm text-barro-600">Sem multa e sem precisar falar com ninguém.</p>
           <div className="mt-3">
@@ -169,7 +169,7 @@ export default async function PaginaAssinatura({ searchParams }: { searchParams:
         </section>
       )}
 
-      <section className="mt-8 rounded-casca border border-barro-100 bg-white p-6">
+      <section className="mt-8 rounded-casca border border-barro-100 bg-superficie p-6">
         <h2 className="font-display text-lg font-semibold text-barro-900">Histórico de pagamentos</h2>
         {pagamentos.length === 0 ? (
           <p className="mt-2 text-sm text-barro-500">Nenhum pagamento registrado ainda.</p>

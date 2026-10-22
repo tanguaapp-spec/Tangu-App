@@ -9,6 +9,7 @@ import { SaldoLaranjas } from '@/components/perfil/saldo-laranjas'
 import { CartoesFidelidade } from '@/components/perfil/cartoes-fidelidade'
 import { PreferenciasComunicacao } from '@/components/perfil/preferencias-comunicacao'
 import { PrivacidadeDados } from '@/components/perfil/privacidade-dados'
+import { SeletorTema } from '@/components/tema/seletor-tema'
 import Link from 'next/link'
 import { buscarSaldoLaranjas } from '@/lib/gamificacao/pontos'
 import { buscarCartoesFidelidadeDoUsuario } from '@/lib/queries/negocios'
@@ -18,10 +19,10 @@ export const dynamic = 'force-dynamic'
 export default async function PaginaPerfil({ searchParams }: { searchParams: { senha?: string } }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/entrar')
+  if (!user) redirect('/entrar?next=/perfil')
 
   const { data: perfil } = await supabase.rpc('meu_perfil').maybeSingle<Perfil>()
-  if (!perfil) redirect('/entrar')
+  if (!perfil) redirect('/entrar?next=/perfil')
 
   const [{ count: totalAvaliacoes }, { count: totalFavoritos }, { count: totalIndicados }, saldoLaranjas, cartoesFidelidade] =
     await Promise.all([
@@ -37,10 +38,10 @@ export default async function PaginaPerfil({ searchParams }: { searchParams: { s
 
   return (
     <div className="mx-auto max-w-3xl pb-10">
-      <div className="relative overflow-hidden rounded-b-[28px] bg-barro-900 px-4 pb-6 pt-3 text-white sm:px-6">
+      <div className="relative overflow-hidden rounded-b-[28px] bg-serra-escuro px-4 pb-6 pt-3 text-white sm:px-6">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-14 -top-20 h-56 w-56 rounded-full bg-casca-500 opacity-25 blur-3xl"
+          className="pointer-events-none absolute -right-14 -top-20 h-56 w-56 rounded-full bg-mata-400 opacity-20 blur-3xl"
         />
         <div className="relative flex items-center gap-3">
           <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/15">
@@ -48,7 +49,7 @@ export default async function PaginaPerfil({ searchParams }: { searchParams: { s
           </span>
           <div className="min-w-0">
             <h1 className="truncate font-display text-2xl font-bold">Olá, {primeiroNome}!</h1>
-            {perfil.bairro && <p className="text-sm text-barro-200">{perfil.bairro}, Tanguá</p>}
+            {perfil.bairro && <p className="text-sm text-white/80">{perfil.bairro}, Tanguá</p>}
           </div>
         </div>
       </div>
@@ -81,7 +82,7 @@ export default async function PaginaPerfil({ searchParams }: { searchParams: { s
           ['/orcamentos', 'Meus orçamentos'],
           ['/ajuda/chamados', 'Meus chamados'],
         ].map(([href, rotulo]) => (
-          <Link key={href} href={href} className="rounded-xl border border-barro-100 bg-white px-2 py-3 font-medium text-barro-800 hover:border-casca-300">
+          <Link key={href} href={href} className="rounded-xl border border-barro-100 bg-superficie px-2 py-3 font-medium text-barro-800 hover:border-casca-300">
             {rotulo}
           </Link>
         ))}
@@ -95,7 +96,7 @@ export default async function PaginaPerfil({ searchParams }: { searchParams: { s
 
       <FormularioPerfil perfil={perfil} />
 
-      <section id="comunicacao" aria-labelledby="titulo-comunicacao" className="mt-6 scroll-mt-20 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <section id="comunicacao" aria-labelledby="titulo-comunicacao" className="mt-6 scroll-mt-20 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         <h2 id="titulo-comunicacao" className="font-display text-lg font-semibold text-barro-900">
           Comunicação
         </h2>
@@ -111,7 +112,15 @@ export default async function PaginaPerfil({ searchParams }: { searchParams: { s
         />
       </section>
 
-      <section id="privacidade" aria-labelledby="titulo-privacidade" className="mt-6 scroll-mt-20 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+      <section aria-labelledby="titulo-aparencia" className="mt-6 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
+        <h2 id="titulo-aparencia" className="font-display text-lg font-semibold text-barro-900">
+          Aparência
+        </h2>
+        <p className="mb-3 text-sm text-barro-600">Automático segue o modo claro/escuro do seu celular.</p>
+        <SeletorTema />
+      </section>
+
+      <section id="privacidade" aria-labelledby="titulo-privacidade" className="mt-6 scroll-mt-20 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         <h2 id="titulo-privacidade" className="font-display text-lg font-semibold text-barro-900">
           Privacidade e dados
         </h2>

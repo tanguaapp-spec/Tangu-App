@@ -75,7 +75,7 @@ export default async function PaginaPedido({ params, searchParams }: { params: {
       ) : (
         <ul className="mt-3 space-y-3">
           {(respostas as unknown as Resposta[]).map((r) => (
-            <li key={r.id} className="rounded-xl border border-barro-100 bg-white p-4">
+            <li key={r.id} className="rounded-xl border border-barro-100 bg-superficie p-4">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <Link href={`/negocio/${r.negocio?.id}`} className="font-semibold text-barro-900 hover:underline">
                   {r.negocio?.nome}
@@ -89,7 +89,7 @@ export default async function PaginaPedido({ params, searchParams }: { params: {
                   href={linkWhatsapp(r.negocio.whatsapp, `Olá! Vi sua resposta ao meu pedido "${pedido.titulo}" no Tanguá App.`)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-3 inline-flex items-center gap-2 rounded-lg bg-mata-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-mata-700"
+                  className="mt-3 inline-flex items-center gap-2 rounded-lg bg-serra px-3 py-1.5 text-sm font-semibold text-white hover:bg-serra"
                 >
                   <MessageCircle className="h-4 w-4" aria-hidden="true" /> Conversar no WhatsApp
                 </a>

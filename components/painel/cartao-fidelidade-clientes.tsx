@@ -55,7 +55,7 @@ export function CartaoFidelidadeClientes({ negocioId, clientes, meta = 10 }: { n
           <div
             key={perfil.id}
             data-testid="cliente-fidelidade"
-            className="flex items-center justify-between gap-3 rounded-xl border border-barro-100 bg-white px-4 py-2.5"
+            className="flex items-center justify-between gap-3 rounded-xl border border-barro-100 bg-superficie px-4 py-2.5"
           >
             <div>
               <p className="text-sm font-medium text-barro-800">{perfil.nome_completo}</p>
@@ -65,7 +65,7 @@ export function CartaoFidelidadeClientes({ negocioId, clientes, meta = 10 }: { n
               <button
                 onClick={() => resgatar(perfil.id)}
                 disabled={carregandoId === perfil.id}
-                className="flex shrink-0 items-center gap-1.5 rounded-lg bg-casca-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-casca-800 disabled:opacity-60"
+                className="flex shrink-0 items-center gap-1.5 rounded-lg bg-laranja px-3 py-1.5 text-xs font-semibold text-tinta hover:bg-laranja-claro disabled:opacity-60"
               >
                 <Gift className="h-3.5 w-3.5" /> Confirmar resgate
               </button>
@@ -73,7 +73,7 @@ export function CartaoFidelidadeClientes({ negocioId, clientes, meta = 10 }: { n
               <button
                 onClick={() => carimbar(perfil.id)}
                 disabled={carregandoId === perfil.id}
-                className="flex shrink-0 items-center gap-1.5 rounded-lg bg-mata-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-mata-600 disabled:opacity-60"
+                className="flex shrink-0 items-center gap-1.5 rounded-lg bg-serra px-3 py-1.5 text-xs font-semibold text-white hover:bg-serra disabled:opacity-60"
               >
                 <Stamp className="h-3.5 w-3.5" /> +1 carimbo
               </button>

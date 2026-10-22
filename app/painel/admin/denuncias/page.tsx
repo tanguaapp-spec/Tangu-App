@@ -63,7 +63,7 @@ export default async function PainelDenuncias() {
       ) : (
         <div className="mt-6 space-y-3">
           {denuncias.map((d: any) => (
-            <div key={d.id} className="rounded-casca border border-barro-100 bg-white p-5 shadow-feira">
+            <div key={d.id} className="rounded-casca border border-barro-100 bg-superficie p-5 shadow-feira">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2">

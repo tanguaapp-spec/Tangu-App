@@ -54,7 +54,7 @@ export default function PaginaArtigoAjuda({ params }: { params: { slug: string }
       {artigo.links && artigo.links.length > 0 && (
         <div className="mt-6 flex flex-wrap gap-2">
           {artigo.links.map((l) => (
-            <Link key={l.href} href={l.href} className="rounded-lg bg-casca-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-casca-800">
+            <Link key={l.href} href={l.href} className="rounded-lg bg-laranja px-3 py-1.5 text-sm font-semibold text-tinta hover:bg-laranja-claro">
               {l.rotulo}
             </Link>
           ))}

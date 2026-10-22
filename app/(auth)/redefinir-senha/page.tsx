@@ -13,7 +13,7 @@ export default async function PaginaRedefinirSenha() {
   } = await supabase.auth.getUser()
 
   return (
-    <div className="rounded-casca border border-barro-100 bg-white p-8 shadow-feira-lg">
+    <div className="rounded-casca border border-barro-100 bg-superficie p-8 shadow-feira-lg">
       <h1 className="font-display text-2xl font-semibold text-barro-900">Criar nova senha</h1>
       {user ? (
         <>

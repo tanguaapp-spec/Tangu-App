@@ -33,7 +33,7 @@ export default async function PainelLogs() {
       ) : (
         <div className="mt-6 space-y-3">
           {logs.map((log) => (
-            <div key={log.id} className="rounded-casca border border-barro-100 bg-white p-4 shadow-feira">
+            <div key={log.id} className="rounded-casca border border-barro-100 bg-superficie p-4 shadow-feira">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <AlertTriangle

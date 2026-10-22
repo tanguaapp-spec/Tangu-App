@@ -46,7 +46,7 @@ export function BottomSheet({
         role="dialog"
         aria-modal="true"
         aria-label={titulo}
-        className="bottom-sheet-painel relative w-full max-w-lg rounded-t-3xl bg-white p-5 pb-[max(20px,env(safe-area-inset-bottom))] shadow-2xl sm:rounded-3xl"
+        className="bottom-sheet-painel relative w-full max-w-lg rounded-t-3xl bg-superficie p-5 pb-[max(20px,env(safe-area-inset-bottom))] shadow-2xl sm:rounded-3xl"
       >
         <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-barro-200 sm:hidden" />
         <div className="flex items-center justify-between gap-3">

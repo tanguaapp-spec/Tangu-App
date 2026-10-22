@@ -1,35 +1,34 @@
 import Link from 'next/link'
 import { MapPin, MessageCircle, ShieldCheck } from 'lucide-react'
-import { LogoTangua } from '@/components/marca/logo-tangua'
+import { MarcaTangua } from '@/components/marca/logo-tangua'
 import { linkWhatsapp } from '@/lib/utils'
 
 const WHATSAPP_CONTATO = '21972652314'
 
 export function Rodape() {
   return (
-    <footer className="mt-20 border-t border-barro-100 bg-barro-900 text-barro-100">
+    <footer className="mt-20 bg-serra-escuro text-white/90">
       <div className="mx-auto max-w-6xl px-4 pb-24 pt-12 sm:px-6 md:pb-12">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <div className="flex items-center gap-2">
-              <LogoTangua className="h-8 w-8" />
-              <span className="font-display text-lg font-semibold text-white">Tanguá App</span>
+              <MarcaTangua variante="sobre-escuro" className="text-white" />
             </div>
-            <p className="mt-3 text-sm text-barro-300">
-              A cidade da laranja, conectada. Encontre quem faz Tanguá funcionar.
+            <p className="mt-3 text-sm text-white/75">
+              Tudo de Tanguá, perto de você. Feito por e para quem é daqui.
             </p>
-            <p className="mt-4 flex items-start gap-2 text-sm text-mata-300">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-mata-400" />
-              Todo negócio passa por checagem da nossa equipe antes de aparecer aqui —
-              nada de perfil fake.
+            <p className="mt-4 flex items-start gap-2 text-sm text-white/80">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-white/70" />
+              Perfis denunciados são revisados por uma pessoa da equipe. Viu algo
+              estranho? Toque em &ldquo;Denunciar&rdquo; no perfil.
             </p>
           </div>
 
           <div>
-            <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-casca-400">
+            <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-laranja">
               Navegue
             </h3>
-            <ul className="mt-3 space-y-2 text-sm text-barro-300">
+            <ul className="mt-3 space-y-2 text-sm text-white/75">
               <li><Link href="/buscar" className="hover:text-white">Profissionais e comércios</Link></li>
               <li><Link href="/vagas" className="hover:text-white">Vagas de emprego</Link></li>
               <li><Link href="/mural" className="hover:text-white">Mural da cidade</Link></li>
@@ -40,10 +39,10 @@ export function Rodape() {
           </div>
 
           <div>
-            <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-casca-400">
+            <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-laranja">
               Legal
             </h3>
-            <ul className="mt-3 space-y-2 text-sm text-barro-300">
+            <ul className="mt-3 space-y-2 text-sm text-white/75">
               <li><Link href="/privacidade" className="hover:text-white">Política de Privacidade</Link></li>
               <li><Link href="/termos" className="hover:text-white">Termos de Uso</Link></li>
               <li><Link href="/ajuda" className="hover:text-white">Central de ajuda</Link></li>
@@ -51,12 +50,12 @@ export function Rodape() {
           </div>
 
           <div>
-            <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-casca-400">
+            <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-laranja">
               Tanguá, RJ
             </h3>
-            <ul className="mt-3 space-y-2 text-sm text-barro-300">
+            <ul className="mt-3 space-y-2 text-sm text-white/75">
               <li className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-casca-400" />
+                <MapPin className="h-4 w-4 text-laranja" />
                 Região Metropolitana do Rio
               </li>
               <li>
@@ -66,7 +65,7 @@ export function Rodape() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 hover:text-white"
                 >
-                  <MessageCircle className="h-4 w-4 text-casca-400" />
+                  <MessageCircle className="h-4 w-4 text-laranja" />
                   Fale com a gente no WhatsApp
                 </a>
               </li>
@@ -74,7 +73,7 @@ export function Rodape() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-barro-800 pt-6 text-xs text-barro-400">
+        <div className="mt-10 border-t border-white/10 pt-6 text-xs text-white/60">
           © {new Date().getFullYear()} Tanguá App. Feito por gente de Tanguá, para Tanguá.
         </div>
       </div>

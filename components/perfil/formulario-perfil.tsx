@@ -35,7 +35,7 @@ export function FormularioPerfil({ perfil }: { perfil: Perfil }) {
   }
 
   return (
-    <form onSubmit={handleSalvar} className="space-y-4 rounded-casca border border-barro-100 bg-white p-6 shadow-feira">
+    <form onSubmit={handleSalvar} className="space-y-4 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
       <Campo rotulo="Nome completo" id="nome" value={nome} onChange={(e) => setNome(e.target.value)} />
       <Campo rotulo="Telefone" id="telefone" value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="(21) 99999-9999" />
       <Campo

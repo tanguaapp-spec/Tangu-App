@@ -34,7 +34,7 @@ export default async function PainelNegociosPendentes() {
       ) : (
         <div className="mt-6 space-y-3">
           {negocios.map((n: any) => (
-            <div key={n.id} className="rounded-casca border border-barro-100 bg-white p-5 shadow-feira">
+            <div key={n.id} className="rounded-casca border border-barro-100 bg-superficie p-5 shadow-feira">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h3 className="font-semibold text-barro-900">{n.nome}</h3>

@@ -23,7 +23,7 @@ export function NavInferior() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-black/10 bg-barro-900 pb-[max(10px,env(safe-area-inset-bottom))] pt-2 md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-black/10 bg-serra-escuro pb-[max(10px,env(safe-area-inset-bottom))] pt-2 md:hidden"
       aria-label="Navegação principal"
     >
       {ITENS.map((item) => {
@@ -37,12 +37,12 @@ export function NavInferior() {
             <span
               className={cn(
                 'flex h-9 w-9 items-center justify-center rounded-xl transition-all',
-                ativo ? 'bg-casca-500 text-white shadow-[0_0_0_6px_rgba(239,122,26,0.18)]' : 'text-barro-400'
+                ativo ? 'bg-laranja text-tinta shadow-[0_0_0_6px_rgba(242,106,27,0.22)]' : 'text-white/70'
               )}
             >
               <item.icone className="h-[18px] w-[18px]" strokeWidth={ativo ? 2.4 : 2} />
             </span>
-            <span className={cn('text-[10px] font-semibold', ativo ? 'text-white' : 'text-barro-400')}>
+            <span className={cn('text-[10px] font-semibold', ativo ? 'text-white' : 'text-white/70')}>
               {item.rotulo}
             </span>
           </Link>

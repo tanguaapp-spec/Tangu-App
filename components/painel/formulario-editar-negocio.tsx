@@ -73,7 +73,7 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
             id="categoria_id"
             name="categoria_id"
             defaultValue={negocio.categoria_id ?? ''}
-            className="w-full rounded-xl border border-barro-300 bg-white px-4 py-2.5 text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
+            className="w-full rounded-xl border border-barro-300 bg-superficie px-4 py-2.5 text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
           >
             <option value="">Sem categoria</option>
             {categorias.map((c) => (
@@ -102,7 +102,7 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
           name="tipo_perfil"
           value={tipo}
           onChange={(e) => setTipo(e.target.value as 'estabelecimento' | 'autonomo')}
-          className="w-full rounded-xl border border-barro-300 bg-white px-4 py-2.5 text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100 sm:max-w-sm"
+          className="w-full rounded-xl border border-barro-300 bg-superficie px-4 py-2.5 text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100 sm:max-w-sm"
         >
           <option value="estabelecimento">Ponto comercial (loja, salão, oficina…)</option>
           <option value="autonomo">Profissional autônomo (sem endereço público)</option>
@@ -140,7 +140,7 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
                 name={`horario_${dia.chave}`}
                 defaultValue={negocio.horario_funcionamento?.[dia.chave] ?? ''}
                 placeholder="08:00-18:00 ou Fechado"
-                className="w-full rounded-lg border border-barro-300 bg-white px-3 py-1.5 text-sm text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
+                className="w-full rounded-lg border border-barro-300 bg-superficie px-3 py-1.5 text-sm text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
               />
             </div>
           ))}

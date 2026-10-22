@@ -32,7 +32,7 @@ export function ListaProdutos({ produtos, negocioId }: { produtos: ProdutoServic
   return (
     <div className="space-y-2">
       {produtos.map((produto) => (
-        <div key={produto.id} className="flex items-start justify-between gap-3 rounded-xl border border-barro-100 bg-white p-3.5">
+        <div key={produto.id} className="flex items-start justify-between gap-3 rounded-xl border border-barro-100 bg-superficie p-3.5">
           <div>
             <p className="font-medium text-barro-900">{produto.nome}</p>
             {produto.descricao && <p className="text-sm text-barro-500">{produto.descricao}</p>}

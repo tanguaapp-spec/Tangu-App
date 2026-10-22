@@ -15,7 +15,7 @@ export function CartoesFidelidade({ cartoes }: { cartoes: CartaoFidelidade[] }) 
             <Link
               key={cartao.id}
               href={`/negocio/${cartao.negocio_id}`}
-              className="rounded-xl border border-barro-100 bg-white p-4 transition-colors hover:border-casca-300"
+              className="rounded-xl border border-barro-100 bg-superficie p-4 transition-colors hover:border-casca-300"
             >
               <div className="flex items-center justify-between">
                 <span className="font-medium text-barro-900">{cartao.negocio?.nome}</span>

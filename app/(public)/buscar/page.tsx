@@ -78,7 +78,7 @@ export default async function PaginaBuscar({ searchParams }: { searchParams: Par
       <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-barro-600">
         <span>{total} {total === 1 ? 'resultado encontrado' : 'resultados encontrados'}</span>
         <span className="flex items-center gap-1 text-sm text-mata-700">
-          <ShieldCheck className="h-3.5 w-3.5" /> todos checados pela nossa equipe
+          <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" /> destaque pago aparece marcado
         </span>
       </p>
 
@@ -94,7 +94,7 @@ export default async function PaginaBuscar({ searchParams }: { searchParams: Par
           href={linkFiltro(searchParams, { categoria: null })}
           className={cn(
             'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
-            !searchParams.categoria ? 'bg-casca-700 text-white' : 'bg-white text-barro-700 hover:bg-barro-100'
+            !searchParams.categoria ? 'bg-laranja text-tinta' : 'bg-superficie text-barro-700 hover:bg-barro-100'
           )}
         >
           Todas
@@ -106,8 +106,8 @@ export default async function PaginaBuscar({ searchParams }: { searchParams: Par
             className={cn(
               'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
               searchParams.categoria === cat.slug
-                ? 'bg-casca-700 text-white'
-                : 'bg-white text-barro-700 hover:bg-barro-100'
+                ? 'bg-laranja text-tinta'
+                : 'bg-superficie text-barro-700 hover:bg-barro-100'
             )}
           >
             {cat.nome}
@@ -124,7 +124,7 @@ export default async function PaginaBuscar({ searchParams }: { searchParams: Par
             href={linkFiltro(searchParams, { bairro: null })}
             className={cn(
               'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
-              !searchParams.bairro ? 'bg-mata-500 text-white' : 'bg-white text-barro-700 hover:bg-barro-100'
+              !searchParams.bairro ? 'bg-serra text-white' : 'bg-superficie text-barro-700 hover:bg-barro-100'
             )}
           >
             Todos
@@ -136,8 +136,8 @@ export default async function PaginaBuscar({ searchParams }: { searchParams: Par
               className={cn(
                 'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
                 searchParams.bairro === bairro
-                  ? 'bg-mata-500 text-white'
-                  : 'bg-white text-barro-700 hover:bg-barro-100'
+                  ? 'bg-serra text-white'
+                  : 'bg-superficie text-barro-700 hover:bg-barro-100'
               )}
             >
               {bairro}
@@ -154,7 +154,7 @@ export default async function PaginaBuscar({ searchParams }: { searchParams: Par
           href={linkFiltro(searchParams, { modalidade: null })}
           className={cn(
             'shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
-            !searchParams.modalidade ? 'bg-barro-800 text-white' : 'bg-white text-barro-700 hover:bg-barro-100'
+            !searchParams.modalidade ? 'bg-serra text-white' : 'bg-superficie text-barro-700 hover:bg-barro-100'
           )}
         >
           Todas
@@ -168,8 +168,8 @@ export default async function PaginaBuscar({ searchParams }: { searchParams: Par
               className={cn(
                 'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
                 searchParams.modalidade === m.valor
-                  ? 'bg-barro-800 text-white'
-                  : 'bg-white text-barro-700 hover:bg-barro-100'
+                  ? 'bg-serra text-white'
+                  : 'bg-superficie text-barro-700 hover:bg-barro-100'
               )}
             >
               <Icone className="h-3.5 w-3.5" /> {m.rotuloCurto}

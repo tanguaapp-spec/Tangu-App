@@ -45,10 +45,10 @@ export default async function PaginaAuditoria({ searchParams }: { searchParams: 
           Filtrar por ação
         </label>
         <input id="acao" name="acao" defaultValue={filtroAcao} placeholder="ex.: assinatura, plano, config, admin" className="rounded-lg border border-barro-300 px-3 py-1.5 text-sm" />
-        <button className="rounded-lg bg-barro-800 px-3 py-1.5 text-sm font-medium text-white">Filtrar</button>
+        <button className="rounded-lg bg-serra px-3 py-1.5 text-sm font-medium text-white">Filtrar</button>
       </form>
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-barro-100 bg-white">
+      <div className="mt-4 overflow-x-auto rounded-xl border border-barro-100 bg-superficie">
         <table className="w-full text-left text-sm">
           <thead className="bg-barro-50 text-barro-600">
             <tr>

@@ -21,7 +21,7 @@ export const Campo = forwardRef<HTMLInputElement, CampoProps>(
           aria-invalid={erro ? true : undefined}
           aria-describedby={erro && id ? `${id}-erro` : undefined}
           className={cn(
-            'w-full rounded-xl border border-barro-300 bg-white px-4 py-2.5 text-barro-900',
+            'w-full rounded-xl border border-barro-300 bg-superficie px-4 py-2.5 text-barro-900',
             'placeholder:text-barro-300',
             'focus:border-casca-500 focus:ring-2 focus:ring-casca-100',
             'transition-colors',
@@ -61,7 +61,7 @@ export const AreaTexto = forwardRef<HTMLTextAreaElement, AreaTextoProps>(
           aria-invalid={erro ? true : undefined}
           aria-describedby={erro && id ? `${id}-erro` : undefined}
           className={cn(
-            'w-full rounded-xl border border-barro-300 bg-white px-4 py-2.5 text-barro-900',
+            'w-full rounded-xl border border-barro-300 bg-superficie px-4 py-2.5 text-barro-900',
             'placeholder:text-barro-300 min-h-[120px] resize-y',
             'focus:border-casca-500 focus:ring-2 focus:ring-casca-100',
             'transition-colors',

@@ -25,7 +25,7 @@ export default async function PaginaAdminConfiguracoes() {
           const def = DEFINICOES_CONFIG[chave]
           const atual = atuais.get(chave)
           return (
-            <section key={chave} className="rounded-casca border border-barro-100 bg-white p-5" aria-label={def.rotulo}>
+            <section key={chave} className="rounded-casca border border-barro-100 bg-superficie p-5" aria-label={def.rotulo}>
               <FormularioAcao acao={salvarConfiguracao}>
                 <input type="hidden" name="chave" value={chave} />
                 <label htmlFor={`cfg-${chave}`} className="font-semibold text-barro-900">

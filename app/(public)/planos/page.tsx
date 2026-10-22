@@ -32,7 +32,7 @@ export default async function PaginaPlanos() {
               href={plano.preco_centavos === 0 ? '/cadastrar?papel=profissional' : `/painel/negocio/assinatura#plano-${plano.id}`}
               className={
                 plano.preco_centavos === 0
-                  ? 'block rounded-xl bg-casca-700 px-5 py-2.5 text-center font-semibold text-white hover:bg-casca-800'
+                  ? 'block rounded-xl bg-laranja px-5 py-2.5 text-center font-semibold text-tinta hover:bg-laranja-claro'
                   : 'block rounded-xl border border-barro-300 px-5 py-2.5 text-center font-semibold text-barro-800 hover:bg-barro-100'
               }
             >
@@ -52,7 +52,7 @@ export default async function PaginaPlanos() {
           ['E se eu passar do limite?', 'Nada é apagado. Itens acima do limite ficam guardados e você só não consegue adicionar novos até arquivar algo ou trocar de plano.'],
           ['Pagar garante vendas?', 'Não. O plano dá mais espaço e visibilidade; o resultado depende do seu negócio. As estatísticas mostram o que realmente aconteceu.'],
         ].map(([pergunta, resposta]) => (
-          <div key={pergunta} className="rounded-casca border border-barro-100 bg-white p-5">
+          <div key={pergunta} className="rounded-casca border border-barro-100 bg-superficie p-5">
             <h3 className="font-semibold text-barro-900">{pergunta}</h3>
             <p className="mt-1 text-sm text-barro-600">{resposta}</p>
           </div>

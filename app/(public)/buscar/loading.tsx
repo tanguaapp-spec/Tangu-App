@@ -13,7 +13,7 @@ export default function CarregandoBusca() {
       </div>
       <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="overflow-hidden rounded-casca border border-barro-100 bg-white">
+          <div key={i} className="overflow-hidden rounded-casca border border-barro-100 bg-superficie">
             <Skeleton className="h-40 w-full rounded-none" />
             <div className="space-y-2 p-4">
               <Skeleton className="h-5 w-3/4" />

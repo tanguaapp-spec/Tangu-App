@@ -38,7 +38,7 @@ export function FormularioPergunta() {
   }
 
   return (
-    <form action={handleSubmit} className="rounded-casca border border-barro-100 bg-white p-4 shadow-feira">
+    <form action={handleSubmit} className="rounded-casca border border-barro-100 bg-superficie p-4 shadow-feira">
       <Campo
         name="titulo"
         id="pergunta_titulo"

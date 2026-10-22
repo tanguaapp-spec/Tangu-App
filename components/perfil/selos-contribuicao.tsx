@@ -16,7 +16,7 @@ export function SelosContribuicao({ totalAvaliacoes, totalFavoritos }: { totalAv
     <div className="grid gap-2 sm:grid-cols-2">
       {selos.map((selo) => (
         <div key={selo.chave} className="flex items-start gap-2.5 rounded-xl bg-barro-50 p-3">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-casca-500 text-white">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-laranja text-tinta">
             <Award className="h-4 w-4" />
           </span>
           <span>

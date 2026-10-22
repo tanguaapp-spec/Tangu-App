@@ -8,7 +8,7 @@ export function ChecklistNegocio({ itens, urlPublica }: { itens: ItemChecklist[]
   if (!proximo) return null
 
   return (
-    <section aria-labelledby="titulo-checklist" className="mt-6 rounded-casca border border-casca-200 bg-white p-6 shadow-feira">
+    <section aria-labelledby="titulo-checklist" className="mt-6 rounded-casca border border-casca-200 bg-superficie p-6 shadow-feira">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 id="titulo-checklist" className="font-display text-lg font-semibold text-barro-900">
           Seu perfil está {percentual}% pronto

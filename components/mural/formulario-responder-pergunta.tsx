@@ -61,9 +61,9 @@ export function FormularioResponderPergunta({ avisoId, logado }: { avisoId: stri
           value={termo}
           onChange={(e) => setTermo(e.target.value)}
           placeholder="Nome do negócio..."
-          className="w-full rounded-lg border border-barro-300 bg-white px-3 py-1.5 text-sm text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
+          className="w-full rounded-lg border border-barro-300 bg-superficie px-3 py-1.5 text-sm text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
         />
-        <button type="submit" className="shrink-0 rounded-lg bg-barro-800 px-3 py-1.5 text-white">
+        <button type="submit" className="shrink-0 rounded-lg bg-serra px-3 py-1.5 text-white">
           <Search className="h-4 w-4" />
         </button>
       </form>
@@ -75,14 +75,14 @@ export function FormularioResponderPergunta({ avisoId, logado }: { avisoId: stri
       {resultados.length > 0 && (
         <div className="mt-2 space-y-1.5">
           {resultados.map((r) => (
-            <div key={r.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-1.5 text-sm">
+            <div key={r.id} className="flex items-center justify-between gap-2 rounded-lg bg-superficie px-3 py-1.5 text-sm">
               <span>
                 {r.nome} {r.categoria && <span className="text-barro-400">· {r.categoria.nome}</span>}
               </span>
               <button
                 onClick={() => indicar(r.id)}
                 disabled={enviandoId === r.id}
-                className="shrink-0 rounded-lg bg-mata-500 px-2.5 py-1 text-xs font-semibold text-white hover:bg-mata-600 disabled:opacity-60"
+                className="shrink-0 rounded-lg bg-serra px-2.5 py-1 text-xs font-semibold text-white hover:bg-serra disabled:opacity-60"
               >
                 {enviandoId === r.id ? 'Indicando...' : 'Indicar'}
               </button>

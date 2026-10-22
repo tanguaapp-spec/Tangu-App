@@ -16,19 +16,19 @@ export function BuscaRapida() {
   return (
     <form
       onSubmit={buscar}
-      className="flex w-full max-w-xl items-center gap-2 rounded-2xl bg-white p-2 shadow-feira-lg"
+      className="flex w-full max-w-xl items-center gap-2 rounded-2xl bg-superficie p-2 shadow-feira-lg"
     >
-      <Search className="ml-3 h-5 w-5 shrink-0 text-barro-300" />
+      <Search className="ml-3 h-5 w-5 shrink-0 text-barro-400" aria-hidden="true" />
       <input
         value={termo}
         onChange={(e) => setTermo(e.target.value)}
         placeholder="Eletricista, salão, marcenaria, mercado..."
-        className="w-full bg-transparent py-2.5 text-barro-900 placeholder:text-barro-300 focus:outline-none"
+        className="w-full bg-transparent py-2.5 text-barro-900 placeholder:text-barro-400 focus:outline-none"
         aria-label="Buscar profissional ou comércio"
       />
       <button
         type="submit"
-        className="shrink-0 rounded-xl bg-casca-700 px-5 py-2.5 font-semibold text-white transition-colors hover:bg-casca-800"
+        className="shrink-0 rounded-xl bg-laranja px-5 py-2.5 font-semibold text-tinta transition-colors hover:bg-laranja-claro"
       >
         Buscar
       </button>

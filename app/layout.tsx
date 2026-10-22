@@ -1,19 +1,21 @@
 import type { Metadata, Viewport } from 'next'
-import { Fraunces, Inter, JetBrains_Mono } from 'next/font/google'
+import { Familjen_Grotesk, Figtree, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { RegistrarServiceWorker } from '@/components/pwa/registrar-service-worker'
 import { SplashScreen } from '@/components/pwa/splash-screen'
+import { SCRIPT_TEMA_INICIAL } from '@/lib/tema/preferencia'
+import { SincronizarTema } from '@/components/tema/sincronizar-tema'
 import './globals.css'
 
-const fraunces = Fraunces({
+// Identidade "Tanguá" (out/2026): títulos, texto e números/códigos.
+const familjen = Familjen_Grotesk({
   subsets: ['latin'],
   variable: '--font-display',
-  weight: ['400', '500', '600', '700', '900'],
-  style: ['normal', 'italic'],
+  weight: ['500', '600', '700'],
 })
 
-const inter = Inter({
+const figtree = Figtree({
   subsets: ['latin'],
   variable: '--font-body',
   weight: ['400', '500', '600', '700'],
@@ -22,34 +24,35 @@ const inter = Inter({
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
-  weight: ['400', '500'],
+  weight: ['500', '700'],
 })
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://tangua-app.vercel.app'),
   title: {
     template: '%s | Tanguá App',
-    default: 'Tanguá App — A cidade em um só lugar',
+    default: 'Tanguá App — Tudo de Tanguá, perto de você',
   },
   description:
-    'Encontre profissionais e comércios de Tanguá, vagas de emprego e tudo o que acontece na cidade.',
+    'Comércios, profissionais, ofertas e o que acontece em Tanguá. Fale direto no WhatsApp, sem intermediário.',
   manifest: '/manifest.json',
   icons: {
     icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
       { url: '/favicon.png', sizes: '48x48', type: 'image/png' },
       { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
       { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
-    apple: [{ url: '/icon-192.png', sizes: '192x192', type: 'image/png' }],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
     url: 'https://tangua-app.vercel.app',
     siteName: 'Tanguá App',
-    title: 'Tanguá App — A cidade em um só lugar',
+    title: 'Tanguá App — Tudo de Tanguá, perto de você',
     description:
-      'Encontre profissionais e comércios de Tanguá, vagas de emprego e tudo o que acontece na cidade.',
+      'Comércios, profissionais, ofertas e o que acontece em Tanguá. Fale direto no WhatsApp, sem intermediário.',
   },
   twitter: {
     card: 'summary_large_image',
@@ -58,17 +61,29 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  // combina com o cabeçalho escuro do mobile (components/layout/cabecalho.tsx)
-  themeColor: '#2E2219',
+  // cor da barra do navegador/app instalado = verde do cabeçalho em cada tema
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#0E4D3A' },
+    { media: '(prefers-color-scheme: dark)', color: '#0B2A20' },
+  ],
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+  // sem maximumScale: bloquear o zoom de pinça prejudica quem enxerga pouco
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable}`}>
+    <html
+      lang="pt-BR"
+      className={`${familjen.variable} ${figtree.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* aplica claro/escuro antes da primeira pintura (sem flash de tema errado) */}
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA_INICIAL }} />
+      </head>
       <body className="font-body antialiased">
+        <SincronizarTema />
         <SplashScreen />
         <RegistrarServiceWorker />
         {children}
