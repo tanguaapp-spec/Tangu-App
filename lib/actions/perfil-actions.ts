@@ -6,6 +6,8 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { creditarPontos, jaCreditouPontos } from '@/lib/gamificacao/pontos'
 import { normalizarTelefoneBR } from '@/lib/utils'
+import { enviarImagem } from '@/lib/storage/imagens'
+import { dentroDoLimite } from '@/lib/seguranca/rate-limit'
 
 // Só estas colunas podem ser alteradas por aqui — o objeto vem do navegador.
 const schemaPerfil = z.object({
@@ -67,4 +69,24 @@ export async function salvarInteresses(formData: FormData) {
 
   revalidatePath('/')
   return { erro: null }
+}
+
+/** Foto do perfil (aparece nas avaliações e no topo do app). */
+export async function atualizarAvatar(formData: FormData) {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Entre na sua conta.' }
+  if (!(await dentroDoLimite(`avatar:${user.id}`, 10, 60 * 60))) return { erro: 'Muitas trocas seguidas. Tente daqui a pouco.' }
+
+  const arquivo = formData.get('foto')
+  if (!(arquivo instanceof File) || arquivo.size === 0) return { erro: 'Escolha uma foto.' }
+  const { url, erro } = await enviarImagem(supabase, arquivo, `usuarios/${user.id}/avatar`)
+  if (erro || !url) return { erro: erro ?? 'Não foi possível enviar a foto.' }
+
+  const { error } = await supabase.from('perfis').update({ avatar_url: url }).eq('id', user.id)
+  if (error) return { erro: traduzirErroBanco(error) }
+  revalidatePath('/perfil')
+  return { erro: null, url }
 }

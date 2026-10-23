@@ -28,7 +28,7 @@ export type ItemChecklist = {
   peso: number
 }
 
-const ANCORA_INFO = '/painel/negocio#informacoes'
+const ANCORA_INFO = '/painel/negocio/perfil'
 
 export function montarChecklistNegocio(d: DadosChecklistNegocio): ItemChecklist[] {
   const autonomo = d.tipo_perfil === 'autonomo'
@@ -95,7 +95,7 @@ export function montarChecklistNegocio(d: DadosChecklistNegocio): ItemChecklist[
       titulo: autonomo ? 'Mostre fotos dos seus trabalhos' : 'Coloque fotos do espaço ou dos produtos',
       beneficio: 'Fotos reais passam confiança antes do primeiro contato.',
       feito: (d.galeria?.length ?? 0) >= 2,
-      href: ANCORA_INFO,
+      href: '/painel/negocio/perfil#fotos',
       peso: 1,
     },
     {
@@ -103,7 +103,7 @@ export function montarChecklistNegocio(d: DadosChecklistNegocio): ItemChecklist[
       titulo: autonomo ? 'Cadastre seu primeiro serviço' : 'Cadastre seu primeiro produto',
       beneficio: 'Quem já vê o que você oferece (e o preço) chega mais decidido.',
       feito: d.total_produtos > 0,
-      href: '/painel/negocio#catalogo',
+      href: '/painel/negocio/catalogo',
       peso: 2,
     },
     {
@@ -111,7 +111,7 @@ export function montarChecklistNegocio(d: DadosChecklistNegocio): ItemChecklist[
       titulo: 'Publique uma novidade',
       beneficio: 'Quem favoritou seu perfil é avisado — é o jeito mais barato de lembrar o cliente.',
       feito: d.total_posts > 0,
-      href: '/painel/negocio#novidade',
+      href: '/painel/negocio/novidades',
       peso: 1,
     },
     {
@@ -119,7 +119,7 @@ export function montarChecklistNegocio(d: DadosChecklistNegocio): ItemChecklist[
       titulo: 'Crie uma oferta',
       beneficio: 'Ofertas aparecem na página inicial da cidade enquanto estiverem valendo.',
       feito: d.total_cupons > 0,
-      href: '/painel/negocio#ofertas',
+      href: '/painel/negocio/ofertas',
       peso: 1,
     },
   ]

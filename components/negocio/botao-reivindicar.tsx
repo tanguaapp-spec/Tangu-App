@@ -24,7 +24,7 @@ export function BotaoReivindicar({ negocioId }: { negocioId: string }) {
 
   const linkWhatsApp = useMemo(() => {
     return criarLinkWhatsApp(
-      `Oi! Fiz uma solicitação de reivindicação no app Cidade Conecta.\n\nNegócio: ${negocioId}\nMensagem: ${mensagem}`
+      `Oi! Fiz uma solicitação de reivindicação no Tanguá App.\n\nNegócio: ${negocioId}\nMensagem: ${mensagem}`
     )
   }, [negocioId, mensagem])
 

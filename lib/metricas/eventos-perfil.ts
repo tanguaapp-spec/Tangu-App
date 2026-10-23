@@ -37,10 +37,19 @@ export function identificadorVisitante(usuarioId: string | null, ip: string, use
   return `a:${createHash('sha256').update(`${sal}|${ip}|${userAgent}`).digest('hex').slice(0, 32)}`
 }
 
+export const ORIGENS_VISITA = ['busca', 'home', 'compartilhado', 'qr', 'push', 'ofertas', 'direto'] as const
+export type OrigemVisita = (typeof ORIGENS_VISITA)[number]
+
+/** ?origem=... da URL (links internos marcam de onde vieram); o resto vira "direto". */
+export function lerOrigem(valor: string | string[] | undefined): OrigemVisita {
+  const v = Array.isArray(valor) ? valor[0] : valor
+  return (ORIGENS_VISITA as readonly string[]).includes(v ?? '') ? (v as OrigemVisita) : 'direto'
+}
+
 export async function registrarEventoPerfil(
   negocioId: string,
   tipo: TipoEventoPerfil,
-  contexto: { usuarioId: string | null; donoId?: string | null }
+  contexto: { usuarioId: string | null; donoId?: string | null; origem?: OrigemVisita }
 ) {
   try {
     if (contexto.usuarioId && contexto.donoId && contexto.usuarioId === contexto.donoId) return
@@ -54,7 +63,10 @@ export async function registrarEventoPerfil(
     const primeiraVez = await dentroDoLimite(`evt:${tipo}:${negocioId}:${visitante}`, 1, JANELA_SEGUNDOS[tipo])
     if (!primeiraVez) return
 
-    await createServiceClient().from('eventos_perfil').insert({ negocio_id: negocioId, tipo })
+    const db = createServiceClient()
+    const { error } = await db.from('eventos_perfil').insert({ negocio_id: negocioId, tipo, origem: contexto.origem ?? 'direto' })
+    // antes da migration 0020 a coluna "origem" não existe: grava sem ela
+    if (error && /origem/.test(error.message)) await db.from('eventos_perfil').insert({ negocio_id: negocioId, tipo })
   } catch (err) {
     console.error('Falha ao registrar evento de perfil:', err)
   }

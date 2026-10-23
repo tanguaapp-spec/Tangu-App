@@ -2,49 +2,50 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Search, Megaphone, Briefcase, User } from 'lucide-react'
+import { Compass, FileText, Home, Tag, User, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-// Barra de navegação fixa embaixo — o padrão que faz um PWA parecer app de
-// verdade (Instagram, iFood, 99), não site responsivo. Só mobile: no desktop
-// a navegação já vive no cabeçalho. "/perfil" resolve sozinho pra /entrar
-// quando não há sessão (redirect no próprio Server Component da página),
-// então não precisa checar login aqui.
-const ITENS = [
+// Barra fixa do celular (no computador a navegação fica no cabeçalho).
+// "Você" funciona sem conta: mostra entrar/cadastrar e as preferências.
+const ITENS: { href: string; rotulo: string; icone: LucideIcon; tambem?: string[] }[] = [
   { href: '/', rotulo: 'Início', icone: Home },
-  { href: '/buscar', rotulo: 'Buscar', icone: Search },
-  { href: '/mural', rotulo: 'Mural', icone: Megaphone },
-  { href: '/vagas', rotulo: 'Vagas', icone: Briefcase },
-  { href: '/perfil', rotulo: 'Perfil', icone: User },
+  { href: '/buscar', rotulo: 'Explorar', icone: Compass, tambem: ['/categoria'] },
+  { href: '/ofertas', rotulo: 'Ofertas', icone: Tag },
+  { href: '/orcamentos', rotulo: 'Orçamentos', icone: FileText },
+  { href: '/perfil', rotulo: 'Você', icone: User, tambem: ['/favoritos', '/notificacoes', '/entrar', '/cadastrar'] },
 ]
 
 export function NavInferior() {
   const pathname = usePathname()
-
+  // o perfil do negócio tem a própria barra fixa (WhatsApp + Orçamento)
+  if (pathname.startsWith('/negocio/')) return null
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-black/10 bg-serra-escuro pb-[max(10px,env(safe-area-inset-bottom))] pt-2 md:hidden"
       aria-label="Navegação principal"
+      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-barro-200/80 bg-superficie pb-[max(8px,env(safe-area-inset-bottom))] md:hidden"
     >
       {ITENS.map((item) => {
-        const ativo = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
+        const ativo =
+          item.href === '/' ? pathname === '/' : [item.href, ...(item.tambem ?? [])].some((p) => pathname.startsWith(p))
         return (
           <Link
             key={item.href}
             href={item.href}
-            className="flex min-w-[56px] flex-col items-center gap-1 py-1"
+            aria-current={ativo ? 'page' : undefined}
+            className={cn(
+              'flex h-[68px] flex-col items-center justify-center gap-[3px] text-[11px]',
+              ativo ? 'font-bold text-mata-700' : 'font-semibold text-barro-600'
+            )}
           >
             <span
               className={cn(
-                'flex h-9 w-9 items-center justify-center rounded-xl transition-all',
-                ativo ? 'bg-laranja text-tinta shadow-[0_0_0_6px_rgba(242,106,27,0.22)]' : 'text-white/70'
+                'flex h-[30px] items-center justify-center rounded-full transition-all duration-200',
+                ativo ? 'w-[52px] bg-mata-100' : 'w-[30px]'
               )}
             >
-              <item.icone className="h-[18px] w-[18px]" strokeWidth={ativo ? 2.4 : 2} />
+              <item.icone className="h-[22px] w-[22px]" strokeWidth={2} />
             </span>
-            <span className={cn('text-[10px] font-semibold', ativo ? 'text-white' : 'text-white/70')}>
-              {item.rotulo}
-            </span>
+            {item.rotulo}
           </Link>
         )
       })}

@@ -1,122 +1,45 @@
 import Link from 'next/link'
-import { ArrowRight, CalendarDays, Megaphone, Sparkles, Tag, TrendingUp, UserRound } from 'lucide-react'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import { CardNegocioMini } from '@/components/negocio/card-negocio-mini'
+import Image from 'next/image'
+import { CartaoOferta } from '@/components/vitrine/cartao-oferta'
+import { CartaoNegocio } from '@/components/vitrine/cartao-negocio'
+import { TituloSecao } from '@/components/vitrine/titulo-secao'
+import { urlNegocio, type NegocioResumo } from '@/lib/ui/apresentacao'
 import type { EventoHome, NovidadeHome, OfertaHome } from '@/lib/queries/home'
-import type { Negocio } from '@/lib/types/database'
 
-function Cabecalho({ icone: Icone, titulo, descricao, href, rotuloLink }: { icone: typeof Tag; titulo: string; descricao?: string; href?: string; rotuloLink?: string }) {
+// Linha que rola de lado no celular e vira grade no computador.
+const trilho =
+  'flex snap-x gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:grid md:gap-4 md:overflow-visible md:px-0'
+
+/** Estado vazio com contexto: explica e convida, em vez de sumir. */
+function Vazio({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-2">
-      <div>
-        <h2 className="flex items-center gap-2 font-display text-xl font-semibold text-barro-900">
-          <Icone className="h-5 w-5 text-casca-500" aria-hidden="true" />
-          {titulo}
-        </h2>
-        {descricao && <p className="mt-0.5 text-sm text-barro-600">{descricao}</p>}
-      </div>
-      {href && (
-        <Link href={href} className="inline-flex items-center gap-1 text-sm font-semibold text-casca-700 hover:underline">
-          {rotuloLink ?? 'Ver tudo'} <ArrowRight className="h-4 w-4" aria-hidden="true" />
-        </Link>
-      )}
+    <div className="mx-5 rounded-[20px] border-[1.5px] border-dashed border-barro-200 p-5 text-center text-sm text-barro-700 md:mx-0">
+      {children}
     </div>
   )
 }
-
-/** Estado vazio com contexto — em vez de esconder, explica e convida a participar. */
-function Vazio({ texto, href, rotulo }: { texto: string; href: string; rotulo: string }) {
-  return (
-    <div className="mt-3 rounded-2xl border border-dashed border-barro-200 bg-superficie/60 p-5 text-sm text-barro-600">
-      {texto}{' '}
-      <Link href={href} className="font-semibold text-casca-700 underline">
-        {rotulo}
-      </Link>
-    </div>
-  )
-}
-
-const envoltorio = 'mx-auto max-w-6xl px-4 pt-8 sm:px-6'
 
 export function SecaoOfertas({ ofertas }: { ofertas: OfertaHome[] }) {
   return (
-    <section className={envoltorio} aria-label="Ofertas valendo">
-      <Cabecalho icone={Tag} titulo="Ofertas valendo" descricao="Promoções publicadas pelos próprios negócios, com prazo." />
-      {ofertas.length === 0 ? (
-        <Vazio texto="Nenhuma oferta ativa agora. Tem um negócio? Publique a primeira oferta da cidade —" href="/painel/negocio#ofertas" rotulo="é grátis." />
-      ) : (
-        <ul className="mt-3 flex snap-x gap-3 overflow-x-auto pb-2">
-          {ofertas.map((o) => (
-            <li key={o.id} className="w-64 shrink-0 snap-start">
-              <Link href={`/negocio/${o.negocio?.id}`} className="block h-full rounded-2xl border border-casca-200 bg-casca-50 p-4 transition-shadow hover:shadow-feira">
-                <span className="inline-block rounded-full bg-laranja px-2.5 py-0.5 text-xs font-bold text-tinta">{o.desconto_texto}</span>
-                <span className="mt-2 block font-semibold text-barro-900">{o.titulo}</span>
-                <span className="mt-1 block text-sm text-barro-600">{o.negocio?.nome}</span>
-                <span className="mt-2 block text-xs text-barro-500">
-                  Até {format(new Date(o.expira_em), "d 'de' MMM, HH'h'mm", { locale: ptBR })}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  )
-}
-
-export function SecaoNovidades({ novidades }: { novidades: NovidadeHome[] }) {
-  if (novidades.length === 0) return null // sem alarde: novidades aparecem conforme os negócios publicam
-  return (
-    <section className={envoltorio} aria-label="Novidades dos negócios">
-      <Cabecalho icone={Megaphone} titulo="Novidades da cidade" descricao="O que os negócios publicaram nos últimos 30 dias." />
-      <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {novidades.map((n) => (
-          <li key={n.id}>
-            <Link href={`/negocio/${n.negocio?.id}`} className="block h-full rounded-2xl border border-barro-100 bg-superficie p-4 hover:border-casca-300">
-              <span className="text-xs font-semibold uppercase tracking-wide text-mata-700">{n.tipo === 'promocao' ? 'Promoção' : 'Novidade'}</span>
-              <span className="mt-1 block font-semibold text-barro-900">{n.titulo}</span>
-              {n.conteudo && <span className="mt-1 line-clamp-2 block text-sm text-barro-600">{n.conteudo}</span>}
-              <span className="mt-2 block text-xs text-barro-500">
-                {n.negocio?.nome} · {format(new Date(n.criado_em), "d 'de' MMM", { locale: ptBR })}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </section>
-  )
-}
-
-export function SecaoPopulares({ negocios }: { negocios: (Negocio & { visitas: number })[] }) {
-  if (negocios.length === 0) return null
-  return (
-    <section className={envoltorio} aria-label="Mais procurados">
-      <Cabecalho icone={TrendingUp} titulo="Mais procurados" descricao="Perfis com mais visitantes diferentes nos últimos 30 dias." href="/buscar" />
-      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {negocios.map((n) => (
-          <CardNegocioMini key={n.id} negocio={n} />
-        ))}
-      </div>
-    </section>
-  )
-}
-
-export function SecaoProfissionais({ profissionais }: { profissionais: Negocio[] }) {
-  return (
-    <section className={envoltorio} aria-label="Profissionais autônomos">
-      <Cabecalho
-        icone={UserRound}
-        titulo="Profissionais da cidade"
-        descricao="Autônomos que atendem em casa, vão até você ou trabalham online. Quem tem selo Destaque pagou pra aparecer primeiro."
-        href="/buscar?modalidade=atende_domicilio"
+    <section aria-labelledby="t-ofertas" className="flex flex-col gap-3 md:gap-4">
+      <TituloSecao
+        id="t-ofertas"
+        titulo="Ofertas valendo"
+        descricao="Publicadas pelos próprios negócios, com prazo."
+        href={ofertas.length ? '/ofertas' : undefined}
+        className="px-5 md:px-0 [&_p]:hidden md:[&_p]:block"
       />
-      {profissionais.length === 0 ? (
-        <Vazio texto="Ainda poucos profissionais cadastrados. Você trabalha por conta própria?" href="/cadastrar?papel=profissional" rotulo="Crie seu perfil grátis." />
+      {ofertas.length === 0 ? (
+        <Vazio>
+          Nenhuma oferta valendo agora. Tem um negócio?{' '}
+          <Link href="/cadastrar?papel=profissional" className="font-bold text-casca-700 underline">
+            Publique a primeira — é grátis.
+          </Link>
+        </Vazio>
       ) : (
-        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {profissionais.map((n) => (
-            <CardNegocioMini key={n.id} negocio={n} />
+        <div className={`${trilho} md:grid-cols-[repeat(auto-fill,minmax(250px,1fr))]`}>
+          {ofertas.map((o) => (
+            <CartaoOferta key={o.id} oferta={o} className="w-[250px] shrink-0 snap-start md:w-auto" />
           ))}
         </div>
       )}
@@ -124,29 +47,132 @@ export function SecaoProfissionais({ profissionais }: { profissionais: Negocio[]
   )
 }
 
+export function SecaoPopulares({ negocios, reais }: { negocios: NegocioResumo[]; reais: boolean }) {
+  if (negocios.length === 0) return null
+  return (
+    <section aria-labelledby="t-populares" className="flex flex-col gap-3 px-5 md:gap-4 md:px-0">
+      <TituloSecao
+        id="t-populares"
+        titulo={reais ? 'Mais procurados' : 'Em destaque'}
+        descricao={reais ? 'Mais visitados nos últimos 30 dias' : 'Perfis verificados e com mais informação'}
+        href="/buscar"
+        rotuloLink="Explorar"
+      />
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] md:gap-4">
+        {negocios.map((n) => (
+          <CartaoNegocio key={n.id} negocio={n} origem="home" />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+export function SecaoNovidades({ novidades }: { novidades: NovidadeHome[] }) {
+  if (novidades.length === 0) return null // aparecem conforme os negócios publicam
+  return (
+    <section aria-labelledby="t-novidades" className="flex flex-col gap-3 md:gap-4">
+      <TituloSecao id="t-novidades" titulo="Novidades da cidade" descricao="O que os negócios publicaram" className="px-5 md:px-0" />
+      <div className={`${trilho} md:grid-cols-3`}>
+        {novidades.map((n) => (
+          <Link
+            key={n.id}
+            href={n.negocio ? `${urlNegocio(n.negocio)}?origem=home#novidades` : '/'}
+            className="flex w-[270px] shrink-0 snap-start flex-col overflow-hidden rounded-[22px] border border-barro-200/80 bg-superficie text-barro-900 md:w-auto"
+          >
+            {n.imagem_url && (
+              <span className="relative block h-32 w-full">
+                <Image src={n.imagem_url} alt="" fill sizes="(max-width: 768px) 270px, 33vw" className="object-cover" />
+              </span>
+            )}
+            <span className="flex flex-1 flex-col gap-1 p-4">
+              <span className="text-xs font-bold uppercase tracking-wide text-mata-700">
+                {n.tipo === 'promocao' ? 'Promoção' : 'Novidade'} · {n.negocio?.nome}
+              </span>
+              <span className="font-display text-lg font-bold leading-snug">{n.titulo}</span>
+              {n.conteudo && <span className="line-clamp-2 text-sm text-barro-700">{n.conteudo}</span>}
+            </span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+export function SecaoProfissionais({ profissionais }: { profissionais: NegocioResumo[] }) {
+  if (profissionais.length === 0) return null
+  return (
+    <section aria-labelledby="t-profissionais" className="flex flex-col gap-3 md:gap-4">
+      <TituloSecao
+        id="t-profissionais"
+        titulo="Profissionais da cidade"
+        descricao="Autônomos que vão até você ou atendem em casa"
+        href="/buscar?tipo=autonomo"
+        rotuloLink="Ver todos"
+        className="px-5 md:px-0"
+      />
+      <div className={`${trilho} md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))]`}>
+        {profissionais.map((n) => (
+          <CartaoNegocio key={n.id} negocio={n} origem="home" className="w-40 shrink-0 snap-start md:w-auto" />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function dataCurta(iso: string) {
+  const d = new Date(iso)
+  const fmt = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', ...o }).format(d)
+  return {
+    dia: fmt({ day: '2-digit' }),
+    mes: fmt({ month: 'short' }).replace('.', '').toUpperCase(),
+    quando: `${fmt({ weekday: 'long' })}, ${fmt({ hour: '2-digit', minute: '2-digit' }).replace(':', 'h')}`,
+  }
+}
+
 export function SecaoEventos({ eventos }: { eventos: EventoHome[] }) {
   return (
-    <section className={envoltorio} aria-label="Agenda">
-      <Cabecalho icone={CalendarDays} titulo="Agenda da cidade" href="/mural?tipo=evento" rotuloLink="Ver mural" />
+    <section
+      aria-labelledby="t-agenda"
+      className="mx-5 flex min-w-0 flex-col gap-3.5 rounded-[24px] border border-barro-200/80 bg-superficie p-5 md:mx-0 md:flex-[999_1_460px] md:rounded-[28px] md:p-6"
+    >
+      <div className="flex items-baseline justify-between">
+        <h2 id="t-agenda" className="font-display text-xl font-bold text-barro-900 md:text-2xl">
+          Agenda da cidade
+        </h2>
+        <Link href="/agenda" className="text-sm font-bold text-casca-700 hover:underline">
+          Ver agenda
+        </Link>
+      </div>
       {eventos.length === 0 ? (
-        <Vazio texto="Nenhum evento marcado por enquanto. Os avisos do mural ficam em" href="/mural" rotulo="Mural da cidade." />
+        <p className="text-sm text-barro-700">
+          Nenhum evento marcado por enquanto. Sabe de algum?{' '}
+          <Link href="/mural" className="font-bold text-casca-700 underline">
+            Conte no mural.
+          </Link>
+        </p>
       ) : (
-        <ul className="mt-3 divide-y divide-barro-100 rounded-2xl border border-barro-100 bg-superficie">
-          {eventos.map((e) => {
-            const data = new Date(e.data_evento)
+        <ul className="flex flex-col gap-3.5">
+          {eventos.map((e, i) => {
+            const d = dataCurta(e.data_evento)
             return (
-              <li key={e.id} className="flex items-center gap-4 p-4">
-                <span className="flex w-12 shrink-0 flex-col items-center rounded-xl bg-casca-100 py-1 text-casca-800">
-                  <span className="text-lg font-bold leading-none">{format(data, 'd')}</span>
-                  <span className="text-[11px] font-semibold uppercase">{format(data, 'MMM', { locale: ptBR })}</span>
-                </span>
-                <span>
-                  <span className="block font-semibold text-barro-900">{e.titulo}</span>
-                  <span className="text-sm text-barro-600">
-                    {format(data, "EEEE, HH'h'mm", { locale: ptBR })}
-                    {e.local_evento ? ` · ${e.local_evento}` : ''}
+              <li key={e.id}>
+                <Link href={`/agenda#evento-${e.id}`} className="flex items-center gap-3.5 text-barro-900">
+                  <span
+                    className={`flex w-14 shrink-0 flex-col items-center rounded-[14px] py-1.5 ${
+                      i % 2 === 0 ? 'bg-casca-100 text-casca-800' : 'bg-mata-100 text-mata-700'
+                    }`}
+                  >
+                    <b className="text-xl leading-none">{d.dia}</b>
+                    <span className="text-[11px] font-bold">{d.mes}</span>
                   </span>
-                </span>
+                  <span className="min-w-0">
+                    <b className="block truncate">{e.titulo}</b>
+                    <span className="text-sm text-barro-600">
+                      {d.quando}
+                      {e.local_evento ? ` · ${e.local_evento}` : ''}
+                    </span>
+                  </span>
+                </Link>
               </li>
             )
           })}
@@ -158,23 +184,24 @@ export function SecaoEventos({ eventos }: { eventos: EventoHome[] }) {
 
 export function SecaoAnuncie() {
   return (
-    <section className={envoltorio} aria-label="Anuncie seu negócio">
-      <div className="relative overflow-hidden rounded-casca bg-serra px-6 py-10 text-white sm:px-12">
-        <Sparkles className="h-7 w-7 text-white/80" aria-hidden="true" />
-        <h2 className="mt-3 max-w-xl font-display text-3xl font-semibold tracking-tight text-balance">
-          Tem um negócio ou trabalha por conta própria? Apareça pra cidade toda.
-        </h2>
-        <p className="mt-2 max-w-xl text-white/85">
-          Perfil, catálogo, ofertas e WhatsApp direto — grátis, no ar em minutos, sem precisar falar com ninguém.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link href="/cadastrar?papel=profissional" className="inline-flex items-center gap-2 rounded-xl bg-laranja px-5 py-2.5 font-semibold text-tinta hover:bg-laranja-claro">
-            Cadastrar grátis <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
-          <Link href="/planos" className="inline-flex items-center rounded-xl border border-white/40 px-5 py-2.5 font-semibold text-white hover:bg-white/10">
-            Ver planos
-          </Link>
-        </div>
+    <section
+      aria-labelledby="t-anuncie"
+      className="mx-5 flex min-w-0 flex-col gap-3 rounded-[24px] bg-laranja p-6 text-tinta md:mx-0 md:flex-[1_1_340px] md:rounded-[28px] md:p-7"
+    >
+      <h2 id="t-anuncie" className="font-display text-2xl font-bold leading-[1.1] md:text-[28px]">
+        Tem um negócio ou trabalha por conta própria?
+      </h2>
+      <p className="text-base">Perfil, catálogo, ofertas e WhatsApp direto. Grátis e no ar em minutos.</p>
+      <div className="flex flex-wrap gap-2.5">
+        <Link
+          href="/cadastrar?papel=profissional"
+          className="flex h-12 items-center rounded-[14px] bg-tinta px-5 font-bold text-white hover:opacity-90"
+        >
+          Cadastrar grátis
+        </Link>
+        <Link href="/planos" className="flex h-12 items-center rounded-[14px] px-3 font-bold underline underline-offset-4">
+          Ver planos
+        </Link>
       </div>
     </section>
   )

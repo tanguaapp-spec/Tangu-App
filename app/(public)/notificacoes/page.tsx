@@ -5,6 +5,8 @@ import { Bell } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { marcarNotificacoesLidas } from '@/lib/actions/conta-actions'
 import { cn } from '@/lib/utils'
+import { SinoNotificacoes } from '@/components/notificacoes/sino-notificacoes'
+import { AtualizarSessao } from '@/components/layout/atualizar-sessao'
 
 export const metadata: Metadata = { title: 'Notificações', robots: { index: false } }
 export const dynamic = 'force-dynamic'
@@ -24,11 +26,15 @@ export default async function PaginaNotificacoes() {
     .limit(50)
 
   const naoLidas = (notificacoes ?? []).filter((n) => !n.lida_em).length
+  // abriu a central = leu (as novas continuam marcadas nesta visita)
+  if (naoLidas > 0) {
+    await supabase.from('notificacoes').update({ lida_em: new Date().toISOString() }).eq('perfil_id', user.id).is('lida_em', null)
+  }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-2xl px-5 pb-8 pt-5 md:pt-10">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-barro-900">Notificações</h1>
+        <h1 className="font-display text-2xl font-bold text-barro-900 md:text-[32px]">Notificações</h1>
         {naoLidas > 0 && (
           <form
             action={async () => {
@@ -40,11 +46,13 @@ export default async function PaginaNotificacoes() {
           </form>
         )}
       </div>
-      <p className="mt-1 text-sm text-barro-600">
-        <Link href="/perfil#comunicacao" className="underline">
+      <AtualizarSessao />
+      <div className="mt-4 flex flex-col gap-1 rounded-[20px] border border-barro-200/80 bg-superficie p-2">
+        <SinoNotificacoes logado comRotulo />
+        <Link href="/perfil#comunicacao" className="px-3 py-2 text-sm font-semibold text-casca-700 underline-offset-4 hover:underline">
           Escolher o que receber
         </Link>
-      </p>
+      </div>
 
       {!notificacoes || notificacoes.length === 0 ? (
         <div className="mt-10 text-center text-barro-500">
@@ -52,7 +60,7 @@ export default async function PaginaNotificacoes() {
           <p className="mt-2">Nada por aqui ainda. Favorite negócios pra saber das novidades e ofertas deles.</p>
         </div>
       ) : (
-        <ul className="mt-6 divide-y divide-barro-100 rounded-xl border border-barro-100 bg-superficie">
+        <ul className="mt-6 divide-y divide-barro-100 overflow-hidden rounded-[20px] border border-barro-200/80 bg-superficie">
           {notificacoes.map((n) => {
             const conteudo = (
               <>

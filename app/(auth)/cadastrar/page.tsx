@@ -4,7 +4,7 @@ import { FormularioCadastrar } from '@/components/auth/formulario-cadastrar'
 export default function PaginaCadastrar({
   searchParams,
 }: {
-  searchParams: { papel?: string; convite?: string }
+  searchParams: { papel?: string; convite?: string; origem?: string }
 }) {
   const papelInicial = searchParams.papel === 'profissional' ? 'profissional' : 'morador'
 
@@ -23,7 +23,11 @@ export default function PaginaCadastrar({
       )}
 
       <div className="mt-6">
-        <FormularioCadastrar papelInicial={papelInicial} codigoConvite={searchParams.convite} />
+        <FormularioCadastrar
+          papelInicial={papelInicial}
+          codigoConvite={searchParams.convite}
+          origem={searchParams.origem ?? (searchParams.convite ? 'convite' : undefined)}
+        />
       </div>
 
       <p className="mt-6 text-center text-sm text-barro-600">

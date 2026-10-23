@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { enviarNotificacaoParaPerfis } from '@/lib/push/enviar-notificacao'
+import { enviarLembretesAvaliacao, enviarLembretesEventos, enviarResumoSemanalLojistas } from '@/lib/cron/lembretes'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,6 +25,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ erro: 'Não autorizado.' }, { status: 401 })
   }
 
+  // lembretes primeiro: não dependem de bairro/opt-in do resumo
+  const lembretes: Record<string, number | string> = {}
+  for (const [nome, tarefa] of [
+    ['avaliacao', enviarLembretesAvaliacao],
+    ['eventos', enviarLembretesEventos],
+    ['resumo_semanal_lojistas', enviarResumoSemanalLojistas],
+  ] as const) {
+    try {
+      lembretes[nome] = await tarefa()
+    } catch (err) {
+      console.error(`Cron/${nome}:`, err)
+      lembretes[nome] = 'erro'
+    }
+  }
+
   const supabase = createServiceClient()
   const desde = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
@@ -34,10 +50,10 @@ export async function GET(request: NextRequest) {
     .not('bairro', 'is', null)
 
   if (erroMoradores) {
-    return NextResponse.json({ erro: erroMoradores.message }, { status: 500 })
+    return NextResponse.json({ erro: erroMoradores.message, lembretes }, { status: 500 })
   }
   if (!moradores || moradores.length === 0) {
-    return NextResponse.json({ enviados: 0, bairros: 0, motivo: 'nenhum morador com bairro + opt-in' })
+    return NextResponse.json({ enviados: 0, bairros: 0, motivo: 'nenhum morador com bairro + opt-in', lembretes })
   }
 
   // só quem tem push realmente ativo, senão a notificação vai pro vazio
@@ -103,5 +119,5 @@ export async function GET(request: NextRequest) {
     totalEnviados += perfilIds.length
   }
 
-  return NextResponse.json({ enviados: totalEnviados, bairros: bairrosNotificados })
+  return NextResponse.json({ enviados: totalEnviados, bairros: bairrosNotificados, lembretes })
 }

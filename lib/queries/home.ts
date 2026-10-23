@@ -1,6 +1,7 @@
 import { createPublicClient, createServiceClient } from '@/lib/supabase/server'
 import { SECOES_HOME } from '@/lib/admin/configuracoes'
 import type { Negocio } from '@/lib/types/database'
+import type { OfertaResumo } from '@/lib/ui/apresentacao'
 
 /**
  * Dados da página inicial. Cliente público (sem cookies) pra home continuar
@@ -8,7 +9,9 @@ import type { Negocio } from '@/lib/types/database'
  * privadas por negócio com service role e devolve só ids/contagens.
  */
 
-const CAMPOS_NEGOCIO = 'id, nome, bairro, foto_capa_url, destaque_ativo, verificado, tipo_perfil, area_atendimento, modalidades_atendimento, categoria:categorias(nome, slug, icone)'
+// `*` em vez de lista fechada: colunas novas (slug, nota_media...) chegam
+// quando a migration roda, sem quebrar a página antes disso.
+const CAMPOS_NEGOCIO = '*, categoria:categorias(nome, slug, icone)'
 
 export type SecaoHome = (typeof SECOES_HOME)[number]
 
@@ -19,29 +22,41 @@ export async function ordemSecoesHome(): Promise<SecaoHome[]> {
   return validas.length ? validas : [...SECOES_HOME]
 }
 
-export type OfertaHome = {
-  id: string
-  titulo: string
-  desconto_texto: string
-  expira_em: string
-  negocio: { id: string; nome: string; bairro: string | null } | null
-}
+export type OfertaHome = OfertaResumo
 
-export async function ofertasVigentes(limite = 8): Promise<OfertaHome[]> {
-  const { data, error } = await createPublicClient()
+/** Ofertas valendo agora (já começaram, não venceram, não esgotaram). */
+export async function ofertasVigentes(limite = 8, categoriaSlug?: string): Promise<OfertaHome[]> {
+  const agora = new Date().toISOString()
+  let query = createPublicClient()
     .from('cupons')
-    .select('id, titulo, desconto_texto, expira_em, negocio:negocios!inner(id, nome, bairro, ativo, status_cadastro)')
+    .select('id, titulo, desconto_texto, expira_em, inicia_em, preco_original_centavos, preco_promocional_centavos, limite_resgates, resgates_count, negocio:negocios!inner(*, categoria:categorias(nome, slug, icone))')
     .eq('ativo', true)
-    .gt('expira_em', new Date().toISOString())
+    .gt('expira_em', agora)
+    .lte('inicia_em', agora)
     .eq('negocio.ativo', true)
     .eq('negocio.status_cadastro', 'aprovado')
     .order('expira_em', { ascending: true })
-    .limit(limite)
+    .limit(limite * 2)
+  if (categoriaSlug) {
+    const { data: cat } = await createPublicClient().from('categorias').select('id').eq('slug', categoriaSlug).maybeSingle()
+    if (!cat) return []
+    query = query.eq('negocio.categoria_id', cat.id)
+  }
+  const { data, error } = await query
   if (error) {
     console.error('Home/ofertas:', error.message)
     return []
   }
-  return data as unknown as OfertaHome[]
+  return (data as unknown as OfertaHome[])
+    .filter((o) => !o.limite_resgates || (o.resgates_count ?? 0) < o.limite_resgates)
+    .slice(0, limite)
+}
+
+export type CategoriaChip = { id: string; nome: string; slug: string; icone: string | null }
+
+export async function categoriasOrdenadas(): Promise<CategoriaChip[]> {
+  const { data } = await createPublicClient().from('categorias').select('id, nome, slug, icone').order('ordem')
+  return (data ?? []) as CategoriaChip[]
 }
 
 export type NovidadeHome = {
@@ -50,13 +65,14 @@ export type NovidadeHome = {
   titulo: string
   conteudo: string | null
   criado_em: string
-  negocio: { id: string; nome: string } | null
+  imagem_url?: string | null
+  negocio: { id: string; slug?: string | null; nome: string } | null
 }
 
 export async function novidadesRecentes(limite = 6): Promise<NovidadeHome[]> {
   const { data, error } = await createPublicClient()
     .from('posts_negocio')
-    .select('id, tipo, titulo, conteudo, criado_em, negocio:negocios!inner(id, nome, ativo, status_cadastro)')
+    .select('id, tipo, titulo, conteudo, imagem_url, criado_em, negocio:negocios!inner(*)')
     .eq('ativo', true)
     .neq('tipo', 'vaga_propria')
     .eq('negocio.ativo', true)

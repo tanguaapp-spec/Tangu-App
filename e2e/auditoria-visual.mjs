@@ -12,13 +12,13 @@ const saida = process.argv[3] ?? 'auditoria'
 fs.mkdirSync(saida, { recursive: true })
 
 const ROTAS = [
-  '/', '/buscar', '/buscar?categoria=beleza-estetica', '/vagas', '/mural', '/ferramentas', '/planos',
+  '/', '/buscar', '/buscar?categoria=beleza-estetica', '/buscar?aberto=1&oferta=1', '/categoria/beleza-estetica', '/ofertas', '/agenda', '/vagas', '/mural', '/ferramentas', '/planos',
   '/ajuda', '/ajuda?q=senha', '/ajuda/recuperar-acesso', '/ajuda/planos-e-pagamentos', '/ajuda/contato',
   '/privacidade', '/termos', '/entrar', '/entrar?erro=link-invalido', '/cadastrar', '/cadastrar?papel=profissional',
   '/cadastrar/confirme-seu-email', '/esqueci-senha', '/redefinir-senha',
   '/negocio/00000000-0000-0000-0000-000000000000', '/rota-que-nao-existe',
   // protegidas: devem redirecionar pro login sem quebrar
-  '/perfil', '/favoritos', '/notificacoes', '/orcamentos', '/orcamentos/novo', '/bem-vindo', '/ajuda/chamados',
+  '/perfil', '/favoritos', '/painel/negocio/catalogo', '/painel/negocio/mais', '/notificacoes', '/orcamentos', '/orcamentos/novo', '/bem-vindo', '/ajuda/chamados',
   '/painel/negocio', '/painel/negocio/assinatura', '/painel/negocio/orcamentos', '/painel/admin', '/painel/admin/planos',
 ]
 

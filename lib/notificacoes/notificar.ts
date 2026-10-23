@@ -1,17 +1,9 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { enviarNotificacaoParaPerfis } from '@/lib/push/enviar-notificacao'
 
-/**
- * Categorias que a pessoa pode desligar em Perfil → Comunicação.
- * Avisos da própria conta (pagamento, suporte, moderação) NÃO têm
- * categoria: são essenciais e sempre chegam.
- */
-export const CATEGORIAS_OPCIONAIS = {
-  novidades_favoritos: 'Novidades dos negócios que favoritei',
-  ofertas_favoritos: 'Ofertas dos negócios que favoritei',
-  mural: 'Avisos e eventos do mural da cidade',
-} as const
-export type CategoriaOpcional = keyof typeof CATEGORIAS_OPCIONAIS
+import { CATEGORIAS_OPCIONAIS, type CategoriaOpcional } from '@/lib/notificacoes/categorias'
+
+export { CATEGORIAS_OPCIONAIS, type CategoriaOpcional }
 
 export type Notificacao = {
   tipo: string
@@ -29,6 +21,20 @@ export async function filtrarPorPreferencia(perfilIds: string[], categoria?: Cat
   return (data ?? []).filter((p) => p.preferencias_notificacao?.[categoria] !== false).map((p) => p.id as string)
 }
 
+/** 22h às 8h em Tanguá: push opcional espera (fica só no sino do app). */
+export function horarioSilencioso(agora = new Date()) {
+  const hora = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hourCycle: 'h23' }).format(agora))
+  return hora >= 22 || hora < 8
+}
+
+/** Marca links de perfil vindos de notificação (o painel do lojista mostra a origem das visitas). */
+export function comOrigemPush(url: string | undefined) {
+  if (!url || !url.startsWith('/negocio/')) return url
+  const [caminho, hash] = url.split('#')
+  const sep = caminho.includes('?') ? '&' : '?'
+  return `${caminho}${caminho.includes('origem=') ? '' : `${sep}origem=push`}${hash ? `#${hash}` : ''}`
+}
+
 /**
  * Grava no sino do app e manda push. Falha em silêncio (nunca derruba a
  * ação principal) — mas registra no console pra aparecer nos logs.
@@ -41,7 +47,7 @@ export async function notificar(
   try {
     const destino = await filtrarPorPreferencia(perfilIds, opcoes.categoria)
     if (destino.length === 0) return
-    const url = n.url && n.url.startsWith('/') ? n.url : undefined
+    const url = n.url && n.url.startsWith('/') && !n.url.startsWith('//') ? n.url : undefined
 
     if (opcoes.noApp !== false) {
       const linhas = destino.map((perfil_id) => ({
@@ -57,8 +63,10 @@ export async function notificar(
       }
     }
 
-    if (opcoes.push !== false) {
-      await enviarNotificacaoParaPerfis(destino, { title: n.titulo, body: n.corpo ?? '', url, tag: n.tipo })
+    // opcional de madrugada não acorda ninguém: fica só no sino
+    const podePush = opcoes.push !== false && !(opcoes.categoria && horarioSilencioso())
+    if (podePush) {
+      await enviarNotificacaoParaPerfis(destino, { title: n.titulo, body: n.corpo ?? '', url: comOrigemPush(url), tag: n.tipo })
     }
   } catch (err) {
     console.error('Falha ao notificar:', err)

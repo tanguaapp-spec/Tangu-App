@@ -9,9 +9,12 @@ import { cn } from '@/lib/utils'
 export function FormularioCadastrar({
   papelInicial,
   codigoConvite,
+  origem,
 }: {
   papelInicial: 'morador' | 'profissional'
   codigoConvite?: string
+  /** de onde a pessoa veio (?origem= no link), pro funil do admin */
+  origem?: string
 }) {
   const [papel, setPapel] = useState(papelInicial)
   const [erro, setErro] = useState<string | null>(null)
@@ -22,6 +25,7 @@ export function FormularioCadastrar({
     setErro(null)
     formData.set('papel', papel)
     if (codigoConvite) formData.set('codigo_convite', codigoConvite)
+    if (origem) formData.set('origem', origem)
 
     const resultado = await cadastrarComEmail(formData)
 

@@ -1,19 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { sair } from '@/lib/actions/auth-actions'
-import { NavPainel } from '@/components/painel/nav-painel'
 
+// Só exige login; cada área (negócio, admin) tem o próprio menu.
 export default async function LayoutPainel({ children }: { children: React.ReactNode }) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) redirect('/entrar?next=/painel/negocio')
-
-  const { data: papel } = await supabase.rpc('meu_papel')
-
-  return (
-    <div className="flex min-h-screen flex-col bg-feira sm:flex-row">
-      <NavPainel papel={papel} acaoSair={sair} />
-      <main className="flex-1 p-6 sm:p-10">{children}</main>
-    </div>
-  )
+  return <div className="min-h-screen bg-feira">{children}</div>
 }

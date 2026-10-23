@@ -23,6 +23,8 @@ export type Perfil = {
   convidado_por: string | null
   categorias_interesse: string[]
   onboarding_concluido_em: string | null
+  origem_cadastro?: string | null
+  suspenso_em?: string | null
   criado_em: string
   atualizado_em: string
 }
@@ -72,6 +74,12 @@ export type Negocio = {
   ativo: boolean
   criado_em: string
   atualizado_em: string
+  // migration 0020 (opcionais até ela rodar)
+  slug?: string | null
+  nota_media?: number | string | null
+  total_avaliacoes?: number
+  verificado_em?: string | null
+  respostas_prontas?: string[]
 }
 
 export type SolicitacaoReivindicacao = {

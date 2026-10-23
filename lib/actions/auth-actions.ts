@@ -59,6 +59,8 @@ export async function cadastrarComEmail(formData: FormData) {
   })
   if (!validado.success) return { erro: validado.error.issues[0].message }
   const { email, senha, nomeCompleto, papel, codigoConvite } = validado.data
+  // o banco também limpa (0020): só letras, números e _:.-
+  const origem = String(formData.get('origem') ?? '').replace(/[^a-zA-Z0-9_:.-]/g, '').slice(0, 60) || undefined
 
   const podeCadastrar = await dentroDoLimite(`cadastro:${ipDoRequest()}`, 5, 60 * 60)
   if (!podeCadastrar) {
@@ -72,7 +74,7 @@ export async function cadastrarComEmail(formData: FormData) {
     password: senha,
     options: {
       // o banco ignora qualquer papel que não seja morador/profissional (migration 0016)
-      data: { nome_completo: nomeCompleto, papel, codigo_convite: codigoConvite },
+      data: { nome_completo: nomeCompleto, papel, codigo_convite: codigoConvite, origem },
       emailRedirectTo: `${urlDoSite()}/auth/callback?next=${encodeURIComponent(destinoPosConfirmacao)}`,
     },
   })

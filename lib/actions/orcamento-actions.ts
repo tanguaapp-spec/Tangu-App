@@ -6,6 +6,9 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { dentroDoLimite } from '@/lib/seguranca/rate-limit'
 import { notificar } from '@/lib/notificacoes/notificar'
 import { lerPrecoCentavos } from '@/lib/admin/configuracoes'
+import { negocioDoPainel } from '@/lib/painel/negocio-atual'
+import { enviarEmailParaPerfis } from '@/lib/email/enviar'
+import { urlDoSite } from '@/lib/site'
 
 /**
  * Pedido de orçamento. Privacidade: o negócio vê só título, descrição,
@@ -100,9 +103,25 @@ export async function criarPedidoOrcamento(formData: FormData) {
     .insert(destinatarios.map((d) => ({ pedido_id: pedido.id, negocio_id: d.id })))
   if (erroDest) console.error('Falha ao gravar destinatários:', erroDest.message)
 
+  // donos e equipe de cada negócio
+  const { data: equipe } = await createServiceClient()
+    .from('membros_negocio')
+    .select('perfil_id')
+    .in('negocio_id', destinatarios.map((d) => d.id))
   await notificar(
-    destinatarios.map((d) => d.reivindicado_por!),
+    [...destinatarios.map((d) => d.reivindicado_por!), ...(equipe ?? []).map((m) => m.perfil_id as string)],
     { tipo: 'orcamento', titulo: 'Novo pedido de orçamento', corpo: dados.titulo, url: `/painel/negocio/orcamentos/${pedido.id}` }
+  )
+  // pedido de cliente é dinheiro na mesa: avisa também por e-mail (se configurado)
+  await enviarEmailParaPerfis(
+    destinatarios.map((d) => d.reivindicado_por!),
+    {
+      assunto: `Novo pedido de orçamento: ${dados.titulo}`,
+      titulo: 'Alguém de Tanguá pediu orçamento pra você',
+      texto: `${dados.titulo}${dados.bairro ? ` (${dados.bairro})` : ''}\n\nResponda pelo app: quem responde primeiro costuma fechar.`,
+      botao: 'Ver e responder',
+      url: `${urlDoSite()}/painel/negocio/orcamentos/${pedido.id}`,
+    }
   )
 
   revalidatePath('/orcamentos')
@@ -116,7 +135,7 @@ export async function responderPedidoOrcamento(pedidoId: string, formData: FormD
   } = await supabase.auth.getUser()
   if (!user) return { erro: 'Não autenticado.' }
 
-  const { data: negocio } = await supabase.from('negocios').select('id, nome').eq('reivindicado_por', user.id).maybeSingle()
+  const { negocio } = await negocioDoPainel()
   if (!negocio) return { erro: 'Negócio não encontrado.' }
 
   const mensagem = String(formData.get('mensagem') ?? '').trim()
@@ -142,6 +161,13 @@ export async function responderPedidoOrcamento(pedidoId: string, formData: FormD
       corpo: pedido.titulo,
       url: `/orcamentos/${pedidoId}`,
     })
+    await enviarEmailParaPerfis([pedido.solicitante_id], {
+      assunto: `${negocio.nome} respondeu seu pedido de orçamento`,
+      titulo: `${negocio.nome} respondeu`,
+      texto: `Seu pedido "${pedido.titulo}" recebeu uma resposta${valor !== null ? ' com valor' : ''}. Veja no app e, se gostar, chame no WhatsApp.`,
+      botao: 'Ver resposta',
+      url: `${urlDoSite()}/orcamentos/${pedidoId}`,
+    })
   }
 
   revalidatePath(`/painel/negocio/orcamentos/${pedidoId}`)
@@ -154,7 +180,7 @@ export async function marcarPedidoVisto(pedidoId: string) {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user || !uuid(pedidoId)) return
-  const { data: negocio } = await supabase.from('negocios').select('id').eq('reivindicado_por', user.id).maybeSingle()
+  const { negocio } = await negocioDoPainel()
   if (!negocio) return
   await createServiceClient()
     .from('pedido_destinatarios')
@@ -180,5 +206,61 @@ export async function encerrarPedidoOrcamento(pedidoId: string) {
 
   revalidatePath(`/orcamentos/${pedidoId}`)
   revalidatePath('/orcamentos')
+  return { erro: null }
+}
+
+/** Respostas prontas do negócio (botões de um toque na hora de responder). Só a dona edita. */
+export async function salvarRespostasProntas(formData: FormData) {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Não autenticado.' }
+  const lista = formData
+    .getAll('resposta')
+    .map((r) => String(r).trim().slice(0, 500))
+    .filter(Boolean)
+    .slice(0, 6)
+  const { error } = await supabase.from('negocios').update({ respostas_prontas: lista }).eq('reivindicado_por', user.id)
+  if (error) return { erro: 'Não foi possível salvar agora.' }
+  revalidatePath('/painel/negocio/orcamentos')
+  return { erro: null }
+}
+
+/** Morador escolhe a resposta que fechou (o negócio é avisado). */
+export async function escolherRespostaOrcamento(pedidoId: string, respostaId: string) {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Entre na sua conta.' }
+  if (!uuid(pedidoId) || !uuid(respostaId)) return { erro: 'Pedido inválido.' }
+  const db = createServiceClient()
+  const { data: resposta } = await db
+    .from('respostas_orcamento')
+    .select('id, negocio_id, pedido:pedidos_orcamento!inner(solicitante_id, titulo)')
+    .eq('id', respostaId)
+    .eq('pedido_id', pedidoId)
+    .maybeSingle()
+  const pedido = resposta?.pedido as { solicitante_id?: string; titulo?: string } | undefined
+  if (!resposta || pedido?.solicitante_id !== user.id) return { erro: 'Resposta não encontrada.' }
+
+  const { error } = await db
+    .from('pedidos_orcamento')
+    .update({ resposta_escolhida_id: respostaId, status: 'encerrado', encerrado_em: new Date().toISOString() })
+    .eq('id', pedidoId)
+    .eq('solicitante_id', user.id)
+  if (error) return { erro: 'Não foi possível salvar agora.' }
+
+  const { data: negocio } = await db.from('negocios').select('reivindicado_por').eq('id', resposta.negocio_id).maybeSingle()
+  if (negocio?.reivindicado_por) {
+    await notificar([negocio.reivindicado_por], {
+      tipo: 'orcamento_escolhido',
+      titulo: 'Seu orçamento foi o escolhido!',
+      corpo: `${pedido?.titulo ?? 'Pedido'}: o morador vai te chamar no WhatsApp.`,
+      url: `/painel/negocio/orcamentos/${pedidoId}`,
+    })
+  }
+  revalidatePath(`/orcamentos/${pedidoId}`)
   return { erro: null }
 }

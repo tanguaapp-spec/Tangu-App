@@ -4,6 +4,8 @@ import { ToggleDestaque } from '@/components/painel/toggle-destaque'
 import { Selo } from '@/components/ui/selo'
 import { Store } from 'lucide-react'
 import Link from 'next/link'
+import { FormularioAcao } from '@/components/painel/admin/formulario-acao'
+import { alternarVerificado } from '@/lib/actions/admin-gestao-actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,7 +74,15 @@ export default async function PainelNegocios({
                   </span>
                 )}
               </div>
-              <ToggleDestaque negocioId={n.id} ativo={n.destaque_ativo} expiraEm={n.destaque_expira_em} />
+              <div className="flex flex-col items-end gap-2">
+                <ToggleDestaque negocioId={n.id} ativo={n.destaque_ativo} expiraEm={n.destaque_expira_em} />
+                <FormularioAcao acao={alternarVerificado.bind(null, n.id)} rotuloBotao={n.verificado ? 'Atualizar' : 'Salvar'}>
+                  <label className="flex items-center gap-2 text-sm text-barro-800">
+                    <input type="checkbox" name="verificado" defaultChecked={n.verificado} /> Verificado (conferi documento/contato)
+                  </label>
+                  <input name="nota" maxLength={300} aria-label="Como foi verificado" placeholder="Como conferiu (interno)" className="mt-1 h-9 w-full rounded-lg border border-barro-200 px-2 text-sm" />
+                </FormularioAcao>
+              </div>
             </div>
           ))}
         </div>

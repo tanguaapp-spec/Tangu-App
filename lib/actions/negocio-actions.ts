@@ -10,14 +10,19 @@ import { creditarPontos } from '@/lib/gamificacao/pontos'
 import { z } from 'zod'
 import { registrarEventoPerfil } from '@/lib/metricas/eventos-perfil'
 import { mensagemErroCupom } from '@/lib/ofertas/desconto'
+import { notificar } from '@/lib/notificacoes/notificar'
+import { agendarLembreteAvaliacao } from '@/lib/avaliacoes/lembretes'
+
+const UUID = /^[0-9a-f-]{36}$/i
 
 export async function registrarCliqueWhatsapp(negocioId: string) {
-  if (typeof negocioId !== 'string' || !/^[0-9a-f-]{36}$/i.test(negocioId)) return { erro: null }
+  if (typeof negocioId !== 'string' || !UUID.test(negocioId)) return { erro: null }
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const { data: negocio } = await supabase.from('negocios').select('reivindicado_por').eq('id', negocioId).maybeSingle()
   if (!negocio) return { erro: null }
   await registrarEventoPerfil(negocioId, 'clique_whatsapp', { usuarioId: user?.id ?? null, donoId: negocio.reivindicado_por })
+  if (user && negocio.reivindicado_por !== user.id) await agendarLembreteAvaliacao(user.id, negocioId, 'whatsapp')
   return { erro: null }
 }
 
@@ -58,6 +63,26 @@ export async function alternarFavorito(negocioId: string) {
 
   revalidatePath(`/negocio/${negocioId}`)
   return { erro: null }
+}
+
+/** Salvar um produto/serviço (aparece em Você → Favoritos). */
+export async function alternarFavoritoProduto(produtoId: string) {
+  if (typeof produtoId !== 'string' || !UUID.test(produtoId)) return { erro: 'Produto inválido.' }
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Entre na sua conta pra salvar.' }
+  const { data: existente } = await supabase
+    .from('favoritos_produtos')
+    .select('produto_id')
+    .eq('perfil_id', user.id)
+    .eq('produto_id', produtoId)
+    .maybeSingle()
+  const { error } = existente
+    ? await supabase.from('favoritos_produtos').delete().eq('perfil_id', user.id).eq('produto_id', produtoId)
+    : await supabase.from('favoritos_produtos').insert({ perfil_id: user.id, produto_id: produtoId })
+  if (error) return { erro: 'Não foi possível salvar agora.' }
+  revalidatePath('/favoritos')
+  return { erro: null, salvo: !existente }
 }
 
 const schemaAvaliacao = z.object({
@@ -115,7 +140,23 @@ export async function enviarAvaliacao(negocioId: string, formData: FormData) {
 
   if (!avaliacaoExistente) {
     creditarPontos(user.id, 'avaliacao').catch(() => {})
+    // avisa o dono (e a equipe dele) — responder avaliação aumenta a confiança
+    const { data: negocio } = await createServiceClient().from('negocios').select('*').eq('id', negocioId).maybeSingle()
+    if (negocio?.reivindicado_por && negocio.reivindicado_por !== user.id) {
+      await notificar(
+        [negocio.reivindicado_por],
+        {
+          tipo: 'avaliacao_recebida',
+          titulo: `Nova avaliação: ${'★'.repeat(validado.data.nota)}`,
+          corpo: validado.data.comentario ? validado.data.comentario.slice(0, 140) : `${negocio.nome} recebeu uma nota ${validado.data.nota}. Responda pelo painel.`,
+          url: '/painel/negocio/mais#avaliacoes',
+        },
+        { categoria: 'meu_negocio' }
+      )
+    }
   }
+  // avaliou: não precisa mais lembrar
+  await createServiceClient().from('lembretes_avaliacao').delete().eq('perfil_id', user.id).eq('negocio_id', negocioId)
 
   revalidatePath(`/negocio/${negocioId}`)
   return { erro: null }

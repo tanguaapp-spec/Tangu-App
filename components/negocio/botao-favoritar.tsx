@@ -1,43 +1,68 @@
 'use client'
 
+import Link from 'next/link'
 import { Heart } from 'lucide-react'
-import { useTransition, useState } from 'react'
+import { useState, useTransition } from 'react'
 import { alternarFavorito } from '@/lib/actions/negocio-actions'
 import { vibrar } from '@/lib/ui/vibrar'
+import { cn } from '@/lib/utils'
 
-interface Props {
+/**
+ * Coração do perfil. Sem conta, leva pra entrar e volta pro mesmo perfil
+ * (antes o botão simplesmente não aparecia pra quem não estava logado).
+ */
+export function BotaoFavoritar({
+  negocioId,
+  initialIsFavorito,
+  logado = true,
+  voltarPara,
+  variante = 'icone',
+  className,
+}: {
   negocioId: string
   initialIsFavorito: boolean
-}
+  logado?: boolean
+  voltarPara?: string
+  variante?: 'icone' | 'texto'
+  className?: string
+}) {
+  const [pendente, iniciar] = useTransition()
+  const [favorito, setFavorito] = useState(initialIsFavorito)
+  const rotulo = favorito ? 'Remover dos favoritos' : 'Favoritar'
+  const conteudo = (
+    <>
+      <Heart className={cn('h-5 w-5', favorito ? 'fill-casca-700 text-casca-700' : 'text-casca-700')} aria-hidden="true" />
+      {variante === 'texto' && (favorito ? 'Favoritado' : 'Favoritar')}
+    </>
+  )
 
-export function BotaoFavoritar({ negocioId, initialIsFavorito }: Props) {
-  const [isPending, startTransition] = useTransition()
-  const [isFavorito, setIsFavorito] = useState(initialIsFavorito)
-
-  const handleClick = async () => {
-    vibrar(12)
-    startTransition(async () => {
-      setIsFavorito(!isFavorito)
-      await alternarFavorito(negocioId)
-    })
+  if (!logado) {
+    return (
+      <Link href={`/entrar?next=${encodeURIComponent(voltarPara ?? `/negocio/${negocioId}`)}`} aria-label={variante === 'icone' ? 'Entrar para favoritar' : undefined} className={className}>
+        {conteudo}
+      </Link>
+    )
   }
 
   return (
     <button
       type="button"
-      onClick={handleClick}
-      disabled={isPending}
-      aria-label={isFavorito ? 'Remover dos favoritos' : 'Favoritar'}
-      aria-pressed={isFavorito}
-      title={isFavorito ? 'Remover dos favoritos' : 'Favoritar'}
+      onClick={() => {
+        vibrar(12)
+        iniciar(async () => {
+          const antes = favorito
+          setFavorito(!antes)
+          const r = await alternarFavorito(negocioId)
+          if (r.erro) setFavorito(antes)
+        })
+      }}
+      disabled={pendente}
+      aria-label={variante === 'icone' ? rotulo : undefined}
+      aria-pressed={favorito}
       data-testid="botao-favoritar"
-      className="p-2 rounded-full hover:bg-superficie/50 transition-colors"
+      className={className}
     >
-      <Heart
-        className={`w-5 h-5 ${
-          isFavorito ? 'fill-casca-500 text-casca-500' : 'text-barro-400'
-        }`}
-      />
+      {conteudo}
     </button>
   )
 }

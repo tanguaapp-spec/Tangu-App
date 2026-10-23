@@ -3,12 +3,9 @@
 import { useState } from 'react'
 import { Botao } from '@/components/ui/botao'
 import { salvarPreferenciasComunicacao } from '@/lib/actions/conta-actions'
+import { CATEGORIAS_OPCIONAIS } from '@/lib/notificacoes/categorias'
 
-const OPCOES: { chave: string; rotulo: string }[] = [
-  { chave: 'novidades_favoritos', rotulo: 'Novidades dos negócios que favoritei' },
-  { chave: 'ofertas_favoritos', rotulo: 'Ofertas dos negócios que favoritei' },
-  { chave: 'mural', rotulo: 'Avisos e eventos do mural da cidade' },
-]
+const OPCOES = Object.entries(CATEGORIAS_OPCIONAIS).map(([chave, rotulo]) => ({ chave, rotulo }))
 
 export function PreferenciasComunicacao({
   preferencias,

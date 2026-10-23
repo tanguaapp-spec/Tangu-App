@@ -44,6 +44,24 @@ export const DEFINICOES_CONFIG = {
     tipo: 'lista',
     validador: z.array(z.enum(SECOES_HOME)).min(1).max(SECOES_HOME.length),
   },
+  dias_teste_gratis: {
+    rotulo: 'Dias de teste grátis do plano pago pra negócio novo',
+    ajuda: 'Vale uma vez por dono, só pra quem se cadastra pelo app. 0 desliga.',
+    tipo: 'inteiro',
+    validador: z.number().int().min(0).max(90),
+  },
+  plano_teste_gratis: {
+    rotulo: 'Plano liberado no teste grátis e no bônus de indicação',
+    ajuda: 'Código do plano (ex.: profissional).',
+    tipo: 'texto',
+    validador: z.string().trim().regex(/^[a-z0-9_-]{2,40}$/),
+  },
+  dias_bonus_indicacao: {
+    rotulo: 'Dias de plano pago pra quem indica outro negócio',
+    ajuda: 'Ganha quando o indicado cadastra o primeiro negócio pelo link de convite. 0 desliga.',
+    tipo: 'inteiro',
+    validador: z.number().int().min(0).max(180),
+  },
 } as const
 
 export type ChaveConfig = keyof typeof DEFINICOES_CONFIG

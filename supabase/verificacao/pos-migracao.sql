@@ -49,3 +49,17 @@ select id, public, file_size_limit, allowed_mime_types from storage.buckets wher
 --    renderiza esses links, mas vale corrigir). Depois de corrigir, rode:
 --    alter table public.negocios validate constraint negocios_site_http;
 select id, nome, site from public.negocios where site is not null and site !~* '^https?://[^\s]+$';
+
+-- 8) Migration 0020. Esperado: nenhum negócio sem slug; total_avaliacoes
+--    igual à contagem real; funções do servidor fora da API pública.
+select count(*) as negocios_sem_slug from public.negocios where slug is null;
+select n.id, n.nome, n.total_avaliacoes, count(a.id) as real
+from public.negocios n left join public.avaliacoes a on a.negocio_id = n.id
+group by n.id having n.total_avaliacoes <> count(a.id);
+select p.proname,
+       has_function_privilege('anon', p.oid, 'execute') as anon_executa,
+       has_function_privilege('authenticated', p.oid, 'execute') as logado_executa
+from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public'
+  and p.proname in ('perfil_id_por_email', 'registrar_impressoes', 'recalcular_nota_negocio');
+select chave, valor from public.configuracoes_sistema where chave in ('dias_teste_gratis', 'plano_teste_gratis', 'dias_bonus_indicacao');

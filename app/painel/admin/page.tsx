@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { AlertTriangle, CheckCircle2, XCircle } from 'lucide-react'
-import { metricasCrescimento, metricasModeracao, metricasReceita, metricasSaude, type PeriodoDias } from '@/lib/queries/admin-metricas'
+import { metricasCrescimento, metricasFunil, metricasModeracao, metricasReceita, metricasSaude, type PeriodoDias } from '@/lib/queries/admin-metricas'
 import { formatarCentavos } from '@/lib/queries/planos'
 import { cn } from '@/lib/utils'
 
@@ -39,11 +39,12 @@ function Secao({ titulo, children, descricao }: { titulo: string; descricao?: st
 export default async function PainelAdminVisaoGeral({ searchParams }: { searchParams: { periodo?: string } }) {
   const dias = (PERIODOS.includes(Number(searchParams.periodo) as PeriodoDias) ? Number(searchParams.periodo) : 30) as PeriodoDias
 
-  const [crescimento, receita, saude, moderacao] = await Promise.all([
+  const [crescimento, receita, saude, moderacao, funil] = await Promise.all([
     metricasCrescimento(dias),
     metricasReceita(dias),
     metricasSaude(),
     metricasModeracao(),
+    metricasFunil(dias),
   ])
 
   const integracoes: [string, boolean, string][] = [
@@ -142,6 +143,47 @@ export default async function PainelAdminVisaoGeral({ searchParams }: { searchPa
           detalhe={saude.cronAtrasado ? 'Mais de 26h sem rodar — confira os Cron Jobs na Vercel' : undefined}
         />
       </Secao>
+
+      <section className="mt-8 grid gap-4 md:grid-cols-2" aria-label="Funil do lojista">
+        <div className="rounded-[20px] border border-barro-200/80 bg-superficie p-4">
+          <h2 className="font-display text-lg font-bold text-barro-900">Funil do lojista</h2>
+          <p className="text-sm text-barro-600">Cadastrados no período e até onde chegaram.</p>
+          <ol className="mt-3 flex flex-col gap-2">
+            {funil.etapas.map((e, i) => {
+              const base = funil.etapas[0].valor || 1
+              return (
+                <li key={e.rotulo}>
+                  <div className="flex justify-between text-sm text-barro-900">
+                    <span>{e.rotulo}</span>
+                    <span className="font-mono font-bold">
+                      {e.valor}
+                      {i > 0 && funil.etapas[0].valor > 0 ? ` · ${Math.round((e.valor / base) * 100)}%` : ''}
+                    </span>
+                  </div>
+                  <div className="mt-1 h-1.5 rounded-full bg-mata-100">
+                    <div className="h-full rounded-full bg-serra" style={{ width: `${Math.round((e.valor / base) * 100)}%` }} />
+                  </div>
+                </li>
+              )
+            })}
+          </ol>
+        </div>
+        <div className="rounded-[20px] border border-barro-200/80 bg-superficie p-4">
+          <h2 className="font-display text-lg font-bold text-barro-900">De onde vieram os cadastros</h2>
+          <p className="text-sm text-barro-600">
+            Use links com <code className="font-mono">?origem=</code> (ex.: <code className="font-mono">/cadastrar?origem=instagram</code>).
+          </p>
+          <ul className="mt-3 flex flex-col gap-1.5 text-sm">
+            {funil.origens.length === 0 && <li className="text-barro-600">Sem cadastros no período.</li>}
+            {funil.origens.map(([o, n]) => (
+              <li key={o} className="flex justify-between">
+                <span className="text-barro-900">{o}</span>
+                <span className="font-mono font-bold text-barro-900">{n}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
       <section className="mt-6 rounded-xl border border-barro-100 bg-superficie p-4" aria-label="Integrações">
         <h3 className="font-semibold text-barro-800">Integrações configuradas</h3>

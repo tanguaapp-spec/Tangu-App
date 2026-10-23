@@ -167,3 +167,51 @@ export async function metricasModeracao() {
   ])
   return { cadastrosPendentes, denunciasPendentes, reivindicacoesPendentes, chamadosAbertos }
 }
+
+/**
+ * Funil do lojista no período: quem se cadastrou como profissional →
+ * criou o negócio → pôs um item no catálogo → criou oferta → paga plano.
+ * Mais a origem dos cadastros (?origem=... no link de convite/QR).
+ */
+export async function metricasFunil(dias: PeriodoDias) {
+  const db = createServiceClient()
+  const desde = new Date(Date.now() - dias * 86400e3).toISOString()
+  const [{ data: profissionais }, { data: todos }] = await Promise.all([
+    db.from('perfis').select('id').eq('papel', 'profissional').gte('criado_em', desde).limit(5000),
+    db.from('perfis').select('*').gte('criado_em', desde).limit(10000),
+  ])
+  const ids = (profissionais ?? []).map((p) => p.id as string)
+  let comNegocio: string[] = []
+  let comProduto = 0
+  let comOferta = 0
+  let pagantes = 0
+  if (ids.length) {
+    const { data: negocios } = await db.from('negocios').select('id').in('reivindicado_por', ids)
+    comNegocio = (negocios ?? []).map((n) => n.id as string)
+    if (comNegocio.length) {
+      const [p, c, a] = await Promise.all([
+        db.from('produtos_servicos').select('negocio_id').in('negocio_id', comNegocio),
+        db.from('cupons').select('negocio_id').in('negocio_id', comNegocio),
+        db.from('assinaturas').select('negocio_id').in('negocio_id', comNegocio).in('status', ['ativa', 'em_atraso']),
+      ])
+      comProduto = new Set((p.data ?? []).map((x) => x.negocio_id)).size
+      comOferta = new Set((c.data ?? []).map((x) => x.negocio_id)).size
+      pagantes = new Set((a.data ?? []).map((x) => x.negocio_id)).size
+    }
+  }
+  const origens = new Map<string, number>()
+  for (const p of (todos ?? []) as { origem_cadastro?: string | null }[]) {
+    const o = p.origem_cadastro || 'sem origem'
+    origens.set(o, (origens.get(o) ?? 0) + 1)
+  }
+  return {
+    etapas: [
+      { rotulo: 'Cadastros de profissional', valor: ids.length },
+      { rotulo: 'Criaram o negócio', valor: comNegocio.length },
+      { rotulo: 'Puseram item no catálogo', valor: comProduto },
+      { rotulo: 'Criaram oferta', valor: comOferta },
+      { rotulo: 'Pagam plano', valor: pagantes },
+    ],
+    origens: Array.from(origens.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8),
+  }
+}

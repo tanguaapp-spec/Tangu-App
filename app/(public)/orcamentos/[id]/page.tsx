@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { CheckCircle2, MessageCircle } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
-import { encerrarPedidoOrcamento } from '@/lib/actions/orcamento-actions'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { encerrarPedidoOrcamento, escolherRespostaOrcamento } from '@/lib/actions/orcamento-actions'
 import { formatarCentavos } from '@/lib/queries/planos'
 import { linkWhatsapp } from '@/lib/utils'
 import { Selo } from '@/components/ui/selo'
@@ -29,7 +29,7 @@ export default async function PaginaPedido({ params, searchParams }: { params: {
 
   const { data: pedido } = await supabase
     .from('pedidos_orcamento')
-    .select('id, titulo, descricao, bairro, status, criado_em, expira_em, solicitante_id')
+    .select('*')
     .eq('id', params.id)
     .eq('solicitante_id', user.id)
     .maybeSingle()
@@ -44,6 +44,12 @@ export default async function PaginaPedido({ params, searchParams }: { params: {
     supabase.from('pedido_destinatarios').select('negocio_id, visto_em').eq('pedido_id', pedido.id),
   ])
   const vistos = (destinatarios ?? []).filter((d) => d.visto_em).length
+  // o negócio fica sabendo que o morador leu a resposta
+  const naoVistas = (respostas ?? []).map((r) => r.id)
+  if (naoVistas.length) {
+    await createServiceClient().from('respostas_orcamento').update({ vista_em: new Date().toISOString() }).in('id', naoVistas).is('vista_em', null)
+  }
+  const escolhida = (pedido as { resposta_escolhida_id?: string | null }).resposta_escolhida_id ?? null
   const aberto = pedido.status === 'aberto' && new Date(pedido.expira_em) > new Date()
   const encerrar = encerrarPedidoOrcamento.bind(null, pedido.id)
 
@@ -75,9 +81,10 @@ export default async function PaginaPedido({ params, searchParams }: { params: {
       ) : (
         <ul className="mt-3 space-y-3">
           {(respostas as unknown as Resposta[]).map((r) => (
-            <li key={r.id} className="rounded-xl border border-barro-100 bg-superficie p-4">
+            <li key={r.id} className={`rounded-[20px] border bg-superficie p-4 ${escolhida === r.id ? 'border-serra ring-2 ring-mata-100' : 'border-barro-200/80'}`}>
+              {escolhida === r.id && <p className="mb-1 text-xs font-bold uppercase text-mata-700">Você escolheu esta</p>}
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <Link href={`/negocio/${r.negocio?.id}`} className="font-semibold text-barro-900 hover:underline">
+                <Link href={`/negocio/${r.negocio?.id}?origem=direto`} className="font-semibold text-barro-900 hover:underline">
                   {r.negocio?.nome}
                 </Link>
                 {r.valor_centavos !== null && <span className="font-semibold text-mata-700">{formatarCentavos(r.valor_centavos)}</span>}
@@ -89,10 +96,21 @@ export default async function PaginaPedido({ params, searchParams }: { params: {
                   href={linkWhatsapp(r.negocio.whatsapp, `Olá! Vi sua resposta ao meu pedido "${pedido.titulo}" no Tanguá App.`)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-3 inline-flex items-center gap-2 rounded-lg bg-serra px-3 py-1.5 text-sm font-semibold text-white hover:bg-serra"
+                  className="mt-3 inline-flex h-11 items-center gap-2 rounded-[14px] bg-serra px-4 text-sm font-bold text-white"
                 >
                   <MessageCircle className="h-4 w-4" aria-hidden="true" /> Conversar no WhatsApp
                 </a>
+              )}
+              {!escolhida && (
+                <form
+                  action={async () => {
+                    'use server'
+                    await escolherRespostaOrcamento(pedido.id, r.id)
+                  }}
+                  className="mt-2"
+                >
+                  <button className="text-sm font-semibold text-casca-700 underline underline-offset-4">Fechei com este negócio</button>
+                </form>
               )}
             </li>
           ))}

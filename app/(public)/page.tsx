@@ -1,13 +1,12 @@
 import Link from 'next/link'
-import { ArrowRight, Briefcase, Megaphone, Sparkles, Store } from 'lucide-react'
-import { BuscaRapida } from '@/components/busca-rapida'
-import { MotivoGomo } from '@/components/motivo-gomo'
-import { LogoTangua } from '@/components/marca/logo-tangua'
-import { CardAchadoDoDia } from '@/components/negocio/card-achado-do-dia'
-import { CardNegocioMini } from '@/components/negocio/card-negocio-mini'
-import { iconeCategoria } from '@/lib/ui/icone-categoria'
+import { Search } from 'lucide-react'
+import { TopoInicio } from '@/components/home/topo-inicio'
+import { ParaVoce } from '@/components/home/para-voce'
+import { VistosRecentemente } from '@/components/home/vistos-recentemente'
+import { FotoNegocio } from '@/components/vitrine/foto-negocio'
 import { buscarAchadoDoDia, buscarNegociosVitrine } from '@/lib/queries/negocios'
 import {
+  categoriasOrdenadas,
   negociosPopulares,
   novidadesRecentes,
   ofertasVigentes,
@@ -24,214 +23,141 @@ import {
   SecaoPopulares,
   SecaoProfissionais,
 } from '@/components/home/secoes-home'
+import { metaNegocio, urlNegocio } from '@/lib/ui/apresentacao'
 
 export const revalidate = 60
 
-// nome do ícone bate com o seed de `categorias.icone` (supabase/migrations/0001) —
-// mesmo ícone que aparece no card de cada negócio dessa categoria.
-const categoriasDestaque = [
-  { nome: 'Alimentação', slug: 'alimentacao', icone: 'utensils' },
-  { nome: 'Beleza e Estética', slug: 'beleza-estetica', icone: 'scissors' },
-  { nome: 'Casa e Construção', slug: 'casa-construcao', icone: 'hammer' },
-  { nome: 'Automotivo', slug: 'automotivo', icone: 'car' },
-  { nome: 'Saúde e Bem-estar', slug: 'saude-bem-estar', icone: 'heart-pulse' },
-  { nome: 'Agro e Produção Rural', slug: 'agro-producao-rural', icone: 'sprout' },
-]
-
-function saudacao() {
-  const hora = new Date().getHours()
-  if (hora < 12) return 'Bom dia'
-  if (hora < 18) return 'Boa tarde'
-  return 'Boa noite'
-}
-
-const pilares = [
-  {
-    href: '/buscar',
-    icone: Store,
-    cor: 'casca' as const,
-    titulo: 'Profissionais e comércios',
-    texto: 'Negócios locais, com contato direto por WhatsApp.',
-    rotulo: 'Explorar diretório',
-  },
-  {
-    href: '/vagas',
-    icone: Briefcase,
-    cor: 'mata' as const,
-    titulo: 'Vagas de emprego',
-    texto: 'Oportunidades reais de empresas e comércios da região.',
-    rotulo: 'Ver vagas abertas',
-  },
-  {
-    href: '/mural',
-    icone: Megaphone,
-    cor: 'barro' as const,
-    titulo: 'Mural da cidade',
-    texto: 'Eventos, avisos, utilidade pública e achados e perdidos.',
-    rotulo: 'Ver o mural',
-  },
-]
-
-const coresPilar = {
-  casca: { bg: 'bg-casca-100', texto: 'text-casca-600', link: 'text-casca-600' },
-  mata: { bg: 'bg-mata-100', texto: 'text-mata-600', link: 'text-mata-600' },
-  barro: { bg: 'bg-barro-100', texto: 'text-barro-700', link: 'text-barro-700' },
-}
-
 export default async function PaginaInicial() {
-  const achadoDoDia = await buscarAchadoDoDia()
-  const [pertoDeVoce, ordem, ofertas, novidades, populares, profissionais, eventos] = await Promise.all([
-    buscarNegociosVitrine(4, achadoDoDia?.id),
+  const achado = await buscarAchadoDoDia()
+  const [categorias, ordem, ofertas, novidades, populares, profissionais, eventos, vitrine] = await Promise.all([
+    categoriasOrdenadas(),
     ordemSecoesHome(),
-    ofertasVigentes(),
+    ofertasVigentes(10),
     novidadesRecentes(),
-    negociosPopulares(),
-    profissionaisAutonomos(),
-    proximosEventos(),
+    negociosPopulares(6),
+    profissionaisAutonomos(8),
+    proximosEventos(4),
+    buscarNegociosVitrine(6, achado?.id),
   ])
+  // "Mais procurados" só com números reais; enquanto não há, mostra a vitrine
+  // (destaque > verificado > nota) com outro título.
+  const procurados = populares.length >= 2 ? populares : vitrine
 
-  const secoes: Record<SecaoHome, React.ReactNode> = {
+  const blocos: Record<SecaoHome, React.ReactNode> = {
     ofertas: <SecaoOfertas key="ofertas" ofertas={ofertas} />,
+    populares: <SecaoPopulares key="populares" negocios={procurados} reais={populares.length >= 2} />,
     novidades: <SecaoNovidades key="novidades" novidades={novidades} />,
-    populares: <SecaoPopulares key="populares" negocios={populares} />,
     profissionais: <SecaoProfissionais key="profissionais" profissionais={profissionais} />,
-    eventos: <SecaoEventos key="eventos" eventos={eventos} />,
-    anuncie: <SecaoAnuncie key="anuncie" />,
+    eventos: null,
+    anuncie: null,
   }
+  // agenda e "anuncie" andam juntos (lado a lado no computador), na posição do primeiro
+  const posicaoDupla = Math.min(...(['eventos', 'anuncie'] as const).map((s) => (ordem.includes(s) ? ordem.indexOf(s) : 99)))
 
   return (
     <>
-      {/* HERO — mobile: painel escuro compacto, cara de app (aba "Início") */}
-      <section className="relative overflow-hidden rounded-b-[28px] bg-serra-escuro px-4 pb-6 pt-3 text-white lg:hidden">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-14 -top-20 h-56 w-56 rounded-full bg-mata-400 opacity-20 blur-3xl"
-        />
-        <div className="relative">
-          <p className="entrada-lista text-xs font-semibold uppercase tracking-wide text-white/70" style={{ '--i': 0 } as React.CSSProperties}>
-            Tanguá, RJ
-          </p>
-          <h1 className="entrada-lista mt-1 font-display text-2xl font-bold" style={{ '--i': 1 } as React.CSSProperties}>
-            {saudacao()}!
-          </h1>
-          <p className="entrada-lista mt-1 text-sm text-white/80" style={{ '--i': 2 } as React.CSSProperties}>
-            O que você precisa encontrar hoje?
-          </p>
-          <div className="entrada-lista mt-4" style={{ '--i': 3 } as React.CSSProperties}>
-            <BuscaRapida />
+      <TopoInicio />
+
+      {/* computador: herói verde do protótipo "Início — desktop" */}
+      <section className="mx-auto hidden max-w-[1200px] px-6 pt-7 md:block">
+        <div className="flex flex-wrap items-center gap-8 rounded-[32px] bg-serra p-[clamp(24px,5vw,56px)] text-white">
+          <div className="flex min-w-0 flex-[999_1_420px] flex-col gap-[18px]">
+            <p className="text-[15px] font-semibold text-white/75">Tanguá · RJ</p>
+            <h1 className="font-display text-[clamp(36px,5vw,60px)] font-bold leading-[1.02]">Tudo de Tanguá, perto de você.</h1>
+            <p className="max-w-[560px] text-lg leading-relaxed text-white/85">
+              Comércios, profissionais, ofertas e o que acontece na cidade. Fale direto no WhatsApp, sem intermediário.
+            </p>
+            <form action="/buscar" method="get" role="search" className="flex max-w-[620px] flex-wrap gap-2.5">
+              <label className="flex h-14 min-w-0 flex-[1_1_260px] items-center gap-2.5 rounded-2xl bg-white px-4">
+                <Search className="h-5 w-5 shrink-0 text-[#55655D]" aria-hidden="true" />
+                <input
+                  name="q"
+                  type="search"
+                  placeholder="Pizza, eletricista, farmácia…"
+                  aria-label="Buscar em Tanguá"
+                  className="min-w-0 flex-1 bg-transparent text-base text-[#13241D] placeholder:text-[#6B7A72] focus:outline-none"
+                />
+              </label>
+              <button type="submit" className="h-14 rounded-2xl bg-laranja px-6 font-bold text-tinta hover:bg-laranja-claro">
+                Buscar
+              </button>
+            </form>
+            <div className="flex flex-wrap gap-2">
+              {categorias.slice(0, 6).map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/categoria/${c.slug}`}
+                  className="flex h-[38px] items-center rounded-full bg-white/[0.12] px-3.5 text-sm font-semibold text-white hover:bg-white/20"
+                >
+                  {c.nome}
+                </Link>
+              ))}
+            </div>
           </div>
+          {achado && (
+            <Link
+              href={`${urlNegocio(achado)}?origem=home`}
+              className="min-w-0 max-w-[380px] flex-[1_1_300px] overflow-hidden rounded-[24px] bg-superficie text-barro-900"
+            >
+              <FotoNegocio
+                id={achado.id}
+                url={achado.foto_capa_url}
+                nome={achado.nome}
+                icone={achado.categoria?.icone}
+                tamanhos="380px"
+                prioridade
+                className="h-[170px] w-full"
+              />
+              <span className="flex flex-col gap-1 px-[18px] py-4">
+                <span className="font-mono text-xs font-bold text-casca-700">ACHADO DO DIA</span>
+                <span className="font-display text-[22px] font-bold">{achado.nome}</span>
+                <span className="text-sm text-barro-600">{metaNegocio(achado, { comBairro: true })}</span>
+              </span>
+            </Link>
+          )}
         </div>
       </section>
 
-      {/* HERO — desktop/tablet: bloco verde da marca */}
-      <section className="mx-auto hidden max-w-6xl px-4 pt-8 sm:px-6 lg:block">
-        <div className="relative overflow-hidden rounded-[32px] bg-serra px-12 py-14 text-white">
-          <MotivoGomo className="pointer-events-none absolute -right-28 -top-28 h-[440px] w-[440px] text-white opacity-[0.06]" />
-          <div className="relative grid grid-cols-[1.25fr_0.75fr] items-center gap-10">
-            <div>
-              <p className="entrada-lista text-sm font-semibold text-white/75" style={{ '--i': 0 } as React.CSSProperties}>
-                Tanguá · RJ
-              </p>
-              <h1
-                className="entrada-lista mt-3 max-w-2xl text-balance font-display text-6xl font-bold leading-[1.02]"
-                style={{ '--i': 1 } as React.CSSProperties}
-              >
-                Tudo de Tanguá, perto de você.
-              </h1>
-              <p className="entrada-lista mt-5 max-w-xl text-lg text-white/85" style={{ '--i': 2 } as React.CSSProperties}>
-                Comércios, profissionais, ofertas e o que acontece na cidade. Fale direto no WhatsApp, sem
-                intermediário.
-              </p>
-              <div className="entrada-lista mt-8" style={{ '--i': 3 } as React.CSSProperties}>
-                <BuscaRapida />
-              </div>
-            </div>
-            <div className="entrada-lista flex justify-center" style={{ '--i': 1 } as React.CSSProperties}>
-              <LogoTangua variante="sobre-escuro" className="h-64 w-64 drop-shadow-[0_18px_30px_rgba(0,0,0,0.25)]" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CATEGORIAS — pílulas de atalho, compartilhadas pelas duas versões do hero */}
-      <section className="mx-auto max-w-6xl px-4 pt-4 sm:px-6 lg:pt-6">
-        <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible">
+      <div className="mx-auto flex max-w-[1200px] flex-col gap-[22px] pt-4 md:gap-11 md:px-6 md:pt-10">
+        {/* categorias (celular): Tudo em destaque, o resto rola de lado */}
+        <nav aria-label="Categorias" className="flex gap-2.5 overflow-x-auto px-5 [scrollbar-width:none] md:hidden">
           <Link
             href="/buscar"
-            className="shrink-0 rounded-full bg-laranja px-4 py-1.5 text-sm font-semibold text-tinta shadow-sm"
+            className="flex h-10 shrink-0 items-center rounded-full bg-barro-900 px-4 text-sm font-bold text-feira"
           >
             Tudo
           </Link>
-          {categoriasDestaque.map((cat) => {
-            const Icone = iconeCategoria(cat.icone)
+          {categorias.map((c) => (
+            <Link
+              key={c.id}
+              href={`/categoria/${c.slug}`}
+              className="flex h-10 shrink-0 items-center rounded-full border border-barro-200/80 bg-superficie px-4 text-sm font-semibold text-barro-900"
+            >
+              {c.nome}
+            </Link>
+          ))}
+        </nav>
+
+        {ordem.map((secao, i) => {
+          if (secao === 'eventos' || secao === 'anuncie') {
+            if (i !== posicaoDupla) return null
             return (
-              <Link
-                key={cat.slug}
-                href={`/buscar?categoria=${cat.slug}`}
-                className="flex shrink-0 items-center gap-1.5 rounded-full bg-superficie px-4 py-1.5 text-sm text-barro-700 shadow-sm transition-colors hover:bg-casca-50 hover:text-casca-700"
-              >
-                <Icone className="h-3.5 w-3.5" />
-                {cat.nome}
-              </Link>
+              <div key="agenda-anuncie" className="flex flex-col gap-[22px] md:flex-row md:flex-wrap md:gap-6">
+                {ordem.includes('eventos') && <SecaoEventos eventos={eventos} />}
+                {ordem.includes('anuncie') && <SecaoAnuncie />}
+              </div>
             )
-          })}
-        </div>
-      </section>
+          }
+          return (
+            <div key={secao} className="contents">
+              {blocos[secao]}
+              {secao === 'populares' && <ParaVoce />}
+            </div>
+          )
+        })}
 
-      {/* ACHADO DO DIA */}
-      {achadoDoDia && (
-        <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-casca-500" />
-            <h2 className="font-display text-xl font-semibold text-barro-900">Achado do dia</h2>
-          </div>
-          <p className="mt-1 text-sm text-barro-600">Um negócio em destaque todo dia — hoje é a vez desse aqui.</p>
-          <div className="mt-4 max-w-sm">
-            <CardAchadoDoDia negocio={achadoDoDia} />
-          </div>
-        </section>
-      )}
-
-      {/* PERTO DE VOCÊ */}
-      {pertoDeVoce.length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
-          <h2 className="font-display text-xl font-semibold text-barro-900">Em destaque no diretório</h2>
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {pertoDeVoce.map((negocio) => (
-              <CardNegocioMini key={negocio.id} negocio={negocio} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {ordem.map((secao) => secoes[secao])}
-
-      {/* TRÊS PILARES */}
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <div className="grid gap-6 sm:grid-cols-3">
-          {pilares.map((p, i) => {
-            const cores = coresPilar[p.cor]
-            return (
-              <Link
-                key={p.href}
-                href={p.href}
-                className="entrada-lista group rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira transition-all hover:-translate-y-1.5 hover:shadow-feira-lg"
-                style={{ '--i': i } as React.CSSProperties}
-              >
-                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${cores.bg} ${cores.texto} transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6`}>
-                  <p.icone className="h-6 w-6" />
-                </div>
-                <h3 className="mt-4 font-display text-xl font-semibold text-barro-900">{p.titulo}</h3>
-                <p className="mt-2 text-barro-600">{p.texto}</p>
-                <span className={`mt-4 inline-flex items-center gap-1 text-sm font-semibold ${cores.link} transition-all group-hover:gap-2`}>
-                  {p.rotulo} <ArrowRight className="h-4 w-4" />
-                </span>
-              </Link>
-            )
-          })}
-        </div>
-      </section>
-
+        <VistosRecentemente />
+      </div>
     </>
   )
 }

@@ -1,11 +1,23 @@
-import { createClient, createPublicClient } from '@/lib/supabase/server'
+import { createClient, createPublicClient, createServiceClient } from '@/lib/supabase/server'
 import type { ModalidadeAtendimento, Negocio } from '@/lib/types/database'
+
+import { headers } from 'next/headers'
+import { situacaoHorario } from '@/lib/horario/funcionamento'
+import { ehRobo } from '@/lib/metricas/eventos-perfil'
+
+export type OrdemBusca = 'relevancia' | 'nota' | 'novos'
 
 interface FiltrosBusca {
   termo?: string
   categoriaSlug?: string
   bairro?: string
   modalidade?: ModalidadeAtendimento
+  tipo?: 'autonomo' | 'estabelecimento'
+  verificado?: boolean
+  comOferta?: boolean
+  /** calculado pelo horário cadastrado (fuso de Tanguá) */
+  abertoAgora?: boolean
+  ordem?: OrdemBusca
   /** limite fixo, sem paginação — usado em vitrines pequenas (ex: destaques na home) */
   limite?: number
   /** paginação de verdade — página 1-based */
@@ -14,47 +26,114 @@ interface FiltrosBusca {
 }
 
 const POR_PAGINA_PADRAO = 24
+// "aberto agora" é calculado aqui (não no banco): filtra até esse tanto e pagina em memória
+const TETO_FILTRO_HORARIO = 300
+
+/** Tira do termo o que tem significado na sintaxe de filtro do PostgREST. */
+export function termoSeguro(termo: string) {
+  return termo.replace(/[,()*%\\:"']/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60)
+}
+
+/** Conta quantas vezes cada perfil com Destaque apareceu na busca (painel → Estatísticas). */
+function contarImpressoesDestaque(lista: Negocio[]) {
+  const ids = lista.filter((n) => n.destaque_ativo).map((n) => n.id)
+  if (ids.length === 0) return
+  try {
+    // robô (Google, prévia de link, testes automatizados) não conta
+    if (ehRobo(headers().get('user-agent'))) return
+    createServiceClient()
+      .rpc('registrar_impressoes', { p_ids: ids })
+      .then(({ error }) => error && console.error('Impressões do destaque:', error.message))
+  } catch {
+    // sem service role (build/preview): não conta
+  }
+}
+
+export type ResultadoBusca = Negocio & { oferta?: string | null }
 
 export async function buscarNegocios(
   filtros: FiltrosBusca = {}
-): Promise<{ negocios: Negocio[]; total: number; porPagina: number }> {
+): Promise<{ negocios: ResultadoBusca[]; total: number; porPagina: number }> {
   const supabase = createClient()
   const porPagina = filtros.porPagina ?? POR_PAGINA_PADRAO
+  const agora = new Date().toISOString()
 
   let query = supabase
     .from('negocios')
     .select('*, categoria:categorias(*)', { count: 'exact' })
     .eq('ativo', true)
-    .order('destaque_ativo', { ascending: false })
-    .order('verificado', { ascending: false })
-    .order('nota_google', { ascending: false, nullsFirst: false })
+    .eq('status_cadastro', 'aprovado')
 
-  if (filtros.termo) {
-    // Use pg_trgm for better search
-    query = query.or(`nome.ilike.%${filtros.termo}%,descricao.ilike.%${filtros.termo}%`)
+  if (filtros.ordem === 'nota') {
+    query = query.order('nota_media', { ascending: false, nullsFirst: false }).order('nota_google', { ascending: false, nullsFirst: false })
+  } else if (filtros.ordem === 'novos') {
+    query = query.order('criado_em', { ascending: false })
+  } else {
+    query = query
+      .order('destaque_ativo', { ascending: false })
+      .order('verificado', { ascending: false })
+      .order('nota_google', { ascending: false, nullsFirst: false })
+  }
+
+  const termo = filtros.termo ? termoSeguro(filtros.termo) : ''
+  if (termo) {
+    query = query.or(`nome.ilike.%${termo}%,descricao.ilike.%${termo}%,area_atendimento.ilike.%${termo}%`)
   }
 
   if (filtros.categoriaSlug) {
-    const { data: categoria } = await supabase
-      .from('categorias')
-      .select('id')
-      .eq('slug', filtros.categoriaSlug)
-      .single()
-    if (categoria) query = query.eq('categoria_id', categoria.id)
+    const { data: categoria } = await supabase.from('categorias').select('id').eq('slug', filtros.categoriaSlug).maybeSingle()
+    if (!categoria) return { negocios: [], total: 0, porPagina }
+    query = query.eq('categoria_id', categoria.id)
+  }
+  if (filtros.bairro) query = query.eq('bairro', filtros.bairro)
+  if (filtros.modalidade) query = query.contains('modalidades_atendimento', [filtros.modalidade])
+  if (filtros.tipo) query = query.eq('tipo_perfil', filtros.tipo)
+  if (filtros.verificado) query = query.eq('verificado', true)
+
+  // ofertas valendo: também servem pro chip "-25%" de cada linha
+  const { data: cupons } = await supabase
+    .from('cupons')
+    .select('negocio_id, desconto_texto, preco_original_centavos, preco_promocional_centavos, limite_resgates, resgates_count')
+    .eq('ativo', true)
+    .gt('expira_em', agora)
+    .lte('inicia_em', agora)
+    .limit(1000)
+  const ofertaPorNegocio = new Map<string, string>()
+  for (const c of cupons ?? []) {
+    if (c.limite_resgates && (c.resgates_count ?? 0) >= c.limite_resgates) continue
+    if (ofertaPorNegocio.has(c.negocio_id)) continue
+    const pct =
+      c.preco_original_centavos && c.preco_promocional_centavos !== null && c.preco_promocional_centavos < c.preco_original_centavos
+        ? Math.floor(((c.preco_original_centavos - c.preco_promocional_centavos) / c.preco_original_centavos) * 100)
+        : null
+    ofertaPorNegocio.set(c.negocio_id, pct ? `-${pct}%` : c.desconto_texto.slice(0, 24))
+  }
+  if (filtros.comOferta) {
+    const ids = Array.from(ofertaPorNegocio.keys())
+    if (ids.length === 0) return { negocios: [], total: 0, porPagina }
+    query = query.in('id', ids.slice(0, 300))
   }
 
-  if (filtros.bairro) {
-    query = query.eq('bairro', filtros.bairro)
+  const comOferta = (lista: Negocio[]) => {
+    contarImpressoesDestaque(lista)
+    return lista.map((n) => ({ ...n, oferta: ofertaPorNegocio.get(n.id) ?? null }))
   }
+  const pagina = Math.max(1, filtros.pagina ?? 1)
 
-  if (filtros.modalidade) {
-    query = query.contains('modalidades_atendimento', [filtros.modalidade])
+  if (filtros.abertoAgora) {
+    const { data, error } = await query.limit(TETO_FILTRO_HORARIO)
+    if (error) {
+      console.error('Erro ao buscar negócios:', error.message)
+      return { negocios: [], total: 0, porPagina }
+    }
+    const abertos = (data as unknown as Negocio[]).filter((n) => situacaoHorario(n.horario_funcionamento, n.aberto_agora).aberto === true)
+    const inicio = (pagina - 1) * porPagina
+    return { negocios: comOferta(abertos.slice(inicio, inicio + porPagina)), total: abertos.length, porPagina }
   }
 
   if (filtros.limite) {
     query = query.limit(filtros.limite)
   } else {
-    const pagina = Math.max(1, filtros.pagina ?? 1)
     const inicio = (pagina - 1) * porPagina
     query = query.range(inicio, inicio + porPagina - 1)
   }
@@ -64,7 +143,7 @@ export async function buscarNegocios(
     console.error('Erro ao buscar negócios:', error.message)
     return { negocios: [], total: 0, porPagina }
   }
-  return { negocios: data as unknown as Negocio[], total: count ?? 0, porPagina }
+  return { negocios: comOferta(data as unknown as Negocio[]), total: count ?? 0, porPagina }
 }
 
 /**
@@ -139,13 +218,25 @@ export async function buscarNegocioPorId(id: string): Promise<Negocio | null> {
     .from('negocios')
     .select('*, categoria:categorias(*)')
     .eq('id', id)
-    .single()
+    .maybeSingle()
 
   if (error) {
     console.error('Erro ao buscar negócio:', error.message)
     return null
   }
-  return data as unknown as Negocio
+  return data as unknown as Negocio | null
+}
+
+/** Aceita o endereço amigável (slug) ou o id antigo (links já compartilhados). */
+export async function buscarNegocioPorSlugOuId(chave: string): Promise<Negocio | null> {
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(chave)) return buscarNegocioPorId(chave)
+  if (!/^[a-z0-9-]{1,80}$/.test(chave)) return null
+  const { data, error } = await createClient().from('negocios').select('*, categoria:categorias(*)').eq('slug', chave).maybeSingle()
+  if (error) {
+    console.error('Erro ao buscar negócio por slug:', error.message)
+    return null
+  }
+  return data as unknown as Negocio | null
 }
 
 export async function buscarCategorias() {

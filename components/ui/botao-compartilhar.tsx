@@ -55,7 +55,9 @@ export function BotaoCompartilhar({
       aria-label={iconApenas ? rotulo || 'Compartilhar' : undefined}
       className={cn(
         'inline-flex items-center justify-center font-semibold transition-colors',
-        iconApenas ? 'rounded-full' : 'gap-2 rounded-xl',
+        !iconApenas && 'gap-2',
+        // sem tailwind-merge: só põe o arredondamento padrão se quem usa não passou o seu
+        !className?.includes('rounded-') && (iconApenas ? 'rounded-full' : 'rounded-xl'),
         className
       )}
     >

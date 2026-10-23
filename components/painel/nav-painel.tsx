@@ -22,6 +22,9 @@ import {
   Settings,
   ScrollText,
   Layers,
+  Users,
+  Tags,
+  Send,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -45,7 +48,10 @@ const LINKS_PROFISSIONAL: LinkPainel[] = [
 const LINKS_ADMIN: LinkPainel[] = [
   { href: '/painel/admin', rotulo: 'Visão geral', icone: LayoutDashboard },
   { href: '/painel/admin/negocios-pendentes', rotulo: 'Cadastros sinalizados', icone: Store },
-  { href: '/painel/admin/negocios', rotulo: 'Negócios', icone: Sparkles },
+  { href: '/painel/admin/negocios', rotulo: 'Negócios (destaque e verificação)', icone: Sparkles },
+  { href: '/painel/admin/usuarios', rotulo: 'Usuários', icone: Users },
+  { href: '/painel/admin/categorias', rotulo: 'Categorias', icone: Tags },
+  { href: '/painel/admin/comunicados', rotulo: 'Comunicados', icone: Send },
   { href: '/painel/admin/reivindicacoes', rotulo: 'Reivindicações', icone: ShieldCheck },
   { href: '/painel/admin/denuncias', rotulo: 'Denúncias', icone: Flag },
   { href: '/painel/admin/vagas', rotulo: 'Vagas', icone: Briefcase },

@@ -9,16 +9,7 @@ import { CampoModalidadeAtendimento } from '@/components/painel/campo-modalidade
 import type { Negocio, Categoria, ModalidadeAtendimento } from '@/lib/types/database'
 import Image from 'next/image'
 import { X } from 'lucide-react'
-
-const DIAS_SEMANA: { chave: string; rotulo: string }[] = [
-  { chave: 'seg', rotulo: 'Segunda' },
-  { chave: 'ter', rotulo: 'Terça' },
-  { chave: 'qua', rotulo: 'Quarta' },
-  { chave: 'qui', rotulo: 'Quinta' },
-  { chave: 'sex', rotulo: 'Sexta' },
-  { chave: 'sab', rotulo: 'Sábado' },
-  { chave: 'dom', rotulo: 'Domingo' },
-]
+import { EditorHorario } from '@/components/painel/editor-horario'
 
 const OPCOES_PAGAMENTO = ['Dinheiro', 'Pix', 'Cartão de débito', 'Cartão de crédito', 'Boleto']
 
@@ -130,22 +121,7 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
         <Campo name="bairro" id="bairro" rotulo="Bairro" defaultValue={negocio.bairro ?? ''} placeholder="Centro, Manilha..." />
       </div>
 
-      <div>
-        <span className="text-sm font-medium text-barro-800">Horário de funcionamento</span>
-        <div className="mt-2 grid gap-2 sm:grid-cols-2">
-          {DIAS_SEMANA.map((dia) => (
-            <div key={dia.chave} className="flex items-center gap-2">
-              <span className="w-20 shrink-0 text-sm text-barro-600">{dia.rotulo}</span>
-              <input
-                name={`horario_${dia.chave}`}
-                defaultValue={negocio.horario_funcionamento?.[dia.chave] ?? ''}
-                placeholder="08:00-18:00 ou Fechado"
-                className="w-full rounded-lg border border-barro-300 bg-superficie px-3 py-1.5 text-sm text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+      <EditorHorario horario={negocio.horario_funcionamento} />
 
       <div>
         <span className="text-sm font-medium text-barro-800">Formas de pagamento aceitas</span>
@@ -191,7 +167,7 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
         />
       </div>
 
-      <div>
+      <div id="fotos" className="scroll-mt-20">
         <span className="text-sm font-medium text-barro-800">Galeria de fotos</span>
         {galeria.length > 0 && (
           <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">

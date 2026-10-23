@@ -9,6 +9,7 @@ import { enviarImagem } from '@/lib/storage/imagens'
 import { z } from 'zod'
 import { lerPrecoCentavos } from '@/lib/admin/configuracoes'
 import { dentroDoLimite } from '@/lib/seguranca/rate-limit'
+import { agendarLembreteAvaliacao } from '@/lib/avaliacoes/lembretes'
 import { normalizarInstagram, normalizarSite, normalizarTelefoneBR } from '@/lib/utils'
 import type { ModalidadeAtendimento } from '@/lib/types/database'
 
@@ -365,12 +366,21 @@ export async function criarPost(negocioId: string, formData: FormData) {
   if (!validado.success) return { erro: validado.error.issues[0].message }
   const { titulo, tipo, conteudo } = validado.data
 
+  let imagemUrl: string | null = null
+  const foto = formData.get('foto')
+  if (foto instanceof File && foto.size > 0) {
+    const r = await enviarImagem(supabase, foto, `negocios/${negocioId}/novidades`)
+    if (r.erro) return { erro: r.erro }
+    imagemUrl = r.url ?? null
+  }
+
   const { error } = await supabase.from('posts_negocio').insert({
     negocio_id: negocioId,
     autor_id: user.id,
     tipo,
     titulo,
     conteudo: conteudo || null,
+    imagem_url: imagemUrl,
   })
 
   if (error) return { erro: traduzirErroBanco(error) }
@@ -393,29 +403,60 @@ export async function criarPost(negocioId: string, formData: FormData) {
     )
   }
 
-  revalidatePath('/painel/negocio')
-  revalidatePath(`/negocio/${negocioId}`)
+  revalidatePath('/painel/negocio/novidades')
+  revalidatePath('/negocio/[id]', 'page')
+  return { erro: null }
+}
+
+/** Tirar uma novidade do perfil (arquivar) ou trazer de volta. */
+export async function alternarPostAtivo(postId: string, ativo: boolean) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Não autenticado.' }
+  const { error } = await supabase.from('posts_negocio').update({ ativo }).eq('id', postId)
+  if (error) return { erro: traduzirErroBanco(error) }
+  revalidatePath('/painel/negocio/novidades')
+  revalidatePath('/negocio/[id]', 'page')
   return { erro: null }
 }
 
 // ---------------------------------------------------------------------
 // Catálogo de produtos/serviços com preço
 // ---------------------------------------------------------------------
+function lerPrecoProduto(bruto: FormDataEntryValue | null): { preco: number | null; erro?: string } {
+  if (!String(bruto ?? '').trim()) return { preco: null }
+  const centavos = lerPrecoCentavos(bruto)
+  if (Number.isNaN(centavos)) return { preco: null, erro: 'Preço inválido. Use só números, ex: 35,00' }
+  return { preco: centavos / 100 }
+}
+
+function revalidarCatalogo() {
+  revalidatePath('/painel/negocio/catalogo')
+  revalidatePath('/negocio/[id]', 'page')
+}
+
 export async function criarProduto(negocioId: string, formData: FormData) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { erro: 'Não autenticado.' }
 
-  const precoStr = (formData.get('preco') as string)?.replace(',', '.').trim()
-  const precoNumero = precoStr ? Number(precoStr) : null
-  if (precoStr && Number.isNaN(precoNumero)) return { erro: 'Preço inválido.' }
+  const preco = lerPrecoProduto(formData.get('preco'))
+  if (preco.erro) return { erro: preco.erro }
 
   const validado = schemaProduto.safeParse({
     nome: formData.get('nome') as string,
     descricao: (formData.get('descricao') as string) || undefined,
-    preco: precoNumero,
+    preco: preco.preco,
   })
   if (!validado.success) return { erro: validado.error.issues[0].message }
+
+  let imagemUrl: string | null = null
+  const foto = formData.get('foto')
+  if (foto instanceof File && foto.size > 0) {
+    const r = await enviarImagem(supabase, foto, `negocios/${negocioId}/produtos`)
+    if (r.erro) return { erro: r.erro }
+    imagemUrl = r.url ?? null
+  }
 
   const { error } = await supabase.from('produtos_servicos').insert({
     negocio_id: negocioId,
@@ -423,26 +464,71 @@ export async function criarProduto(negocioId: string, formData: FormData) {
     descricao: validado.data.descricao || null,
     preco: validado.data.preco,
     preco_a_partir_de: formData.get('preco_a_partir_de') === 'on',
+    imagem_url: imagemUrl,
   })
 
   if (error) return { erro: traduzirErroBanco(error) }
-
-  revalidatePath('/painel/negocio')
-  revalidatePath(`/negocio/${negocioId}`)
+  revalidarCatalogo()
   return { erro: null }
 }
 
-export async function removerProduto(produtoId: string, negocioId: string) {
+/** Editar nome, preço, detalhes e foto de um item do catálogo. */
+export async function atualizarProduto(produtoId: string, formData: FormData) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Não autenticado.' }
+  const { data: atual } = await supabase.from('produtos_servicos').select('negocio_id').eq('id', produtoId).maybeSingle()
+  if (!atual) return { erro: 'Item não encontrado.' }
+
+  const preco = lerPrecoProduto(formData.get('preco'))
+  if (preco.erro) return { erro: preco.erro }
+  const validado = schemaProduto.safeParse({
+    nome: formData.get('nome') as string,
+    descricao: (formData.get('descricao') as string) || undefined,
+    preco: preco.preco,
+  })
+  if (!validado.success) return { erro: validado.error.issues[0].message }
+
+  const dados: Record<string, unknown> = {
+    nome: validado.data.nome,
+    descricao: validado.data.descricao || null,
+    preco: validado.data.preco,
+    preco_a_partir_de: formData.get('preco_a_partir_de') === 'on',
+  }
+  const foto = formData.get('foto')
+  if (foto instanceof File && foto.size > 0) {
+    const r = await enviarImagem(supabase, foto, `negocios/${atual.negocio_id}/produtos`)
+    if (r.erro) return { erro: r.erro }
+    dados.imagem_url = r.url ?? null
+  } else if (formData.get('remover_foto') === 'on') {
+    dados.imagem_url = null
+  }
+
+  const { error } = await supabase.from('produtos_servicos').update(dados).eq('id', produtoId)
+  if (error) return { erro: traduzirErroBanco(error) }
+  revalidarCatalogo()
+  return { erro: null }
+}
+
+/** Arquivar (some do perfil, não conta no limite do plano) ou reativar. */
+export async function alternarProdutoAtivo(produtoId: string, ativo: boolean) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Não autenticado.' }
+  const { error } = await supabase.from('produtos_servicos').update({ ativo }).eq('id', produtoId)
+  if (error) return { erro: traduzirErroBanco(error) }
+  revalidarCatalogo()
+  return { erro: null }
+}
+
+export async function removerProduto(produtoId: string, _negocioId?: string) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { erro: 'Não autenticado.' }
 
   const { error } = await supabase.from('produtos_servicos').delete().eq('id', produtoId)
-
   if (error) return { erro: traduzirErroBanco(error) }
-
-  revalidatePath('/painel/negocio')
-  revalidatePath(`/negocio/${negocioId}`)
+  revalidarCatalogo()
   return { erro: null }
 }
 
@@ -727,7 +813,13 @@ export async function validarCodigoCupom(formData: FormData) {
   const { data, error } = await supabase.rpc('validar_codigo_cupom', { p_codigo: codigo })
   if (error) return { erro: traduzirErroBanco(error) }
   const r = data as { resultado: string; titulo?: string; desconto?: string; usado_em?: string }
-  if (r.resultado === 'ok') return { erro: null, mensagem: `Cupom válido: ${r.titulo} — ${r.desconto}. Marcado como usado.` }
+  if (r.resultado === 'ok') {
+    // 2 dias depois, pergunta pro cliente como foi (se ainda não avaliou)
+    const { data: resgate } = await supabase.from('cupom_resgates').select('perfil_id, cupom:cupons(negocio_id)').eq('codigo', codigo).maybeSingle()
+    const negocioId = (resgate?.cupom as { negocio_id?: string } | null)?.negocio_id
+    if (resgate?.perfil_id && negocioId) await agendarLembreteAvaliacao(resgate.perfil_id, negocioId, 'cupom')
+    return { erro: null, mensagem: `Cupom válido: ${r.titulo} — ${r.desconto}. Marcado como usado.` }
+  }
   if (r.resultado === 'ja_usado') {
     return { erro: `Esse código já foi usado em ${new Date(r.usado_em!).toLocaleString('pt-BR')}.` }
   }

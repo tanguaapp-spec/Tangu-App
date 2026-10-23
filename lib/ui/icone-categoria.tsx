@@ -1,18 +1,70 @@
-import * as LucideIcons from 'lucide-react'
-import { Store, type LucideIcon } from 'lucide-react'
+import {
+  Baby,
+  Bike,
+  Briefcase,
+  Cake,
+  Car,
+  Coffee,
+  Dog,
+  Dumbbell,
+  GraduationCap,
+  Hammer,
+  HeartPulse,
+  Home,
+  Laptop,
+  PartyPopper,
+  Pill,
+  Pizza,
+  Scissors,
+  Shirt,
+  ShoppingBag,
+  ShoppingCart,
+  Sprout,
+  Stethoscope,
+  Store,
+  Truck,
+  Utensils,
+  Wrench,
+  type LucideIcon,
+} from 'lucide-react'
 
 /**
- * `categorias.icone` guarda o nome do ícone em kebab-case (ex: "heart-pulse"),
- * o mesmo formato usado pelo próprio site do Lucide — aqui a gente resolve
- * pro componente React de verdade. Cai pra `Store` se o nome não existir
- * (categoria nova sem ícone cadastrado, ou erro de digitação no banco).
+ * `categorias.icone` guarda o nome do ícone em kebab-case (o mesmo do site
+ * do Lucide). Mapa fechado de propósito: importar o pacote inteiro do
+ * lucide colocava ~1.500 ícones no JavaScript de todas as telas. Ícone
+ * fora da lista cai pra `Store` — pra usar outro, é só incluir aqui.
  */
+const ICONES: Record<string, LucideIcon> = {
+  baby: Baby,
+  bike: Bike,
+  briefcase: Briefcase,
+  cake: Cake,
+  car: Car,
+  coffee: Coffee,
+  dog: Dog,
+  dumbbell: Dumbbell,
+  'graduation-cap': GraduationCap,
+  hammer: Hammer,
+  'heart-pulse': HeartPulse,
+  home: Home,
+  laptop: Laptop,
+  'party-popper': PartyPopper,
+  pill: Pill,
+  pizza: Pizza,
+  scissors: Scissors,
+  shirt: Shirt,
+  'shopping-bag': ShoppingBag,
+  'shopping-cart': ShoppingCart,
+  sprout: Sprout,
+  stethoscope: Stethoscope,
+  store: Store,
+  truck: Truck,
+  utensils: Utensils,
+  wrench: Wrench,
+}
+
+export const ICONES_CATEGORIA = Object.keys(ICONES)
+
 export function iconeCategoria(nomeIcone: string | null | undefined): LucideIcon {
-  if (!nomeIcone) return Store
-  const pascalCase = nomeIcone
-    .split('-')
-    .map((parte) => parte.charAt(0).toUpperCase() + parte.slice(1))
-    .join('')
-  const Icone = (LucideIcons as unknown as Record<string, LucideIcon>)[pascalCase]
-  return Icone ?? Store
+  return (nomeIcone && ICONES[nomeIcone]) || Store
 }

@@ -13,7 +13,7 @@ export async function CartaoDivulgacao({ urlPublica, nomeNegocio }: { urlPublica
   const mensagemCompartilhamento = `Conheça o ${nomeNegocio} no Tanguá App! ${urlPublica}`
 
   return (
-    <div className="mt-8 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
+    <div className="rounded-[24px] border border-barro-200/80 bg-superficie p-4 md:p-6">
       <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-barro-900">
         <Share2 className="h-5 w-5 text-casca-500" />
         Divulgue seu negócio

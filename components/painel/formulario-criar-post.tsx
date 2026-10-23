@@ -1,59 +1,106 @@
 'use client'
 
-import { useState } from 'react'
-import { Campo, AreaTexto } from '@/components/ui/campo'
-import { Botao } from '@/components/ui/botao'
+import { useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Camera, Loader2 } from 'lucide-react'
 import { criarPost } from '@/lib/actions/painel-negocio-actions'
 import { cn } from '@/lib/utils'
 
 const tipos = [
   { valor: 'novidade', rotulo: 'Novidade' },
   { valor: 'promocao', rotulo: 'Promoção' },
-  { valor: 'vaga_propria', rotulo: 'Vaga própria' },
 ]
 
+const campo =
+  'w-full rounded-[14px] border-[1.5px] border-barro-200 bg-superficie px-3.5 text-[15px] text-barro-900 placeholder:text-barro-400 focus:border-serra focus:outline-none'
+
 export function FormularioCriarPost({ negocioId }: { negocioId: string }) {
+  const router = useRouter()
+  const form = useRef<HTMLFormElement>(null)
   const [tipo, setTipo] = useState('novidade')
   const [carregando, setCarregando] = useState(false)
   const [enviado, setEnviado] = useState(false)
-
-  async function handleSubmit(formData: FormData) {
-    setCarregando(true)
-    formData.set('tipo', tipo)
-    await criarPost(negocioId, formData)
-    setCarregando(false)
-    setEnviado(true)
-    setTimeout(() => setEnviado(false), 2500)
-  }
+  const [erro, setErro] = useState<string | null>(null)
+  const [previa, setPrevia] = useState<string | null>(null)
 
   return (
-    <form action={handleSubmit} className="flex flex-col gap-4">
-      <div>
-        <span className="text-sm font-medium text-barro-800">Tipo de post</span>
-        <div className="mt-1.5 flex gap-2">
-          {tipos.map((t) => (
-            <button
-              key={t.valor}
-              type="button"
-              onClick={() => setTipo(t.valor)}
-              className={cn(
-                'rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
-                tipo === t.valor ? 'bg-laranja text-tinta' : 'bg-barro-100 text-barro-700'
-              )}
-            >
-              {t.rotulo}
-            </button>
-          ))}
-        </div>
+    <form
+      ref={form}
+      action={async (dados) => {
+        setCarregando(true)
+        setErro(null)
+        dados.set('tipo', tipo)
+        const r = await criarPost(negocioId, dados)
+        setCarregando(false)
+        if (r?.erro) {
+          setErro(r.erro)
+          return
+        }
+        form.current?.reset()
+        setPrevia(null)
+        setEnviado(true)
+        router.refresh()
+        setTimeout(() => setEnviado(false), 4000)
+      }}
+      className="flex flex-col gap-3"
+    >
+      <div role="radiogroup" aria-label="Tipo" className="flex gap-2">
+        {tipos.map((t) => (
+          <button
+            key={t.valor}
+            type="button"
+            role="radio"
+            aria-checked={tipo === t.valor}
+            onClick={() => setTipo(t.valor)}
+            className={cn('h-10 rounded-full px-4 text-sm font-semibold', tipo === t.valor ? 'bg-serra text-white' : 'border border-barro-200 text-barro-900')}
+          >
+            {t.rotulo}
+          </button>
+        ))}
       </div>
-
-      <Campo name="titulo" id="titulo" rotulo="Título" placeholder="Ex: Promoção de inverno!" required />
-      <AreaTexto name="conteudo" id="conteudo" rotulo="Detalhes" placeholder="Conte os detalhes da novidade..." />
-
-      {enviado && <p className="text-sm text-mata-600">Publicado! Já está visível no seu perfil.</p>}
-      <Botao type="submit" carregando={carregando} className="self-start">
+      <label className="sr-only" htmlFor="titulo-post">
+        Título
+      </label>
+      <input id="titulo-post" name="titulo" required maxLength={120} placeholder="Ex: Chegou açaí de 500ml!" className={`${campo} h-12`} />
+      <label className="sr-only" htmlFor="conteudo-post">
+        Detalhes
+      </label>
+      <textarea id="conteudo-post" name="conteudo" maxLength={2000} placeholder="Conte os detalhes (opcional)" className={`${campo} min-h-[90px] py-2.5`} />
+      <label className="flex cursor-pointer items-center gap-3 rounded-[14px] border-[1.5px] border-dashed border-barro-200 p-2.5 text-sm font-semibold text-barro-700">
+        {previa ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={previa} alt="" className="h-14 w-14 rounded-xl object-cover" />
+        ) : (
+          <span className="flex h-14 w-14 items-center justify-center rounded-xl bg-feira">
+            <Camera className="h-5 w-5" aria-hidden="true" />
+          </span>
+        )}
+        {previa ? 'Trocar foto' : 'Adicionar foto (opcional)'}
+        <input
+          type="file"
+          name="foto"
+          accept="image/jpeg,image/png,image/webp"
+          className="sr-only"
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            if (f) setPrevia(URL.createObjectURL(f))
+          }}
+        />
+      </label>
+      {erro && (
+        <p role="alert" className="text-sm text-red-700">
+          {erro}
+        </p>
+      )}
+      {enviado && (
+        <p role="status" className="rounded-[14px] bg-mata-100 p-3 text-sm font-semibold text-mata-700">
+          Publicado! Já aparece no seu perfil e quem favoritou foi avisado.
+        </p>
+      )}
+      <button disabled={carregando} className="flex h-12 items-center justify-center gap-2 rounded-[14px] bg-laranja font-bold text-tinta disabled:opacity-60">
+        {carregando && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
         Publicar
-      </Botao>
+      </button>
     </form>
   )
 }
