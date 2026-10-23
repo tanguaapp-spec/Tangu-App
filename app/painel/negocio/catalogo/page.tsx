@@ -32,7 +32,7 @@ export default async function PaginaCatalogo() {
           ) : null
         }
       />
-      <div className="grid gap-4 md:grid-cols-[1fr_380px] md:items-start md:gap-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_380px] md:items-start md:gap-6">
         <ListaProdutos produtos={(produtos ?? []) as ProdutoServico[]} negocioId={negocio.id} />
         <CartaoPainel id="novo" titulo="Novo item" descricao="A foto é opcional, mas ajuda muito.">
           <FormularioProduto negocioId={negocio.id} />

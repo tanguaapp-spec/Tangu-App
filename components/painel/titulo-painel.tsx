@@ -21,7 +21,7 @@ export function TituloPainel({ titulo, descricao, voltar = '/painel/negocio', ac
 
 export function CartaoPainel({ id, titulo, descricao, children }: { id?: string; titulo?: string; descricao?: string; children: React.ReactNode }) {
   return (
-    <section id={id} className="scroll-mt-20 rounded-[24px] border border-barro-200/80 bg-superficie p-4 md:p-6">
+    <section id={id} className="min-w-0 scroll-mt-20 rounded-[24px] border border-barro-200/80 bg-superficie p-4 md:p-6">
       {titulo && <h2 className="font-display text-lg font-bold text-barro-900 md:text-xl">{titulo}</h2>}
       {descricao && <p className="mt-0.5 text-sm text-barro-600">{descricao}</p>}
       <div className={titulo || descricao ? 'mt-4' : ''}>{children}</div>

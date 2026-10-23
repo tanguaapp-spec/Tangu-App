@@ -30,6 +30,15 @@
     transition: none !important;
   }
 
+  /* campos de data/hora têm largura mínima própria no celular e estouram a
+     tela dentro de grade/flex: deixa encolher como qualquer input */
+  input[type='date'],
+  input[type='time'],
+  input[type='datetime-local'] {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   /* foco visível para navegação por teclado — acessibilidade */
   :focus-visible {
     outline: 3px solid rgb(var(--laranja));

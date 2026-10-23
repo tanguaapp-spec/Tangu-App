@@ -7,6 +7,8 @@ export function traduzirErroAuth(mensagem: string | undefined): string {
     return 'A senha precisa ter pelo menos 8 caracteres.'
   if (m.includes('weak') || m.includes('pwned')) return 'Essa senha é fácil de adivinhar. Escolha outra.'
   if (m.includes('invalid email') || m.includes('unable to validate email')) return 'Confira o e-mail digitado.'
+  // limite de envio de e-mail do Supabase (SMTP embutido manda poucos por hora)
+  if (m.includes('email rate limit')) return 'Muita gente se cadastrando agora. Tente de novo em alguns minutos.'
   if (m.includes('rate limit') || m.includes('too many')) return 'Muitas tentativas seguidas. Aguarde alguns minutos.'
   if (m.includes('email not confirmed')) return 'Confirme seu e-mail antes de entrar — procure a mensagem na caixa de entrada ou spam.'
   if (m.includes('same password') || m.includes('different from the old'))

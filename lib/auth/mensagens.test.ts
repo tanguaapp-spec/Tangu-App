@@ -20,4 +20,7 @@ describe('caminhoInternoSeguro (open redirect)', () => {
     ['/\\evil.com', '/'],
     [null, '/'],
   ])('%s → %s', (entrada, saida) => expect(caminhoInternoSeguro(entrada as string | null)).toBe(saida))
+  it('limite de e-mail do Supabase tem mensagem própria', () => {
+    expect(traduzirErroAuth('email rate limit exceeded')).toMatch(/Muita gente/)
+  })
 })

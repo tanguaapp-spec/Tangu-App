@@ -43,7 +43,7 @@ export function FormularioCriarCupom({ negocioId }: { negocioId: string }) {
   const padraoExpira = paraInputLocal(new Date(Date.now() + 48 * 60 * 60 * 1000))
 
   return (
-    <form action={handleSubmit} className="grid gap-3 sm:grid-cols-3">
+    <form action={handleSubmit} className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       <Campo name="titulo" id="cupom_titulo" rotulo="Título da oferta" placeholder="Ex: Fim de semana" maxLength={120} required />
       <Campo name="desconto_texto" id="cupom_desconto" rotulo="Desconto" placeholder="Ex: 20% off, Leve 2 pague 1" maxLength={60} required />
       <Campo type="datetime-local" name="expira_em" id="cupom_expira" rotulo="Termina em" defaultValue={padraoExpira} required />

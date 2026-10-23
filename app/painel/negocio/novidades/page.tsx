@@ -20,7 +20,7 @@ export default async function PaginaNovidades() {
   return (
     <>
       <TituloPainel titulo="Novidades" descricao="Chegou produto novo, mudou o horário, fez um trabalho bonito? Publique: aparece no seu perfil e na página inicial, e quem favoritou você recebe aviso." voltar="/painel/negocio/mais" />
-      <div className="grid gap-4 md:grid-cols-[380px_1fr] md:items-start md:gap-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[380px_minmax(0,1fr)] md:items-start md:gap-6">
         <CartaoPainel titulo="Publicar">
           <FormularioCriarPost negocioId={negocio.id} />
         </CartaoPainel>

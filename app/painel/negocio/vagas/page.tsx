@@ -14,7 +14,7 @@ export default async function PaginaVagasPainel() {
   return (
     <>
       <TituloPainel titulo="Vagas" descricao="Está contratando? A vaga vai pro mural de vagas da cidade, com o nome do seu negócio." voltar="/painel/negocio/mais" />
-      <div className="grid gap-4 md:grid-cols-[1fr_400px] md:items-start md:gap-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_400px] md:items-start md:gap-6">
         <CartaoPainel titulo="Suas vagas">
           {!vagas?.length ? (
             <p className="text-sm text-barro-600">Nenhuma vaga publicada.</p>

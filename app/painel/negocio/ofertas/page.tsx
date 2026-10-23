@@ -19,7 +19,7 @@ export default async function PaginaOfertasPainel() {
         titulo="Ofertas e cupons"
         descricao="Ofertas valendo aparecem na página inicial e em Ofertas. Quem favoritou seu perfil é avisado. Com limite de cupons, cada pessoa pega um código e você valida no balcão."
       />
-      <div className="grid gap-4 md:grid-cols-[1fr_400px] md:items-start md:gap-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_400px] md:items-start md:gap-6">
         <div className="flex flex-col gap-4">
           <CartaoPainel id="validar" titulo="Validar cupom no balcão" descricao="Digite o código que o cliente mostrar. Cada código vale uma vez.">
             <ValidarCupom />
