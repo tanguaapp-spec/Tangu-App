@@ -44,16 +44,19 @@ export function FormularioAvaliacao({ negocioId }: Props) {
   }
 
   return (
-    <form onSubmit={handleEnviar} className="mt-6 rounded-xl border border-barro-100 bg-superficie p-4">
+    <form onSubmit={handleEnviar} className="rounded-[20px] bg-feira p-4">
       <h4 className="font-semibold text-barro-900 mb-3">Deixe sua avaliação</h4>
 
-      <div className="flex gap-1 mb-4">
+      <div role="radiogroup" aria-label="Sua nota" className="flex gap-1 mb-4">
         {[1, 2, 3, 4, 5].map((n) => (
           <button
             key={n}
             type="button"
+            role="radio"
+            aria-checked={nota === n}
+            aria-label={`${n} ${n === 1 ? 'estrela' : 'estrelas'}`}
             onClick={() => setNota(n)}
-            className="p-1"
+            className="flex h-11 w-11 items-center justify-center"
           >
             <Star
               className={`w-7 h-7 ${
