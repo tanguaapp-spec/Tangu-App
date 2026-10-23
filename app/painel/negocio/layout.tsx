@@ -18,10 +18,11 @@ export default async function LayoutNegocio({ children }: { children: React.Reac
     pendentes = count ?? 0
   }
   const temNegocio = !!negocio && negocio.status_cadastro === 'aprovado'
+  const { data: ehAdmin } = await createClient().rpc('eh_admin')
   return (
     <div className="md:flex">
-      <NavNegocio pendentes={pendentes} urlPublica={negocio ? urlNegocio(negocio) : null} acaoSair={sair} temNegocio={temNegocio} />
-      <main className="min-w-0 flex-1 pb-28 md:pb-12">
+      <NavNegocio pendentes={pendentes} urlPublica={negocio ? urlNegocio(negocio) : null} acaoSair={sair} temNegocio={temNegocio} ehAdmin={ehAdmin === true} />
+      <main className="min-w-0 flex-1 pb-[calc(var(--altura-nav)+24px)] md:pb-12">
         <div className="mx-auto max-w-[1100px] px-4 pt-[max(18px,env(safe-area-inset-top))] md:px-[clamp(16px,3vw,40px)] md:pt-6">{children}</div>
       </main>
     </div>

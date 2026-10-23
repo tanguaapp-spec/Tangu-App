@@ -15,6 +15,8 @@ export type Sessao = {
   naoLidas: number
   /** id do negócio que a pessoa administra (dona ou colaboradora), se houver */
   negocioId: string | null
+  /** administrador da plataforma (mostra atalho pro painel do admin) */
+  ehAdmin: boolean
   recarregar: () => void
 }
 
@@ -25,6 +27,7 @@ const SESSAO_VAZIA: Sessao = {
   avatarUrl: null,
   naoLidas: 0,
   negocioId: null,
+  ehAdmin: false,
   recarregar: () => undefined,
 }
 
@@ -55,11 +58,12 @@ export function ProvedorSessao({ children }: { children: React.ReactNode }) {
       setEstado({ ...SESSAO_VAZIA, carregado: true })
       return
     }
-    const [perfil, notificacoes, proprio, membro] = await Promise.all([
+    const [perfil, notificacoes, proprio, membro, admin] = await Promise.all([
       supabase.rpc('meu_perfil').maybeSingle(),
       supabase.from('notificacoes').select('id', { count: 'exact', head: true }).eq('perfil_id', user.id).is('lida_em', null),
       supabase.from('negocios').select('id').eq('reivindicado_por', user.id).limit(1).maybeSingle(),
       supabase.from('membros_negocio').select('negocio_id').eq('perfil_id', user.id).limit(1).maybeSingle(),
+      supabase.rpc('eh_admin'),
     ])
     const p = perfil.data as { nome_completo?: string; avatar_url?: string | null } | null
     setEstado({
@@ -69,6 +73,7 @@ export function ProvedorSessao({ children }: { children: React.ReactNode }) {
       avatarUrl: p?.avatar_url ?? null,
       naoLidas: notificacoes.count ?? 0,
       negocioId: (proprio.data?.id as string | undefined) ?? (membro.data?.negocio_id as string | undefined) ?? null,
+      ehAdmin: admin.data === true,
     })
   }, [])
 

@@ -32,7 +32,7 @@ import { MarcaTangua } from '@/components/marca/logo-tangua'
 import { SeletorTema } from '@/components/tema/seletor-tema'
 import type { PapelUsuario } from '@/lib/types/database'
 
-type LinkPainel = { href: string; rotulo: string; icone: LucideIcon }
+type LinkPainel = { href: string; rotulo: string; icone: LucideIcon; contador?: 'erros' }
 
 // Definidos aqui dentro (componente client) de propósito: os ícones do
 // lucide-react são componentes (forwardRef), e um Server Component não
@@ -47,6 +47,7 @@ const LINKS_PROFISSIONAL: LinkPainel[] = [
 ]
 const LINKS_ADMIN: LinkPainel[] = [
   { href: '/painel/admin', rotulo: 'Visão geral', icone: LayoutDashboard },
+  { href: '/painel/admin/logs', rotulo: 'Logs de erro', icone: AlertTriangle, contador: 'erros' },
   { href: '/painel/admin/negocios-pendentes', rotulo: 'Cadastros sinalizados', icone: Store },
   { href: '/painel/admin/negocios', rotulo: 'Negócios (destaque e verificação)', icone: Sparkles },
   { href: '/painel/admin/usuarios', rotulo: 'Usuários', icone: Users },
@@ -57,7 +58,6 @@ const LINKS_ADMIN: LinkPainel[] = [
   { href: '/painel/admin/vagas', rotulo: 'Vagas', icone: Briefcase },
   { href: '/painel/admin/avisos', rotulo: 'Avisos da cidade', icone: Megaphone },
   { href: '/painel/admin/prospeccao', rotulo: 'Prospecção (Google Maps)', icone: Radar },
-  { href: '/painel/admin/logs', rotulo: 'Logs de erro', icone: AlertTriangle },
   { href: '/painel/admin/suporte', rotulo: 'Chamados de suporte', icone: LifeBuoy },
   { href: '/painel/admin/assinaturas', rotulo: 'Assinaturas e pagamentos', icone: CreditCard },
   { href: '/painel/admin/planos', rotulo: 'Planos e limites', icone: Layers },
@@ -69,9 +69,12 @@ const LINKS_ADMIN: LinkPainel[] = [
 export function NavPainel({
   papel,
   acaoSair,
+  errosAbertos = 0,
 }: {
   papel: PapelUsuario | null | undefined
   acaoSair: () => void
+  /** erros sem resolver — aparece como bolinha vermelha no item Logs */
+  errosAbertos?: number
 }) {
   const [aberto, setAberto] = useState(false)
   const pathname = usePathname()
@@ -91,6 +94,11 @@ export function NavPainel({
       >
         <link.icone className="h-4 w-4" />
         {link.rotulo}
+        {link.contador === 'erros' && errosAbertos > 0 && (
+          <span className="ml-auto flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-red-600 px-1.5 font-mono text-xs font-bold text-white" aria-label={`${errosAbertos} erros abertos`}>
+            {errosAbertos > 99 ? '99+' : errosAbertos}
+          </span>
+        )}
       </Link>
     )
   }
@@ -103,13 +111,29 @@ export function NavPainel({
           <MarcaTangua tamanho="sm" className="text-mata-700" />
           <span className="rounded-full border border-barro-200 px-2 py-0.5 text-xs font-semibold text-barro-600">painel</span>
         </Link>
-        <button
-          aria-label={aberto ? 'Fechar menu' : 'Abrir menu'}
-          onClick={() => setAberto(!aberto)}
-          className="rounded-lg p-2 text-barro-800 hover:bg-barro-100"
-        >
-          {aberto ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="flex items-center gap-1">
+          {papel === 'admin' && (
+            <Link
+              href="/painel/admin/logs"
+              aria-label={errosAbertos > 0 ? `Logs de erro, ${errosAbertos} abertos` : 'Logs de erro'}
+              className={cn(
+                'flex h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold',
+                errosAbertos > 0 ? 'bg-red-50 text-red-700' : 'text-barro-800 hover:bg-barro-100'
+              )}
+            >
+              <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+              Logs
+              {errosAbertos > 0 && <span className="font-mono text-xs font-bold">{errosAbertos > 99 ? '99+' : errosAbertos}</span>}
+            </Link>
+          )}
+          <button
+            aria-label={aberto ? 'Fechar menu' : 'Abrir menu'}
+            onClick={() => setAberto(!aberto)}
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-barro-800 hover:bg-barro-100"
+          >
+            {aberto ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </header>
 
       {/* menu mobile — slide-down */}

@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import * as Sentry from '@sentry/nextjs'
+import { registrarErroCliente } from '@/lib/actions/observabilidade-actions'
 
 // Só entra em ação se o próprio app/layout.tsx (root layout) quebrar — o
 // error.tsx normal não cobre esse caso porque ele também faz parte da árvore
@@ -16,6 +17,12 @@ export default function GlobalError({
   useEffect(() => {
     console.error('Erro no layout raiz:', error)
     Sentry.captureException(error)
+    // também vai pra Logs de erro no painel do admin
+    registrarErroCliente(
+      `[app inteiro] ${error.message || `Erro sem mensagem (digest: ${error.digest ?? 'nenhum'})`}`,
+      error.stack,
+      typeof window !== 'undefined' ? window.location.href : undefined
+    ).catch(() => undefined)
   }, [error])
 
   return (

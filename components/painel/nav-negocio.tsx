@@ -14,6 +14,7 @@ import {
   MoreHorizontal,
   Package,
   QrCode,
+  ShieldCheck,
   Star,
   Store,
   Tag,
@@ -23,6 +24,7 @@ import {
 import { cn } from '@/lib/utils'
 import { LogoTangua } from '@/components/marca/logo-tangua'
 import { SeletorTema } from '@/components/tema/seletor-tema'
+import { useTecladoAberto } from '@/components/layout/use-teclado-aberto'
 
 type Item = { href: string; rotulo: string; icone: LucideIcon; badge?: 'orcamentos'; exato?: boolean }
 
@@ -60,13 +62,16 @@ export function NavNegocio({
   urlPublica,
   acaoSair,
   temNegocio,
+  ehAdmin = false,
 }: {
   pendentes: number
   urlPublica: string | null
   acaoSair: () => void
   temNegocio: boolean
+  ehAdmin?: boolean
 }) {
   const pathname = usePathname()
+  const teclado = useTecladoAberto()
   // "Mais" acende nas telas que só existem dentro dele
   const noMais = !INFERIOR.slice(0, 4).some((i) => ativoEm(pathname, i))
 
@@ -108,6 +113,11 @@ export function NavNegocio({
           </nav>
         )}
         <div className="mt-auto flex flex-col gap-3 px-1">
+          {ehAdmin && (
+            <Link href="/painel/admin" className="flex items-center gap-2 rounded-xl bg-white/[0.08] px-3 py-2.5 text-sm font-semibold text-white hover:bg-white/[0.14]">
+              <ShieldCheck className="h-4 w-4" aria-hidden="true" /> Painel do administrador
+            </Link>
+          )}
           {urlPublica && (
             <a href={urlPublica} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-2 text-sm font-semibold text-[#A9D9BC] hover:text-white">
               <Eye className="h-4 w-4" aria-hidden="true" /> Ver como o cliente vê
@@ -127,7 +137,10 @@ export function NavNegocio({
       {temNegocio && (
         <nav
           aria-label="Navegação do painel"
-          className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-barro-200/80 bg-superficie pb-[max(8px,env(safe-area-inset-bottom))] md:hidden print:hidden"
+          className={cn(
+            'barra-fixa fixed inset-x-0 bottom-0 z-40 grid h-[var(--altura-nav)] grid-cols-5 border-t border-barro-200/80 bg-superficie pb-[var(--respiro-nav)] transition-transform duration-200 md:hidden print:hidden',
+            teclado && 'translate-y-full'
+          )}
         >
           {INFERIOR.map((item) => {
             const ativo = item.href === '/painel/negocio/mais' ? noMais : ativoEm(pathname, item)
@@ -136,7 +149,7 @@ export function NavNegocio({
                 key={item.href}
                 href={item.href}
                 aria-current={ativo ? 'page' : undefined}
-                className={cn('flex h-[68px] flex-col items-center justify-center gap-[3px] text-[11px]', ativo ? 'font-bold text-mata-700' : 'font-semibold text-barro-600')}
+                className={cn('flex flex-col items-center justify-center gap-[3px] text-[11px]', ativo ? 'font-bold text-mata-700' : 'font-semibold text-barro-600')}
               >
                 <span className={cn('relative flex h-[30px] items-center justify-center rounded-full', ativo ? 'w-[52px] bg-mata-100' : 'w-[30px]')}>
                   <item.icone className="h-[22px] w-[22px]" aria-hidden="true" />

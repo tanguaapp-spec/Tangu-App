@@ -22,6 +22,7 @@ import { BotaoDenunciar } from '@/components/moderacao/botao-denunciar'
 import { BotaoCompartilhar } from '@/components/ui/botao-compartilhar'
 import { FotoNegocio } from '@/components/vitrine/foto-negocio'
 import { RegistrarVisto } from '@/components/home/vistos-recentemente'
+import { BarraContato } from '@/components/negocio/barra-contato'
 import type { Negocio } from '@/lib/types/database'
 
 export const dynamic = 'force-dynamic'
@@ -191,7 +192,7 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
   )
 
   return (
-    <div className="pb-28 md:mx-auto md:max-w-[1200px] md:px-6 md:pb-14 md:pt-5">
+    <div className="pb-[76px] md:mx-auto md:max-w-[1200px] md:px-6 md:pb-14 md:pt-5">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <RegistrarVisto
         negocio={{
@@ -457,13 +458,13 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
 
       {/* celular: barra fixa de contato (no lugar da navegação) */}
       {(negocio.whatsapp || podeOrcamento) && (
-        <div className="fixed inset-x-0 bottom-0 z-40 flex gap-2.5 border-t border-barro-200/80 bg-superficie px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-3 md:hidden">
+        <BarraContato>
           {negocio.whatsapp && (
             <BotaoWhatsapp
               negocioId={id}
               whatsapp={negocio.whatsapp}
               mensagem={mensagemWhats}
-              className="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-2xl bg-serra text-base font-bold text-white"
+              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-serra text-base font-bold text-white"
             >
               <MessageCircle className="h-5 w-5" aria-hidden="true" /> Chamar no WhatsApp
             </BotaoWhatsapp>
@@ -471,12 +472,12 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
           {podeOrcamento && (
             <Link
               href={`/orcamentos/novo?negocio=${id}`}
-              className={`flex h-[52px] items-center justify-center rounded-2xl border-[1.5px] border-barro-200 px-4 font-semibold text-barro-900 ${negocio.whatsapp ? '' : 'flex-1'}`}
+              className={`flex h-12 items-center justify-center rounded-2xl border-[1.5px] border-barro-200 px-4 font-semibold text-barro-900 ${negocio.whatsapp ? '' : 'flex-1'}`}
             >
               Orçamento
             </Link>
           )}
-        </div>
+        </BarraContato>
       )}
     </div>
   )

@@ -12,7 +12,7 @@ export default function LayoutPublico({ children }: { children: React.ReactNode 
         <Cabecalho />
         <PullToRefresh>
           {/* pb: a barra inferior fixa não tapa o fim do conteúdo no celular */}
-          <main className="flex-1 pb-24 md:pb-0">{children}</main>
+          <main className="flex-1 pb-[calc(var(--altura-nav)+16px)] md:pb-0">{children}</main>
           <Rodape />
         </PullToRefresh>
         <NavInferior />

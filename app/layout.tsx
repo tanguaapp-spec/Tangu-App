@@ -68,7 +68,11 @@ export const viewport: Viewport = {
   ],
   width: 'device-width',
   initialScale: 1,
-  // sem maximumScale: bloquear o zoom de pinça prejudica quem enxerga pouco
+  // comportamento de app instalado: sem zoom de pinça/toque duplo
+  maximumScale: 1,
+  userScalable: false,
+  // usa a tela toda (atrás da barra de gesto); as barras somam a área segura
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

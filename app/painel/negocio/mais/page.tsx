@@ -10,6 +10,7 @@ import {
   LogOut,
   Megaphone,
   QrCode,
+  ShieldCheck,
   Stamp,
   Star,
   Store,
@@ -18,6 +19,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { exigirNegocio } from '@/lib/painel/negocio-atual'
+import { createClient } from '@/lib/supabase/server'
 import { sair } from '@/lib/actions/auth-actions'
 import { urlNegocio } from '@/lib/ui/apresentacao'
 import { SeletorTema } from '@/components/tema/seletor-tema'
@@ -59,9 +61,20 @@ const GRUPOS: { titulo: string; itens: Item[] }[] = [
 
 export default async function PaginaMais() {
   const { negocio, papel } = await exigirNegocio('/painel/negocio/mais')
+  const { data: ehAdmin } = await createClient().rpc('eh_admin')
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-5">
       <TituloPainel titulo="Mais" voltar={null} />
+      {ehAdmin === true && (
+        <Link href="/painel/admin" className="flex items-center gap-3 rounded-[20px] bg-barro-900 p-4 text-feira">
+          <ShieldCheck className="h-5 w-5 shrink-0" aria-hidden="true" />
+          <span className="flex-1">
+            <b className="block">Painel do administrador</b>
+            <span className="text-sm opacity-80">Logs de erro, cadastros, denúncias e pagamentos</span>
+          </span>
+          <ChevronRight className="h-5 w-5" aria-hidden="true" />
+        </Link>
+      )}
       <a
         href={urlNegocio(negocio)}
         target="_blank"

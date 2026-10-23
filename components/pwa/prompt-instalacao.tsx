@@ -71,7 +71,7 @@ export function PromptInstalacao() {
   if (!visivel) return null
 
   return (
-    <div className="fixed inset-x-3 bottom-[calc(76px+env(safe-area-inset-bottom))] z-30 md:hidden">
+    <div className="fixed inset-x-3 bottom-[calc(var(--altura-nav)+8px)] z-30 md:hidden">
       <div className="flex items-center gap-3 rounded-2xl bg-serra-escuro p-3.5 text-white shadow-feira-lg">
         <LogoTangua variante="sobre-escuro" className="h-10 w-10 shrink-0" />
         <div className="min-w-0 flex-1">

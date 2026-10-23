@@ -5,6 +5,9 @@
 @tailwind utilities;
 
 :root {
+  /* barra inferior: 68px de botões + a área do gesto do iPhone/Android */
+  --respiro-nav: max(8px, env(safe-area-inset-bottom));
+  --altura-nav: calc(68px + var(--respiro-nav));
   --font-display: 'Familjen Grotesk', system-ui, sans-serif;
   --font-body: 'Figtree', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -13,6 +16,35 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* sem "elástico" no fim da página (arrastava a barra fixa) e sem o
+       puxar-pra-atualizar do navegador recarregar tudo — o app tem o dele */
+    overscroll-behavior-y: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    overscroll-behavior-y: none;
+    /* toque duplo não dá zoom; toque responde na hora */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* iPhone dá zoom sozinho ao tocar em campo com letra menor que 16px */
+  @media (max-width: 767px) {
+    input[class*='text-sm'],
+    input[class*='text-xs'],
+    input[class*='text-[13px]'],
+    input[class*='text-[14px]'],
+    input[class*='text-[15px]'],
+    select[class*='text-sm'],
+    select[class*='text-xs'],
+    textarea[class*='text-sm'],
+    textarea[class*='text-xs'],
+    textarea[class*='text-[15px]'],
+    input[class*='text-[15px]'] {
+      font-size: 16px !important;
+    }
   }
 
   body {
@@ -57,6 +89,16 @@
 }
 
 @layer components {
+  /* barras fixas (navegação, contato): camada própria na GPU — não tremem
+     nem "pulam" durante a rolagem; texto não seleciona com toque longo */
+  .barra-fixa {
+    transform: translateZ(0);
+    will-change: transform;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
   /* textura sutil de "papel de feira" usada em seções de destaque */
   .textura-papel {
     background-image:

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ChevronLeft, Heart, Store } from 'lucide-react'
+import { ChevronLeft, Heart, ShieldCheck, Store } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { MarcaTangua } from '@/components/marca/logo-tangua'
 import { BotaoSino } from '@/components/layout/botao-sino'
@@ -66,6 +66,14 @@ export function Cabecalho() {
                 >
                   <Heart className="h-5 w-5" />
                 </Link>
+                {sessao.ehAdmin && (
+                  <Link
+                    href="/painel/admin"
+                    className="flex h-11 items-center gap-1.5 rounded-[14px] px-3 font-semibold text-barro-900 hover:bg-barro-50"
+                  >
+                    <ShieldCheck className="h-4 w-4" aria-hidden="true" /> Admin
+                  </Link>
+                )}
                 <BotaoSino />
                 <Link
                   href="/perfil"
