@@ -22,7 +22,7 @@ export default async function PaginaOrcamentos() {
   const { data: pedidos } = user
     ? await supabase
         .from('pedidos_orcamento')
-        .select('id, titulo, status, criado_em, expira_em, respostas:respostas_orcamento(count)')
+        .select('id, titulo, status, criado_em, expira_em, respostas:respostas_orcamento!respostas_orcamento_pedido_id_fkey(count)')
         .eq('solicitante_id', user.id)
         .order('criado_em', { ascending: false })
         .limit(50)

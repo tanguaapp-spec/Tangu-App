@@ -236,13 +236,15 @@ export async function escolherRespostaOrcamento(pedidoId: string, respostaId: st
   if (!user) return { erro: 'Entre na sua conta.' }
   if (!uuid(pedidoId) || !uuid(respostaId)) return { erro: 'Pedido inválido.' }
   const db = createServiceClient()
-  const { data: resposta } = await db
+  // duas ligações entre as tabelas (pedido da resposta e resposta escolhida): o nome da FK desfaz a dúvida
+  const { data: resposta, error: erroBusca } = await db
     .from('respostas_orcamento')
-    .select('id, negocio_id, pedido:pedidos_orcamento!inner(solicitante_id, titulo)')
+    .select('id, negocio_id, pedido:pedidos_orcamento!respostas_orcamento_pedido_id_fkey(solicitante_id, titulo)')
     .eq('id', respostaId)
     .eq('pedido_id', pedidoId)
     .maybeSingle()
   const pedido = resposta?.pedido as { solicitante_id?: string; titulo?: string } | undefined
+  if (erroBusca) console.error('escolherRespostaOrcamento:', erroBusca.message)
   if (!resposta || pedido?.solicitante_id !== user.id) return { erro: 'Resposta não encontrada.' }
 
   const { error } = await db
