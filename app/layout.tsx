@@ -71,8 +71,9 @@ export const viewport: Viewport = {
   // comportamento de app instalado: sem zoom de pinça/toque duplo
   maximumScale: 1,
   userScalable: false,
-  // usa a tela toda (atrás da barra de gesto); as barras somam a área segura
-  viewportFit: 'cover',
+  // sem viewportFit "cover" de propósito: no Safari a área segura de baixo
+  // alterna entre 0 e 34px quando a barra do navegador some/aparece ao rolar,
+  // e a nossa barra inferior crescia e encolhia junto ("se mexendo")
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

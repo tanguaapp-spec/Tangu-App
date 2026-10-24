@@ -57,6 +57,7 @@ export function SinoNotificacoes({
             const r = await ativarPush()
             setEstado(r.estado)
             if (r.erro) setErro(r.erro)
+            else if (r.aviso) setErro(r.aviso)
           }
         }}
         aria-label={comRotulo ? undefined : ativo ? 'Desativar notificações' : 'Ativar notificações'}

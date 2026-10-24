@@ -21,7 +21,12 @@ const withPWA = require('next-pwa')({
   // push notification, não em code review — sem esse teste, ficaria
   // invisível pra sempre, já que o app continua funcionando normal sem SW,
   // só sem push/offline).
-  buildExcludes: [/app-build-manifest\.json$/],
+  //
+  // Também fica de fora do pré-download todo o JavaScript/CSS do Next (eram
+  // 221 arquivos, 2,4 MB): no 4G o service worker demorava demais pra ficar
+  // pronto e "Ativar notificações" desistia. Esses arquivos continuam em
+  // cache, mas sob demanda (runtimeCaching padrão do next-pwa).
+  buildExcludes: [/app-build-manifest\.json$/, /^static\//, /\.map$/],
 })
 
 // CSP pensada pro que o app de fato usa: fontes self-hosted (next/font), imagens

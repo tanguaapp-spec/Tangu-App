@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { dentroDoLimite, ipDoRequest } from '@/lib/seguranca/rate-limit'
 import { endpointPushValido } from '@/lib/push/endpoint'
+import { enviarBoasVindasPush } from '@/lib/push/enviar-notificacao'
 
 type InscricaoPush = {
   endpoint: string
@@ -52,6 +53,11 @@ export async function inscreverPush(inscricao: InscricaoPush, userAgent?: string
     // antes da migration 0022 só quem tem conta pode ativar
     if (!user && /perfil_id|null value/.test(error.message)) return { erro: 'Entre na sua conta pra ativar as notificações.' }
     return { erro: 'Não foi possível ativar agora. Tente de novo.' }
+  }
+  // primeira vez neste aparelho: manda uma de boas-vindas (prova na hora que funcionou)
+  if (!existente) {
+    const enviada = await enviarBoasVindasPush({ endpoint: v.data.endpoint, p256dh: v.data.keys.p256dh, auth: v.data.keys.auth })
+    if (!enviada) return { erro: null, aviso: 'Ativado, mas o teste não chegou. Confira se o celular não está no modo silencioso/“Não perturbe”.' }
   }
   return { erro: null }
 }

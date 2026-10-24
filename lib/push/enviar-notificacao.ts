@@ -100,6 +100,33 @@ export async function enviarNotificacaoParaTodosInscritos(payload: PayloadNotifi
   await enviarParaInscricoes(data ?? [], payload)
 }
 
+/** Notificação de confirmação logo depois de ativar (só pra aquele aparelho). */
+export async function enviarBoasVindasPush(inscricao: { endpoint: string; p256dh: string; auth: string }) {
+  if (!garantirVapidConfigurado()) return false
+  try {
+    await webpush.sendNotification(
+      { endpoint: inscricao.endpoint, keys: { p256dh: inscricao.p256dh, auth: inscricao.auth } },
+      JSON.stringify({
+        title: 'Notificações ativadas 🍊',
+        body: 'Pronto! Você vai saber das ofertas, eventos e avisos de Tanguá.',
+        url: '/',
+        tag: 'boas-vindas',
+      } satisfies PayloadNotificacao)
+    )
+    return true
+  } catch (err: any) {
+    console.error('Falha ao enviar notificação de boas-vindas:', err?.statusCode, err?.body || err?.message)
+    // vai pra Logs do admin: 401/403 costuma ser par de chaves VAPID diferente na Vercel
+    const { registrarErro } = await import('@/lib/observabilidade/registrar-erro')
+    await registrarErro({
+      mensagem: `Notificação de teste não chegou (status ${err?.statusCode ?? '?'}): ${String(err?.body || err?.message || '').slice(0, 300)}`,
+      contexto: `push boas-vindas · ${new URL(inscricao.endpoint).host}`,
+      nivel: 'warning',
+    })
+    return false
+  }
+}
+
 /** Notifica todos os admins (aprovação de cadastro/reivindicação, etc.) */
 export async function enviarNotificacaoParaAdmins(payload: PayloadNotificacao) {
   if (!garantirVapidConfigurado()) return

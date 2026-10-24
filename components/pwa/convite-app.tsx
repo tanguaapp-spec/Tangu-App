@@ -117,6 +117,7 @@ export function ConviteApp() {
     setAtivando(false)
     setPush(r.estado)
     if (r.erro) setErro(r.erro)
+    else if (r.aviso) setErro(r.aviso)
   }
 
   const passo = (feito: boolean, numero: number, titulo: string, children: React.ReactNode) => (
@@ -201,7 +202,7 @@ export function ConviteApp() {
                   className="flex h-12 items-center justify-center gap-2 rounded-[14px] bg-serra font-bold text-white disabled:opacity-60"
                 >
                   {ativando ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Bell className="h-4 w-4" aria-hidden="true" />}
-                  Ativar notificações
+                  {ativando ? 'Ativando… (pode levar alguns segundos)' : 'Ativar notificações'}
                 </button>
                 <p className="text-xs text-barro-600">
                   Sem conta e sem spam: só novidades da cidade. Nada de aviso entre 22h e 8h.{!logado && ' Criando conta, você recebe também as ofertas dos lugares que favoritar.'}
@@ -219,7 +220,7 @@ export function ConviteApp() {
 
         {jaInstalado && notificacaoOk ? (
           <p role="status" className="rounded-[14px] bg-mata-100 p-3 text-center font-semibold text-mata-700">
-            Tudo pronto! Você vai receber as novidades de Tanguá.
+            Tudo pronto! Chegou uma notificação de teste no seu celular.
           </p>
         ) : (
           <button type="button" onClick={fechar} className="h-11 rounded-[14px] text-sm font-semibold text-barro-600 hover:bg-barro-50">

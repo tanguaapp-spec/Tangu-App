@@ -22,11 +22,14 @@ function base64ParaBytes(base64: string) {
   return Uint8Array.from([...bruto].map((c) => c.charCodeAt(0)))
 }
 
-async function registro() {
-  // o service worker é registrado no carregamento (RegistrarServiceWorker); aqui só espera ficar pronto
+async function registro(espera = 45000) {
+  // normalmente já registrado no carregamento (RegistrarServiceWorker); se não, registra agora
+  if (!(await navigator.serviceWorker.getRegistration())) {
+    await navigator.serviceWorker.register('/sw.js').catch(() => undefined)
+  }
   return Promise.race([
     navigator.serviceWorker.ready,
-    new Promise<never>((_, rejeitar) => setTimeout(() => rejeitar(new Error('service worker não ficou pronto')), 20000)),
+    new Promise<never>((_, rejeitar) => setTimeout(() => rejeitar(new Error('service worker não ficou pronto')), espera)),
   ])
 }
 
@@ -39,7 +42,7 @@ export async function estadoPush(): Promise<EstadoPush> {
   // (na primeira visita ele ainda está instalando e pode levar vários segundos)
   if (Notification.permission === 'default') return 'inativo'
   try {
-    const r = await registro()
+    const r = await registro(8000)
     return (await r.pushManager.getSubscription()) ? 'ativo' : 'inativo'
   } catch {
     return 'inativo'
@@ -47,7 +50,7 @@ export async function estadoPush(): Promise<EstadoPush> {
 }
 
 /** Pede permissão, inscreve o aparelho e salva no servidor (com ou sem conta). */
-export async function ativarPush(): Promise<{ ok: boolean; erro?: string; estado: EstadoPush }> {
+export async function ativarPush(): Promise<{ ok: boolean; erro?: string; aviso?: string; estado: EstadoPush }> {
   const chave = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
   if (!chave) return { ok: false, erro: 'Notificações ainda não configuradas.', estado: 'indisponivel' }
   const antes = await estadoPush()
@@ -60,10 +63,15 @@ export async function ativarPush(): Promise<{ ok: boolean; erro?: string; estado
     const json = inscricao.toJSON()
     const res = await inscreverPush({ endpoint: json.endpoint!, keys: { p256dh: json.keys!.p256dh, auth: json.keys!.auth } }, navigator.userAgent)
     if (res.erro) return { ok: false, erro: res.erro, estado: 'inativo' }
-    return { ok: true, estado: 'ativo' }
+    return { ok: true, estado: 'ativo', aviso: 'aviso' in res ? res.aviso : undefined }
   } catch (err) {
     console.error('Erro ao ativar notificações:', err)
-    return { ok: false, erro: 'Não foi possível ativar agora. Tente de novo.', estado: 'inativo' }
+    const lento = err instanceof Error && /não ficou pronto/.test(err.message)
+    return {
+      ok: false,
+      erro: lento ? 'O app ainda está terminando de carregar. Espere alguns segundos e toque de novo.' : 'Não foi possível ativar agora. Tente de novo.',
+      estado: 'inativo',
+    }
   }
 }
 
