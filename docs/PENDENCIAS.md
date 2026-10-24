@@ -8,6 +8,8 @@ está simulado no código.
 | Item | O que falta | Quem |
 |---|---|---|
 | Migrations 0016–0020 em produção | Aplicar no SQL Editor, na ordem (`docs/DEPLOY.md`). **A 0020 precisa rodar antes do deploy do app novo** (slug, nota média, equipe, cortesias, lembretes) | dono |
+| Migrations 0021 e 0022 | Rodar no SQL Editor (logs do admin; notificações sem conta). Sem a 0022, visitante sem conta vê "Entre na sua conta pra ativar" | dono |
+| SMTP próprio no Supabase Auth | O e-mail embutido do Supabase manda poucos e-mails de confirmação por hora; cadastros novos falham em dias de movimento. Configurar Resend em Authentication → SMTP | dono |
 | Conferir a 0020 | Rodar `supabase/verificacao/pos-migracao.sql` bloco 8 | dono |
 | E-mail (opcional) | `RESEND_API_KEY` e `EMAIL_REMETENTE` com domínio verificado no Resend | dono |
 | Conferir admins após a 0016 | Rodar `supabase/verificacao/pos-migracao.sql` bloco 1 | dono |

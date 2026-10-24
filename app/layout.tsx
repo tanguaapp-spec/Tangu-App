@@ -85,6 +85,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* aplica claro/escuro antes da primeira pintura (sem flash de tema errado) */}
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA_INICIAL }} />
+        {/* o Chrome avisa "dá pra instalar" logo no começo; guarda pro convite de instalação usar depois */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__tanguaInstalar=e;window.dispatchEvent(new Event('tangua-pode-instalar'))});",
+          }}
+        />
       </head>
       <body className="font-body antialiased">
         <SincronizarTema />

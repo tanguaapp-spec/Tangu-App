@@ -3,6 +3,7 @@ import { sair } from '@/lib/actions/auth-actions'
 import { NavNegocio } from '@/components/painel/nav-negocio'
 import { negocioDoPainel } from '@/lib/painel/negocio-atual'
 import { urlNegocio } from '@/lib/ui/apresentacao'
+import { ConviteApp } from '@/components/pwa/convite-app'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +26,8 @@ export default async function LayoutNegocio({ children }: { children: React.Reac
       <main className="min-w-0 flex-1 pb-[calc(var(--altura-nav)+24px)] md:pb-12">
         <div className="mx-auto max-w-[1100px] px-4 pt-[max(18px,env(safe-area-inset-top))] md:px-[clamp(16px,3vw,40px)] md:pt-6">{children}</div>
       </main>
+      {/* lojista também: aviso de pedido de orçamento e de avaliação chega no celular */}
+      <ConviteApp />
     </div>
   )
 }

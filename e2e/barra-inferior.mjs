@@ -11,7 +11,7 @@ const ruim = (m) => { falhas++; console.log('  ✘ ' + m) }
 for (const [nome, disp] of [['iPhone 13', devices['iPhone 13']], ['Pixel 7', devices['Pixel 7']]]) {
   console.log(`\n▶ ${nome}`)
   const ctx = await nav.newContext({ ...disp })
-  await ctx.addInitScript(() => { try { localStorage.setItem('tangua-instalar-dispensado', '1') } catch {} })
+  await ctx.addInitScript(() => { try { localStorage.setItem('tangua-convite-adiado-ate', '9999999999999') } catch {} })
   const p = await ctx.newPage()
   const posicao = () => p.evaluate(() => {
     const n = document.querySelector('nav[aria-label="Navegação principal"]')

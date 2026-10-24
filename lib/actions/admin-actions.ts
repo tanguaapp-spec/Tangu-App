@@ -4,7 +4,8 @@ import { verificarAdmin } from '@/lib/auth/require-admin'
 
 import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/server'
-import { notificar } from '@/lib/notificacoes/notificar'
+import { horarioSilencioso, notificar } from '@/lib/notificacoes/notificar'
+import { enviarNotificacaoParaVisitantes } from '@/lib/push/enviar-notificacao'
 
 const requireAdmin = verificarAdmin
 
@@ -252,12 +253,16 @@ export async function criarAviso(formData: FormData) {
   }
   // mural vai pra todo mundo com push ativo (respeitando quem desligou "mural");
   // não grava no sino do app de cada usuário pra não multiplicar linhas.
-  const { data: inscritos } = await createServiceClient().from('push_subscriptions').select('perfil_id')
-  await notificar(
-    (inscritos ?? []).map((i) => i.perfil_id),
-    { tipo: 'mural', titulo: `${rotulosTipo[tipo] || 'Novidade'} no mural de Tanguá`, corpo: titulo, url: '/mural' },
-    { categoria: 'mural', noApp: false }
-  )
+  const { data: inscritos } = await createServiceClient().from('push_subscriptions').select('perfil_id').not('perfil_id', 'is', null)
+  const aviso = {
+    tipo: 'mural',
+    titulo: `${rotulosTipo[tipo] || 'Novidade'} em Tanguá`,
+    corpo: titulo,
+    url: tipo === 'evento' ? '/agenda' : '/mural',
+  }
+  await notificar(Array.from(new Set((inscritos ?? []).map((i) => i.perfil_id as string))), aviso, { categoria: 'mural', noApp: false })
+  // e quem ativou notificação sem ter conta (fora do horário silencioso)
+  if (!horarioSilencioso()) await enviarNotificacaoParaVisitantes({ title: aviso.titulo, body: aviso.corpo, url: aviso.url, tag: 'mural' })
 
   revalidatePath('/painel/admin/avisos')
   revalidatePath('/mural')

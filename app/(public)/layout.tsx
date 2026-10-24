@@ -3,7 +3,7 @@ import { Rodape } from '@/components/layout/rodape'
 import { NavInferior } from '@/components/layout/nav-inferior'
 import { ProvedorSessao } from '@/components/layout/sessao'
 import { PullToRefresh } from '@/components/pwa/pull-to-refresh'
-import { PromptInstalacao } from '@/components/pwa/prompt-instalacao'
+import { ConviteApp } from '@/components/pwa/convite-app'
 
 export default function LayoutPublico({ children }: { children: React.ReactNode }) {
   return (
@@ -16,7 +16,7 @@ export default function LayoutPublico({ children }: { children: React.ReactNode 
           <Rodape />
         </PullToRefresh>
         <NavInferior />
-        <PromptInstalacao />
+        <ConviteApp />
       </div>
     </ProvedorSessao>
   )

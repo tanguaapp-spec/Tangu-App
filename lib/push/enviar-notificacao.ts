@@ -27,6 +27,35 @@ export type PayloadNotificacao = {
   tag?: string
 }
 
+type Inscricao = { id: string; endpoint: string; p256dh: string; auth: string }
+
+/** Manda pra uma lista de aparelhos e limpa os que não existem mais. */
+async function enviarParaInscricoes(inscricoes: Inscricao[], payload: PayloadNotificacao) {
+  if (inscricoes.length === 0) return
+  const supabase = createServiceClient()
+  const corpo = JSON.stringify(payload)
+  const inscricoesExpiradas: string[] = []
+
+  // em lotes, pra um envio pra cidade toda não abrir milhares de conexões de uma vez
+  for (let i = 0; i < inscricoes.length; i += 100) {
+    await Promise.all(
+      inscricoes.slice(i, i + 100).map(async (inscricao) => {
+        try {
+          await webpush.sendNotification({ endpoint: inscricao.endpoint, keys: { p256dh: inscricao.p256dh, auth: inscricao.auth } }, corpo)
+        } catch (err: any) {
+          // 404/410 = inscrição não existe mais (desinstalou, trocou de navegador etc.)
+          if (err?.statusCode === 404 || err?.statusCode === 410) inscricoesExpiradas.push(inscricao.id)
+          else console.error('Erro ao enviar notificação push:', err?.message || err)
+        }
+      })
+    )
+  }
+
+  if (inscricoesExpiradas.length > 0) {
+    await supabase.from('push_subscriptions').delete().in('id', inscricoesExpiradas)
+  }
+}
+
 /**
  * Envia notificação push pra todos os dispositivos inscritos dos perfis
  * informados. Roda com a service role (ignora RLS) — uso restrito a
@@ -37,56 +66,38 @@ export async function enviarNotificacaoParaPerfis(perfilIds: string[], payload: 
   if (!garantirVapidConfigurado()) return
 
   const supabase = createServiceClient()
-  const { data: inscricoes, error } = await supabase
-    .from('push_subscriptions')
-    .select('id, endpoint, p256dh, auth')
-    .in('perfil_id', perfilIds)
-
+  const { data: inscricoes, error } = await supabase.from('push_subscriptions').select('id, endpoint, p256dh, auth').in('perfil_id', perfilIds)
   if (error) {
     console.error('Erro ao buscar inscrições push:', error.message)
     return
   }
-  if (!inscricoes || inscricoes.length === 0) return
-
-  const corpo = JSON.stringify(payload)
-  const inscricoesExpiradas: string[] = []
-
-  await Promise.all(
-    inscricoes.map(async (inscricao) => {
-      try {
-        await webpush.sendNotification(
-          {
-            endpoint: inscricao.endpoint,
-            keys: { p256dh: inscricao.p256dh, auth: inscricao.auth },
-          },
-          corpo
-        )
-      } catch (err: any) {
-        // 404/410 = inscrição não existe mais (usuário desinstalou, trocou de navegador etc.)
-        if (err?.statusCode === 404 || err?.statusCode === 410) {
-          inscricoesExpiradas.push(inscricao.id)
-        } else {
-          console.error('Erro ao enviar notificação push:', err?.message || err)
-        }
-      }
-    })
-  )
-
-  if (inscricoesExpiradas.length > 0) {
-    await supabase.from('push_subscriptions').delete().in('id', inscricoesExpiradas)
-  }
+  await enviarParaInscricoes(inscricoes ?? [], payload)
 }
 
-/** Notifica todo mundo que já ativou notificação (usado pro mural da cidade) */
+/**
+ * Aparelhos que ativaram notificação sem ter conta (migration 0022).
+ * Recebem só o que é da cidade: avisos, eventos e comunicados gerais.
+ */
+export async function enviarNotificacaoParaVisitantes(payload: PayloadNotificacao) {
+  if (!garantirVapidConfigurado()) return
+  const { data, error } = await createServiceClient()
+    .from('push_subscriptions')
+    .select('id, endpoint, p256dh, auth')
+    .is('perfil_id', null)
+    .limit(20000)
+  if (error) {
+    console.error('Erro ao buscar visitantes inscritos:', error.message)
+    return
+  }
+  await enviarParaInscricoes(data ?? [], payload)
+}
+
+/** Notifica todo mundo que já ativou notificação, com ou sem conta (mural da cidade) */
 export async function enviarNotificacaoParaTodosInscritos(payload: PayloadNotificacao) {
   if (!garantirVapidConfigurado()) return
-
-  const supabase = createServiceClient()
-  const { data: inscricoes, error } = await supabase.from('push_subscriptions').select('perfil_id')
-
-  if (error || !inscricoes || inscricoes.length === 0) return
-  const perfilIds = Array.from(new Set(inscricoes.map((i) => i.perfil_id)))
-  await enviarNotificacaoParaPerfis(perfilIds, payload)
+  const { data, error } = await createServiceClient().from('push_subscriptions').select('id, endpoint, p256dh, auth').limit(50000)
+  if (error) return
+  await enviarParaInscricoes(data ?? [], payload)
 }
 
 /** Notifica todos os admins (aprovação de cadastro/reivindicação, etc.) */

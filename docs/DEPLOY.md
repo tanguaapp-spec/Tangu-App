@@ -1,4 +1,4 @@
-# Deploy e configuração — rodada SaaS (migrations 0016–0020)
+# Deploy e configuração — rodada SaaS (migrations 0016–0022)
 
 > **Ordem obrigatória: banco primeiro, código depois.** O código novo lê o próprio perfil por
 > `meu_perfil()`, checa admin por `eh_admin()` e usa tabelas novas. Publicar o código antes das
@@ -39,6 +39,8 @@ de todos os usuários da leitura anônima.
 | `0018_suporte_notificacoes_lgpd.sql` | chamados de suporte, notificações no app, preferências de comunicação, denúncia de negócio/post |
 | `0019_cupons_resgate_e_orcamentos.sql` | cupom com código/limite/QR (resgate atômico), pedidos de orçamento |
 | `0020_app_completo.sql` | slug, nota da comunidade, equipe do negócio, interesse em evento, favoritar produto, lembretes de avaliação, origem das visitas/cadastro, impressões do Destaque, cortesias (teste grátis 14 dias e bônus de indicação 30 dias — ajuste em Configurações), suspensão de usuário. **Rode antes de publicar o app novo.** |
+| `0021_logs_admin.sql` | Logs de erro visíveis pro admin (regra de leitura corrigida) e "marcar como resolvido" |
+| `0022_push_visitantes.sql` | Notificações pra quem ainda não tem conta (convite de instalar + ativar na primeira visita) |
 
 Depois de cada uma, rode `supabase/verificacao/pos-migracao.sql` (blocos 2–7).
 

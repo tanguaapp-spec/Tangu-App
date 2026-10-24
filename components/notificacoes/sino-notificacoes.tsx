@@ -1,145 +1,85 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Bell, BellOff, BellRing } from 'lucide-react'
-import { inscreverPush, desinscreverPush } from '@/lib/actions/push-actions'
+import { Bell, BellOff, BellRing, Loader2 } from 'lucide-react'
+import { ativarPush, desativarPush, estadoPush, type EstadoPush } from '@/lib/push/navegador'
 import { cn } from '@/lib/utils'
 
-type Estado = 'indisponivel' | 'carregando' | 'inativo' | 'ativo' | 'negado'
-
-function urlBase64ParaUint8Array(base64: string) {
-  const padding = '='.repeat((4 - (base64.length % 4)) % 4)
-  const base64Segura = (base64 + padding).replace(/-/g, '+').replace(/_/g, '/')
-  const bruto = atob(base64Segura)
-  return Uint8Array.from([...bruto].map((c) => c.charCodeAt(0)))
-}
-
+/** Liga/desliga as notificações deste aparelho (funciona com ou sem conta). */
 export function SinoNotificacoes({
-  logado,
   comRotulo = false,
   tema = 'claro',
 }: {
-  logado: boolean
+  /** mantido por compatibilidade: não depende mais de estar logado */
+  logado?: boolean
   comRotulo?: boolean
-  /** "escuro" ajusta o estado inativo pra ter contraste num fundo escuro (cabeçalho mobile) */
   tema?: 'claro' | 'escuro'
 }) {
-  const [estado, setEstado] = useState<Estado>('carregando')
+  const [estado, setEstado] = useState<EstadoPush | 'carregando'>('carregando')
+  const [erro, setErro] = useState<string | null>(null)
 
   useEffect(() => {
-    async function checar() {
-      if (typeof window === 'undefined' || !('serviceWorker' in navigator) || !('PushManager' in window)) {
-        setEstado('indisponivel')
-        return
-      }
-      if (Notification.permission === 'denied') {
-        setEstado('negado')
-        return
-      }
-      try {
-        const registro = await navigator.serviceWorker.ready
-        const inscricao = await registro.pushManager.getSubscription()
-        setEstado(inscricao ? 'ativo' : 'inativo')
-      } catch {
-        setEstado('indisponivel')
-      }
-    }
-    checar()
+    estadoPush().then(setEstado)
   }, [])
 
-  async function ativar() {
-    const chavePublica = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-    if (!chavePublica) {
-      setEstado('indisponivel')
-      return
-    }
+  if (estado === 'indisponivel') return null
 
-    setEstado('carregando')
-    try {
-      const permissao = await Notification.requestPermission()
-      if (permissao !== 'granted') {
-        setEstado(permissao === 'denied' ? 'negado' : 'inativo')
-        return
-      }
-
-      const registro = await navigator.serviceWorker.ready
-      const inscricao = await registro.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ParaUint8Array(chavePublica),
-      })
-
-      const json = inscricao.toJSON()
-      await inscreverPush(
-        { endpoint: json.endpoint!, keys: { p256dh: json.keys!.p256dh, auth: json.keys!.auth } },
-        navigator.userAgent
-      )
-      setEstado('ativo')
-    } catch (err) {
-      console.error('Erro ao ativar notificações:', err)
-      setEstado('inativo')
-    }
+  if (estado === 'precisa-instalar') {
+    return (
+      <p className={cn('flex items-start gap-2 text-sm text-barro-700', comRotulo ? 'px-3 py-3' : '')}>
+        <Bell className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+        No iPhone, as notificações funcionam depois de adicionar o app à Tela de Início (Compartilhar → “Adicionar à Tela de Início”) e abrir por lá.
+      </p>
+    )
   }
-
-  async function desativar() {
-    setEstado('carregando')
-    try {
-      const registro = await navigator.serviceWorker.ready
-      const inscricao = await registro.pushManager.getSubscription()
-      if (inscricao) {
-        await desinscreverPush(inscricao.endpoint)
-        await inscricao.unsubscribe()
-      }
-      setEstado('inativo')
-    } catch (err) {
-      console.error('Erro ao desativar notificações:', err)
-      setEstado('ativo')
-    }
-  }
-
-  if (!logado || estado === 'indisponivel') return null
 
   if (estado === 'negado') {
     return (
-      <span
-        title="Notificações bloqueadas nas configurações do navegador"
-        className={cn(
-          'flex items-center gap-2',
-          tema === 'escuro' ? 'text-barro-400' : 'text-barro-300',
-          comRotulo ? 'rounded-lg px-3 py-3 text-sm' : 'h-9 w-9 justify-center rounded-lg'
-        )}
-      >
-        <BellOff className="h-4 w-4" />
-        {comRotulo && 'Notificações bloqueadas'}
-      </span>
+      <p className={cn('flex items-start gap-2 text-sm', tema === 'escuro' ? 'text-white/70' : 'text-barro-600', comRotulo ? 'px-3 py-3' : '')}>
+        <BellOff className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+        Notificações bloqueadas neste navegador. Libere em Configurações do site → Notificações.
+      </p>
     )
   }
 
   const ativo = estado === 'ativo'
-  const Icone = ativo ? BellRing : Bell
-
+  const Icone = estado === 'carregando' ? Loader2 : ativo ? BellRing : Bell
   return (
-    <button
-      type="button"
-      onClick={ativo ? desativar : ativar}
-      disabled={estado === 'carregando'}
-      title={ativo ? 'Desativar notificações' : 'Ativar notificações'}
-      aria-label={ativo ? 'Desativar notificações' : 'Ativar notificações'}
-      className={cn(
-        'flex items-center gap-2 transition-colors disabled:opacity-50',
-        comRotulo
-          ? 'w-full rounded-lg px-3 py-3 text-left text-sm'
-          : 'h-9 w-9 justify-center rounded-lg',
-        ativo
-          ? tema === 'escuro'
-            ? 'text-casca-400 hover:bg-white/10'
-            : 'text-casca-600 hover:bg-casca-50'
-          : tema === 'escuro'
-            ? 'text-barro-200 hover:bg-white/10 hover:text-white'
-            : 'text-barro-500 hover:bg-barro-100 hover:text-barro-800'
+    <div className="flex flex-col">
+      <button
+        type="button"
+        disabled={estado === 'carregando'}
+        onClick={async () => {
+          setErro(null)
+          setEstado('carregando')
+          if (ativo) setEstado(await desativarPush())
+          else {
+            const r = await ativarPush()
+            setEstado(r.estado)
+            if (r.erro) setErro(r.erro)
+          }
+        }}
+        aria-label={comRotulo ? undefined : ativo ? 'Desativar notificações' : 'Ativar notificações'}
+        className={cn(
+          'flex items-center gap-2 transition-colors disabled:opacity-60',
+          comRotulo ? 'min-h-[48px] w-full rounded-xl px-3 text-left text-sm font-semibold' : 'h-11 w-11 justify-center rounded-xl',
+          ativo
+            ? tema === 'escuro'
+              ? 'text-casca-400 hover:bg-white/10'
+              : 'text-mata-700 hover:bg-mata-50'
+            : tema === 'escuro'
+              ? 'text-white hover:bg-white/10'
+              : 'text-barro-900 hover:bg-barro-50'
+        )}
+      >
+        <Icone className={cn('h-5 w-5', estado === 'carregando' && 'animate-spin')} aria-hidden="true" />
+        {comRotulo && (ativo ? 'Notificações ativadas neste aparelho (toque pra desligar)' : 'Ativar notificações neste aparelho')}
+      </button>
+      {erro && (
+        <p role="alert" className="px-3 text-sm text-red-700">
+          {erro}
+        </p>
       )}
-    >
-      <Icone className={comRotulo ? 'h-5 w-5' : 'h-4 w-4'} />
-      {comRotulo && (ativo ? 'Desativar notificações' : 'Ativar notificações')}
-    </button>
+    </div>
   )
 }

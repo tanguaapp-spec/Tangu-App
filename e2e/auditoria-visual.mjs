@@ -37,6 +37,7 @@ for (const cen of CENARIOS) {
   await ctx.addInitScript((tema) => {
     try {
       localStorage.setItem('tangua-tema', tema)
+      localStorage.setItem('tangua-convite-adiado-ate', '9999999999999') // convite de instalar testado à parte
     } catch {}
   }, cen.tema)
 

@@ -28,7 +28,7 @@ async function sessao(email, { desktop = false } = {}) {
   await ctx.addInitScript(() => {
     try {
       sessionStorage.setItem('tangua-splash-visto', '1')
-      localStorage.setItem('tangua-instalar-dispensado', '1')
+      localStorage.setItem('tangua-convite-adiado-ate', '9999999999999')
     } catch {}
   })
   const p = await ctx.newPage()

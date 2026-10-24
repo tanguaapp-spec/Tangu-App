@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { verificarAdmin } from '@/lib/auth/require-admin'
 import { createServiceClient } from '@/lib/supabase/server'
-import { notificar } from '@/lib/notificacoes/notificar'
+import { horarioSilencioso, notificar } from '@/lib/notificacoes/notificar'
+import { enviarNotificacaoParaVisitantes } from '@/lib/push/enviar-notificacao'
 import { caminhoInternoSeguro } from '@/lib/site'
 
 /** Ações do admin: usuários, categorias, verificação e comunicados. Tudo auditado. */
@@ -177,6 +178,8 @@ export async function enviarComunicado(formData: FormData) {
   // lojista recebe como aviso da conta; público geral pode desligar (categoria mural)
   const paraLojista = publico === 'lojistas' || publico === 'sem_negocio_completo'
   await notificar(ids, { tipo: 'comunicado', titulo, corpo: corpo || undefined, url: url || undefined }, paraLojista ? {} : { categoria: 'mural' })
+  // "Todo mundo" inclui quem ativou notificação sem ter conta
+  if (publico === 'todos' && !horarioSilencioso()) await enviarNotificacaoParaVisitantes({ title: titulo, body: corpo, url: url || '/', tag: 'comunicado' })
   await auditar(auth.user.id, 'enviar_comunicado', 'comunicado', crypto.randomUUID(), { publico, bairro: bairro || null, titulo, total: ids.length })
   return { erro: null, total: ids.length }
 }
