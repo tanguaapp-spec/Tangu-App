@@ -155,7 +155,8 @@ describe('cortesias de plano', () => {
   it('negócio novo do app ganha teste grátis (e só uma vez por dono)', async () => {
     const u = await criarUsuario(db, { papel: 'profissional' })
     const primeiro = await cadastrarComoDono(u, 'Barbearia do Zé')
-    expect(await plano(primeiro)).toBe('profissional')
+    // plano do teste vem da configuração (0024: Essencial)
+    expect(await plano(primeiro)).toBe('essencial')
     // recadastro depois de apagar o negócio não renova o teste
     await db.query(`update public.cortesias_plano set fim = now() - interval '1 second', inicio = now() - interval '2 days' where negocio_id = $1`, [primeiro])
     await db.query('update public.negocios set reivindicado_por = null where id = $1', [primeiro])
@@ -176,7 +177,7 @@ describe('cortesias de plano', () => {
     const { rows } = await db.query<{ codigo_convite: string }>('select codigo_convite from public.perfis where id = $1', [padrinho])
     const afilhado = await criarUsuario(db, { papel: 'profissional', codigo_convite: rows[0].codigo_convite })
     await cadastrarComoDono(afilhado, 'Loja do Afilhado')
-    expect(await plano(negocioPadrinho)).toBe('profissional')
+    expect(await plano(negocioPadrinho)).toBe('essencial')
     const { rows: c } = await db.query('select motivo from public.cortesias_plano where negocio_id = $1', [negocioPadrinho])
     expect(c).toEqual([{ motivo: 'indicacao' }])
   })

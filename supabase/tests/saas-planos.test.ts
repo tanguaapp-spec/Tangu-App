@@ -73,10 +73,10 @@ describe('plano efetivo', () => {
 })
 
 describe('limites aplicados pelo banco', () => {
-  it('gratuito: 11º produto ativo é recusado', async () => {
+  it('gratuito: 6º produto ativo é recusado (0024: limite 5)', async () => {
     const { dono, negocio } = await novoDonoComNegocio()
     await como(db, dono, async (tx) => {
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 5; i++) {
         await tx.query(`insert into public.produtos_servicos (negocio_id, nome) values ($1, $2)`, [negocio, `p${i}`])
       }
     })
@@ -89,7 +89,7 @@ describe('limites aplicados pelo banco', () => {
     const { dono, negocio } = await novoDonoComNegocio()
     await db.query(`insert into public.produtos_servicos (negocio_id, nome, ativo) values ($1, 'arquivado', false)`, [negocio])
     await como(db, dono, async (tx) => {
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 5; i++) {
         await tx.query(`insert into public.produtos_servicos (negocio_id, nome) values ($1, $2)`, [negocio, `p${i}`])
       }
     })
@@ -134,7 +134,7 @@ describe('limites aplicados pelo banco', () => {
     const { dono, negocio } = await novoDonoComNegocio()
     const r = await como(db, dono, (tx) => tx.query<{ u: any }>('select public.uso_plano($1) as u', [negocio]))
     expect(r.rows[0].u.plano).toBe('gratuito')
-    expect(r.rows[0].u.limites.max_produtos).toEqual({ limite: 10, uso: 0 })
+    expect(r.rows[0].u.limites.max_produtos).toEqual({ limite: 5, uso: 0 })
     const intruso = await criarUsuario(db)
     await expect(como(db, intruso, (tx) => tx.query('select public.uso_plano($1)', [negocio]))).rejects.toThrow(/acesso negado/)
   })
@@ -203,10 +203,13 @@ describe('autocadastro de negócio (self-service)', () => {
     expect(r.rows[0].status_cadastro).toBe('aprovado')
   })
 
-  it('segundo negócio na mesma conta é recusado pelo banco (não só pela tela)', async () => {
+  it('mesma conta pode ter vários negócios, mas o banco segura acima do limite configurado', async () => {
     const u = await criarUsuario(db)
     await cadastrar(u, 'Primeiro')
-    await expect(cadastrar(u, 'Segundo')).rejects.toThrow(/NEGOCIO_DUPLICADO/)
+    await cadastrar(u, 'Segundo')
+    await db.query(`update public.configuracoes_sistema set valor = '2' where chave = 'max_negocios_por_dono'`)
+    await expect(cadastrar(u, 'Terceiro')).rejects.toThrow(/NEGOCIO_DUPLICADO/)
+    await db.query(`update public.configuracoes_sistema set valor = '5' where chave = 'max_negocios_por_dono'`)
   })
 
   it('morador vira profissional ao cadastrar', async () => {
