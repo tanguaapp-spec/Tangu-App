@@ -15,7 +15,7 @@ import { BotaoFavoritar } from '@/components/negocio/botao-favoritar'
 import { BotaoWhatsapp } from '@/components/negocio/botao-whatsapp'
 import { BotaoVoltar } from '@/components/negocio/botao-voltar'
 import { BotaoSalvarProduto } from '@/components/negocio/botao-salvar-produto'
-import { BotaoReivindicar } from '@/components/negocio/botao-reivindicar'
+import { AvisoNaoReivindicado } from '@/components/negocio/aviso-nao-reivindicado'
 import { FormularioAvaliacao } from '@/components/negocio/formulario-avaliacao'
 import { CupomBanner } from '@/components/negocio/cupom-banner'
 import { BotaoDenunciar } from '@/components/moderacao/botao-denunciar'
@@ -401,7 +401,7 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
               </section>
             )}
 
-            {!negocio.reivindicado_por && <BotaoReivindicar negocioId={id} />}
+            {!negocio.reivindicado_por && <AvisoNaoReivindicado negocioId={id} nome={negocio.nome} />}
             {eDono && (
               <Link href="/painel/negocio" className="rounded-[18px] bg-mata-100 p-4 text-sm font-semibold text-mata-700">
                 Este é o seu negócio. Toque aqui pra editar no painel.

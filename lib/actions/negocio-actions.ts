@@ -4,7 +4,7 @@ import { traduzirErroBanco } from '@/lib/planos/limites'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { enviarNotificacaoParaAdmins } from '@/lib/push/enviar-notificacao'
-import { dentroDoLimite } from '@/lib/seguranca/rate-limit'
+import { dentroDoLimite, ipDoRequest } from '@/lib/seguranca/rate-limit'
 import { enviarImagem } from '@/lib/storage/imagens'
 import { creditarPontos } from '@/lib/gamificacao/pontos'
 import { z } from 'zod'
@@ -253,4 +253,34 @@ export async function resgatarCupom(cupomId: string) {
   const { data, error } = await supabase.rpc('resgatar_cupom', { p_cupom_id: cupomId })
   if (error) return { erro: mensagemErroCupom(error.message), codigo: null }
   return { erro: null, codigo: data as string }
+}
+
+/**
+ * Dono de um perfil criado pela plataforma pede para não aparecer.
+ * Sem login (o dono pode nem ter conta); o time confirma e oculta.
+ */
+export async function pedirOcultarPerfil(formData: FormData) {
+  const v = z
+    .object({
+      negocio_id: z.string().uuid(),
+      nome: z.string().trim().min(2, 'Diga seu nome.').max(100),
+      contato: z.string().trim().min(5, 'Deixe um WhatsApp ou e-mail para a gente confirmar.').max(120),
+      motivo: z.string().trim().max(500).optional(),
+    })
+    .safeParse({
+      negocio_id: formData.get('negocio_id'),
+      nome: formData.get('nome'),
+      contato: formData.get('contato'),
+      motivo: formData.get('motivo') || undefined,
+    })
+  if (!v.success) return { erro: v.error.issues[0].message }
+  if (!(await dentroDoLimite(`ocultar:${ipDoRequest()}`, 5, 86400))) return { erro: 'Recebemos vários pedidos deste aparelho hoje. Fale com a gente pelo WhatsApp.' }
+  const db = createServiceClient()
+  const { data: n } = await db.from('negocios').select('nome, reivindicado_por').eq('id', v.data.negocio_id).maybeSingle()
+  if (!n) return { erro: 'Perfil não encontrado.' }
+  if (n.reivindicado_por) return { erro: 'Este perfil já tem dono. Quem cuida dele pode pausar pelo painel.' }
+  const { error } = await db.from('pedidos_ocultar').insert({ ...v.data, motivo: v.data.motivo ?? null })
+  if (error) return { erro: 'Não foi possível enviar agora. Tente de novo.' }
+  enviarNotificacaoParaAdmins({ title: 'Pedido para ocultar perfil', body: n.nome, url: '/painel/admin/importar#ocultar', tag: 'ocultar' }).catch(() => undefined)
+  return { erro: null }
 }
