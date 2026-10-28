@@ -174,6 +174,12 @@ async function limpar() {
     ['pedidos de orçamento', s.from('pedidos_orcamento').delete().in('solicitante_id', ids)],
     ['avisos/eventos', s.from('avisos_cidade').delete().in('publicado_por', ids)],
     ['vagas', s.from('vagas').delete().in('publicado_por', ids)],
+    // tabelas da 0023 (antes dela, o erro é só "tabela não existe")
+    ['sugestões de notícia', s.from('noticias').delete().in('sugerida_por', ids)],
+    ['sugestões de evento', s.from('sugestoes_evento').delete().in('perfil_id', ids)],
+    ['respostas de satisfação', s.from('respostas_nps').delete().in('perfil_id', ids)],
+    ['atividade no app', s.from('atividade_diaria').delete().in('perfil_id', ids)],
+    ['compras de divulgação', s.from('compras_servicos').delete().in('perfil_id', ids)],
     ['negócios', negocioIds.length ? s.from('negocios').delete().in('id', negocioIds) : Promise.resolve({ error: null })],
   ]
   for (const [nome, p] of passos) {
