@@ -104,6 +104,11 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
         <Campo name="telefone" id="telefone" rotulo="Telefone fixo" defaultValue={negocio.telefone ?? ''} placeholder="(21) 2665-0000" />
         <Campo name="instagram" id="instagram" rotulo="Instagram" defaultValue={negocio.instagram ?? ''} placeholder="@seuusuario" />
         <Campo name="site" id="site" type="url" rotulo="Site" defaultValue={negocio.site ?? ''} placeholder="seusite.com.br" />
+        <Campo name="facebook" id="facebook" rotulo="Facebook" defaultValue={negocio.facebook ?? ''} placeholder="facebook.com/suapagina" />
+        <label className="flex min-h-11 items-center gap-3 text-sm text-barro-800 sm:col-span-2">
+          <input type="checkbox" name="so_hora_marcada" defaultChecked={!!negocio.so_hora_marcada} className="h-5 w-5" />
+          Atendo só com hora marcada (o perfil mostra “Com hora marcada” em vez de aberto/fechado)
+        </label>
         {tipo === 'autonomo' ? (
           <Campo
             name="area_atendimento"

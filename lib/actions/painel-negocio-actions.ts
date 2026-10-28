@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers'
 import { lerConfig } from '@/lib/config/ler'
+import { lerFacebook } from '@/lib/ui/redes'
 import { recursoLiberado } from '@/lib/planos/recursos'
 import { COOKIE_NEGOCIO_ATIVO } from '@/lib/painel/negocio-atual'
 import { traduzirErroBanco } from '@/lib/planos/limites'
@@ -239,6 +240,13 @@ export async function atualizarNegocio(negocioId: string, formData: FormData) {
     horario_funcionamento: Object.keys(horarioFuncionamento).length ? horarioFuncionamento : null,
     formas_pagamento: formasPagamento.length ? formasPagamento : null,
     modalidades_atendimento: modalidadesValidas,
+  }
+  // campos da 0026 (só vêm do formulário novo)
+  if (formData.has('facebook')) {
+    const fb = lerFacebook(texto('facebook', 200))
+    if (fb === false) return { erro: 'Facebook inválido. Informe o endereço da página (facebook.com/suapagina) ou só o nome dela.' }
+    atualizacoes.facebook = fb
+    atualizacoes.so_hora_marcada = formData.get('so_hora_marcada') === 'on'
   }
 
   const capa = formData.get('foto_capa') as File | null

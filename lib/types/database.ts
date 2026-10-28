@@ -90,6 +90,9 @@ export type Negocio = {
   config_pedidos?: import('@/lib/vendas/whatsapp').ConfigPedidos | null
   import_ref?: string | null
   pausado_em?: string | null
+  // migration 0026
+  facebook?: string | null
+  so_hora_marcada?: boolean
 }
 
 export type SolicitacaoReivindicacao = {

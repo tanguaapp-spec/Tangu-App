@@ -23,3 +23,9 @@ as $$
      and (public.eh_admin() or exists (select 1 from public.equipe_plataforma where perfil_id = auth.uid() and papel = 'crescimento'));
 $$;
 grant execute on function public.eh_crescimento() to authenticated;
+
+-- ---------------------------------------------------------------------
+-- Perfil do negócio: Facebook e "atendimento só com hora marcada" (do BoraAli)
+-- ---------------------------------------------------------------------
+alter table public.negocios add column if not exists facebook text check (facebook is null or char_length(facebook) <= 120);
+alter table public.negocios add column if not exists so_hora_marcada boolean not null default false;

@@ -139,7 +139,10 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
   const notaCalculada = avaliacoes.length ? avaliacoes.reduce((s, a) => s + a.nota, 0) / avaliacoes.length : null
   const nota =
     notaNegocio(negocio) ?? (notaCalculada ? { nota: notaCalculada, total: avaliacoes.length, fonte: 'comunidade' as const } : null)
-  const horario = situacaoHorario(negocio.horario_funcionamento, negocio.aberto_agora)
+  // "só com hora marcada": não faz sentido dizer aberto/fechado
+  const horario = negocio.so_hora_marcada
+    ? { aberto: null, rotulo: null }
+    : situacaoHorario(negocio.horario_funcionamento, negocio.aberto_agora)
   const semana = resumoSemana(negocio.horario_funcionamento)
   const urlPublica = `${urlDoSite()}${caminho}`
   const jsonLd = JSON.stringify(jsonLdNegocio(negocio, nota)).replace(/</g, '\\u003c')
@@ -217,7 +220,7 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
           )}
         </>
       )}
-      {redesLiberadas && (negocio.instagram || urlSegura(negocio.site)) && (
+      {redesLiberadas && (negocio.instagram || urlSegura(negocio.site) || negocio.facebook) && (
         <div className="mt-1 flex flex-wrap gap-2">
           {negocio.instagram && (
             <a
@@ -227,6 +230,16 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
               className="flex h-10 items-center gap-1.5 rounded-full border border-barro-200 px-3 text-sm font-semibold"
             >
               <Instagram className="h-4 w-4" aria-hidden="true" /> @{negocio.instagram.replace('@', '')}
+            </a>
+          )}
+          {negocio.facebook && (
+            <a
+              href={`https://facebook.com/${negocio.facebook}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-10 items-center gap-1.5 rounded-full border border-barro-200 px-3 text-sm font-semibold"
+            >
+              <Globe className="h-4 w-4" aria-hidden="true" /> Facebook
             </a>
           )}
           {urlSegura(negocio.site) && (
@@ -294,6 +307,11 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
               {negocio.verificado && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-serra px-2.5 py-0.5 text-xs font-bold text-white md:px-3 md:py-1 md:text-[13px]">
                   <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" /> Verificado
+                </span>
+              )}
+              {negocio.so_hora_marcada && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-mata-100 px-2.5 py-0.5 text-xs font-bold text-mata-800 md:px-3 md:py-1 md:text-[13px]">
+                  Com hora marcada
                 </span>
               )}
               {parceiro && (
