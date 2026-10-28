@@ -61,6 +61,9 @@ export default function PaginaPrivacidade() {
             <li><strong>Estatísticas do negócio:</strong> contagem de visitas ao perfil e cliques no WhatsApp. Para não contar a mesma pessoa várias vezes usamos um código irreversível derivado do IP e do navegador — o IP em si não é guardado.</li>
             <li><strong>Notificações:</strong> se você ativar notificações push, guardamos um identificador técnico do seu navegador/dispositivo (nunca conteúdo das notificações em si).</li>
             <li><strong>Uso técnico:</strong> registros de erro do sistema (para corrigir falhas), sem finalidade de perfilamento ou publicidade.</li>
+            <li><strong>Uso do app:</strong> um código aleatório do aparelho, guardado de forma irreversível, marca os dias em que o app foi aberto (para saber quantas pessoas usam e se voltam). Não guardamos IP nem o que você vê em cada página.</li>
+            <li><strong>Pesquisa de satisfação:</strong> se você responder à pergunta de 0 a 10, guardamos a nota e o comentário (opcional).</li>
+            <li><strong>Perfis de comércios criados pela plataforma:</strong> nome, categoria, endereço, bairro, telefone e horário de comércios, a partir de listas públicas. O responsável pode assumir o perfil ou pedir para ocultar a qualquer momento, direto na página do comércio.</li>
           </ul>
           <p>
             <strong>Não coletamos localização por GPS, não vendemos dados a terceiros e não usamos seus dados

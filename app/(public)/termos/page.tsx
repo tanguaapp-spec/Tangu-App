@@ -100,6 +100,16 @@ export default function PaginaTermos() {
             <li>Ao voltar ao Gratuito nada é apagado; apenas a criação de novos itens acima do limite fica bloqueada.</li>
             <li>O plano Destaque coloca o negócio em posição de destaque, sinalizada como tal. Planos pagos não garantem vendas nem resultados.</li>
             <li>Mudanças de preço valem só para novas contratações.</li>
+            <li>
+              <strong>Divulgação avulsa</strong> (banner, destaque na busca, post ou notificação): pagamento único pelo Mercado Pago, pelo período
+              escolhido na compra. Depois do pagamento, a arte é combinada com o time do Tanguá App pelo WhatsApp e o serviço entra no ar; o destaque
+              na busca entra no ar sozinho. Todo conteúdo pago aparece identificado como publicidade ou patrocinado.
+            </li>
+            <li>
+              Você pode desistir da divulgação em até 7 dias da compra (direito de arrependimento) com reembolso integral, desde que ela ainda não
+              tenha ido ao ar. Peça pelo WhatsApp do time ou pela central de ajuda. O Tanguá App pode recusar arte que viole a lei ou estes termos,
+              com reembolso.
+            </li>
           </ul>
         </section>
 

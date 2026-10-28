@@ -56,6 +56,15 @@ export async function GET() {
     .select('tipo_conteudo, motivo, status, criado_em')
     .eq('denunciante_id', user.id)
 
+  // dados da 0023 (antes dela, as consultas só voltam vazias)
+  const svc = createServiceClient()
+  const [nps, sugNoticias, sugEventos, compras] = await Promise.all([
+    svc.from('respostas_nps').select('nota, comentario, criado_em').eq('perfil_id', user.id),
+    svc.from('noticias').select('titulo, status, criado_em').eq('sugerida_por', user.id),
+    svc.from('sugestoes_evento').select('titulo, status, data_evento, criado_em').eq('perfil_id', user.id),
+    svc.from('compras_servicos').select('nome_servico, dias, valor_centavos, status, pago_em, criado_em').eq('perfil_id', user.id),
+  ])
+
   const exportacao = {
     gerado_em: new Date().toISOString(),
     aviso: 'Cópia dos seus dados pessoais no Tanguá App. Guarde em local seguro.',
@@ -69,6 +78,10 @@ export async function GET() {
     pontos_laranjas: pontos.data ?? [],
     cartoes_fidelidade: cartoes.data ?? [],
     denuncias_enviadas: denuncias ?? [],
+    pesquisa_satisfacao: nps.data ?? [],
+    noticias_sugeridas: sugNoticias.data ?? [],
+    eventos_sugeridos: sugEventos.data ?? [],
+    compras_de_divulgacao: compras.data ?? [],
   }
 
   return new NextResponse(JSON.stringify(exportacao, null, 2), {
