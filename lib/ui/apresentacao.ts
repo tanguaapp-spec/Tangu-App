@@ -54,13 +54,18 @@ export function metaNegocio(n: NegocioResumo, { comBairro = false } = {}) {
   return partes.join(' · ')
 }
 
-/** Prazo curto de oferta: "hoje", "amanhã", "3 dias", "5h". */
+/** Prazo curto de oferta: "hoje", "amanhã", "3 dias", "5h 20min". */
 export function prazoCurto(expiraEm: string, agora = new Date()) {
   const ms = new Date(expiraEm).getTime() - agora.getTime()
   if (ms <= 0) return 'encerrada'
   const horas = ms / 3600e3
   if (horas < 1) return `${Math.max(1, Math.round(ms / 60e3))} min`
-  if (horas < 12) return `${Math.round(horas)}h`
+  // contagem regressiva nas últimas horas: "5h 20min" dá mais urgência que "5h"
+  if (horas < 12) {
+    const h = Math.floor(horas)
+    const min = Math.floor((ms - h * 3600e3) / 60e3)
+    return min ? `${h}h ${min}min` : `${h}h`
+  }
   const fim = new Date(expiraEm)
   const doDia = (d: Date) => d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })
   if (doDia(fim) === doDia(agora)) return 'hoje'

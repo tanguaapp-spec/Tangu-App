@@ -20,6 +20,7 @@ describe('apresentação', () => {
   it('prazo curto', () => {
     const agora = new Date('2026-10-21T10:00:00-03:00')
     expect(prazoCurto('2026-10-21T13:00:00-03:00', agora)).toBe('3h')
+    expect(prazoCurto('2026-10-21T13:20:00-03:00', agora)).toBe('3h 20min')
     expect(prazoCurto('2026-10-21T23:00:00-03:00', agora)).toBe('hoje')
     expect(prazoCurto('2026-10-22T20:00:00-03:00', agora)).toBe('amanhã')
     expect(prazoCurto('2026-10-23T12:00:00-03:00', agora)).toBe('3 dias')

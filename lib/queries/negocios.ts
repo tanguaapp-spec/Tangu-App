@@ -3,7 +3,7 @@ import { createClient, createPublicClient, createServiceClient } from '@/lib/sup
 import type { ModalidadeAtendimento, Negocio } from '@/lib/types/database'
 
 import { headers } from 'next/headers'
-import { situacaoHorario } from '@/lib/horario/funcionamento'
+import { aplicarEspeciais, situacaoHorario, type HorarioEspecial } from '@/lib/horario/funcionamento'
 import { ehRobo } from '@/lib/metricas/eventos-perfil'
 
 export type OrdemBusca = 'relevancia' | 'nota' | 'novos'
@@ -18,6 +18,8 @@ interface FiltrosBusca {
   comOferta?: boolean
   /** calculado pelo horário cadastrado (fuso de Tanguá) */
   abertoAgora?: boolean
+  /** ★ mínima (média da comunidade ou, sem ela, do Google) */
+  notaMinima?: 3 | 4
   ordem?: OrdemBusca
   /** limite fixo, sem paginação — usado em vitrines pequenas (ex: destaques na home) */
   limite?: number
@@ -51,6 +53,33 @@ function contarImpressoesDestaque(lista: Negocio[]) {
 }
 
 export type ResultadoBusca = Negocio & { oferta?: string | null }
+
+/**
+ * Troca o horário da semana pelos feriados/horários especiais dos próximos
+ * 7 dias (tabela horarios_especiais, 0023). Antes da migration, não faz nada.
+ */
+export async function comHorariosEspeciais<T extends { id: string; horario_funcionamento?: Record<string, string> | null }>(
+  lista: T[]
+): Promise<(T & { aviso_horario?: string | null })[]> {
+  if (lista.length === 0) return lista
+  const fmt = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(d)
+  const hoje = new Date()
+  const { data, error } = await createPublicClient()
+    .from('horarios_especiais')
+    .select('negocio_id, data, fechado, abre, fecha, motivo')
+    .in('negocio_id', lista.map((n) => n.id).slice(0, 400))
+    .gte('data', fmt(hoje))
+    .lte('data', fmt(new Date(hoje.getTime() + 6 * 86400e3)))
+  if (error || !data?.length) return lista
+  const porNegocio = new Map<string, HorarioEspecial[]>()
+  for (const e of data) porNegocio.set(e.negocio_id, [...(porNegocio.get(e.negocio_id) ?? []), e as HorarioEspecial])
+  return lista.map((n) => {
+    const esp = porNegocio.get(n.id)
+    if (!esp) return n
+    const { horario, aviso } = aplicarEspeciais(n.horario_funcionamento, esp, hoje)
+    return { ...n, horario_funcionamento: horario, aviso_horario: aviso }
+  })
+}
 
 export async function buscarNegocios(
   filtros: FiltrosBusca = {}
@@ -90,6 +119,7 @@ export async function buscarNegocios(
   if (filtros.modalidade) query = query.contains('modalidades_atendimento', [filtros.modalidade])
   if (filtros.tipo) query = query.eq('tipo_perfil', filtros.tipo)
   if (filtros.verificado) query = query.eq('verificado', true)
+  if (filtros.notaMinima) query = query.or(`nota_media.gte.${filtros.notaMinima},nota_google.gte.${filtros.notaMinima}`)
 
   // ofertas valendo: também servem pro chip "-25%" de cada linha
   const { data: cupons } = await supabase
@@ -127,7 +157,8 @@ export async function buscarNegocios(
       console.error('Erro ao buscar negócios:', error.message)
       return { negocios: [], total: 0, porPagina }
     }
-    const abertos = (data as unknown as Negocio[]).filter((n) => situacaoHorario(n.horario_funcionamento, n.aberto_agora).aberto === true)
+    const ajustados = await comHorariosEspeciais(data as unknown as Negocio[])
+    const abertos = ajustados.filter((n) => situacaoHorario(n.horario_funcionamento, n.aberto_agora).aberto === true)
     const inicio = (pagina - 1) * porPagina
     return { negocios: comOferta(abertos.slice(inicio, inicio + porPagina)), total: abertos.length, porPagina }
   }
@@ -144,7 +175,7 @@ export async function buscarNegocios(
     console.error('Erro ao buscar negócios:', error.message)
     return { negocios: [], total: 0, porPagina }
   }
-  return { negocios: comOferta(data as unknown as Negocio[]), total: count ?? 0, porPagina }
+  return { negocios: comOferta(await comHorariosEspeciais(data as unknown as Negocio[])), total: count ?? 0, porPagina }
 }
 
 /**
@@ -238,7 +269,9 @@ export const buscarNegocioPorSlugOuId = cache(async function buscarNegocioPorSlu
     console.error('Erro ao buscar negócio por slug:', error.message)
     return null
   }
-  return data as unknown as Negocio | null
+  if (!data) return null
+  const [ajustado] = await comHorariosEspeciais([data as unknown as Negocio])
+  return ajustado
 })
 
 export async function buscarCategorias() {

@@ -16,10 +16,11 @@ export type ParamsExplorar = {
   oferta?: string
   verificado?: string
   ordem?: string
+  nota?: string
   pagina?: string
 }
 
-const CHAVES: (keyof ParamsExplorar)[] = ['q', 'categoria', 'bairro', 'modalidade', 'tipo', 'aberto', 'oferta', 'verificado', 'ordem']
+const CHAVES: (keyof ParamsExplorar)[] = ['q', 'categoria', 'bairro', 'modalidade', 'tipo', 'aberto', 'oferta', 'verificado', 'nota', 'ordem']
 
 // Filtros liga/desliga do protótipo (chips do Explorar)
 const ALTERNAVEIS: { chave: keyof ParamsExplorar; valor: string; rotulo: string }[] = [
@@ -68,6 +69,7 @@ export async function TelaExplorar({
       verificado: p.verificado === '1',
       comOferta: p.oferta === '1',
       abertoAgora: p.aberto === '1',
+      notaMinima: p.nota === '4' ? 4 : p.nota === '3' ? 3 : undefined,
       ordem,
       pagina,
     }),
@@ -154,6 +156,16 @@ export async function TelaExplorar({
               urls={Object.fromEntries([['', url({ bairro: null })], ...bairros.map((b) => [b, url({ bairro: b as string })])])}
             />
           )}
+          <SeletorFiltro
+            rotulo="Avaliação"
+            valor={p.nota === '4' || p.nota === '3' ? p.nota : ''}
+            opcoes={[
+              { valor: '', rotulo: 'Qualquer nota' },
+              { valor: '4', rotulo: '★ 4 ou mais' },
+              { valor: '3', rotulo: '★ 3 ou mais' },
+            ]}
+            urls={{ '': url({ nota: null }), '4': url({ nota: '4' }), '3': url({ nota: '3' }) }}
+          />
           <SeletorFiltro
             rotulo="Ordenar"
             valor={ordem === 'relevancia' ? '' : ordem}

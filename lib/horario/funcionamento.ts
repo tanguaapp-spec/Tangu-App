@@ -148,3 +148,35 @@ export function resumoSemana(horario: Record<string, string> | null | undefined)
     return { dias: rotuloDias, horas: fechado ? 'Fechado' : texto.replace(/\s*-\s*/g, '–'), fechado }
   })
 }
+
+export type HorarioEspecial = { data: string; fechado: boolean; abre: string | null; fecha: string | null; motivo: string | null }
+
+/**
+ * Feriado/horário diferente cadastrado pelo dono vale por cima do horário
+ * da semana, nos próximos 7 dias (o dia da semana daquela data é trocado).
+ * Assim "aberto agora", "abre amanhã às…" e o filtro da busca acertam sem
+ * mudar o resto do código. Devolve também o aviso de hoje/amanhã.
+ */
+export function aplicarEspeciais(
+  horario: Record<string, string> | null | undefined,
+  especiais: HorarioEspecial[],
+  agora = new Date()
+): { horario: Record<string, string> | null; aviso: string | null } {
+  if (!especiais.length) return { horario: horario ?? null, aviso: null }
+  const fmt = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(d)
+  const proximos = Array.from({ length: 7 }, (_, i) => fmt(new Date(agora.getTime() + i * 86400e3)))
+  const copia: Record<string, string> = { ...(horario ?? {}) }
+  let aviso: string | null = null
+  for (const e of especiais) {
+    const pos = proximos.indexOf(e.data)
+    if (pos < 0) continue
+    const dia = DIAS[new Date(`${e.data}T12:00:00Z`).getUTCDay()]
+    const hhmm = (t: string | null) => (t ?? '').slice(0, 5)
+    copia[dia] = e.fechado ? 'Fechado' : `${hhmm(e.abre)}-${hhmm(e.fecha)}`
+    if (pos <= 1 && !aviso) {
+      const quando = pos === 0 ? 'Hoje' : 'Amanhã'
+      aviso = `${quando}: ${e.fechado ? 'fechado' : `horário especial, ${hhmm(e.abre)} às ${hhmm(e.fecha)}`}${e.motivo ? ` (${e.motivo})` : ''}`
+    }
+  }
+  return { horario: copia, aviso }
+}

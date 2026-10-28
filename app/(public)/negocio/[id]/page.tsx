@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound, permanentRedirect } from 'next/navigation'
-import { BadgeCheck, ChevronLeft, FileText, Globe, Instagram, MessageCircle, Star } from 'lucide-react'
+import { BadgeCheck, ChevronLeft, FileText, Globe, Instagram, MessageCircle, Navigation, Star } from 'lucide-react'
 import { buscarNegocioPorSlugOuId, isFavorito, buscarCupomAtivo, buscarCartaoFidelidade } from '@/lib/queries/negocios'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { registrarEventoPerfil, lerOrigem } from '@/lib/metricas/eventos-perfil'
@@ -147,11 +147,22 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
     negocio.formas_pagamento?.length ? negocio.formas_pagamento.slice(0, 3).join(' · ') : null,
   ].filter(Boolean) as string[]
 
+  // rota só pra ponto comercial (autônomo nunca expõe endereço)
+  const destinoRota = autonomo
+    ? null
+    : negocio.latitude && negocio.longitude
+      ? `${negocio.latitude},${negocio.longitude}`
+      : negocio.endereco
+        ? encodeURIComponent(`${negocio.endereco}${negocio.bairro ? `, ${negocio.bairro}` : ''}, Tanguá - RJ`)
+        : null
+  const avisoHorario = (negocio as { aviso_horario?: string | null }).aviso_horario ?? null
+
   const quadroHorario = (semana.length > 0 || negocio.endereco || negocio.area_atendimento) && (
     <div className="flex flex-col gap-2.5 rounded-[24px] border border-barro-200/80 bg-superficie p-5 text-[15px] text-barro-900">
       {semana.length > 0 && (
         <>
           <h2 className="font-display text-lg font-bold">Horário</h2>
+          {avisoHorario && <p className="rounded-xl bg-casca-50 px-3 py-2 text-sm font-semibold text-casca-900">{avisoHorario}</p>}
           {semana.map((l) => (
             <div key={l.dias} className={`flex justify-between gap-3 ${l.fechado ? 'text-barro-600' : ''}`}>
               <span>{l.dias}</span>
@@ -167,6 +178,30 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
             {autonomo ? negocio.area_atendimento || 'Tanguá' : [negocio.endereco, negocio.bairro].filter(Boolean).join(' · ')}
           </p>
           {autonomo && <p className="text-[13px] text-barro-600">Perfis de autônomo mostram só a área de atendimento, nunca o endereço de casa.</p>}
+          {destinoRota && (
+            <div className="flex flex-wrap gap-2">
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${destinoRota}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-11 items-center gap-1.5 rounded-full border border-barro-200 px-4 text-sm font-semibold"
+              >
+                <Navigation className="h-4 w-4" aria-hidden="true" /> Como chegar
+              </a>
+              <a
+                href={
+                  negocio.latitude && negocio.longitude
+                    ? `https://waze.com/ul?ll=${negocio.latitude},${negocio.longitude}&navigate=yes`
+                    : `https://waze.com/ul?q=${destinoRota}&navigate=yes`
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-11 items-center gap-1.5 rounded-full border border-barro-200 px-4 text-sm font-semibold"
+              >
+                <Navigation className="h-4 w-4" aria-hidden="true" /> Waze
+              </a>
+            </div>
+          )}
         </>
       )}
       {(negocio.instagram || urlSegura(negocio.site)) && (
