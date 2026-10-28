@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { createServiceClient } from '@/lib/supabase/server'
 import { FormularioAcao } from '@/components/painel/admin/formulario-acao'
-import { reativarUsuario, suspenderUsuario } from '@/lib/actions/admin-gestao-actions'
+import { alterarAcessoCrescimento, reativarUsuario, suspenderUsuario } from '@/lib/actions/admin-gestao-actions'
 import { termoSeguro } from '@/lib/queries/negocios'
 
 export const metadata: Metadata = { title: 'Usuários', robots: { index: false } }
@@ -20,6 +20,9 @@ type Linha = {
 
 export default async function PaginaUsuarios({ searchParams }: { searchParams: { q?: string; suspensos?: string } }) {
   const db = createServiceClient()
+  // antes da 0026 a tabela não existe: lista vazia
+  const { data: membros } = await db.from('equipe_plataforma').select('perfil:perfis!equipe_plataforma_perfil_id_fkey(nome_completo)')
+  const equipe = (membros ?? []).map((m) => ({ nome: (m.perfil as unknown as { nome_completo?: string } | null)?.nome_completo ?? 'sem nome' }))
   const termo = termoSeguro(searchParams.q ?? '')
   let emails = new Map<string, string>()
   let ids: string[] | null = null
@@ -48,6 +51,23 @@ export default async function PaginaUsuarios({ searchParams }: { searchParams: {
     <div className="mx-auto max-w-4xl">
       <h1 className="font-display text-3xl font-bold text-barro-900">Usuários</h1>
       <p className="text-barro-600">Busque por nome ou e-mail. Suspender bloqueia o login na hora e fica registrado na auditoria.</p>
+      <section className="mt-4 rounded-[20px] border border-barro-200/80 bg-superficie p-4">
+        <h2 className="font-semibold text-barro-900">Equipe de crescimento</h2>
+        <p className="text-sm text-barro-600">
+          Quem cuida das métricas e dos clientes. Entra em <b>/painel/crescimento</b> e vê só Crescimento e Leads (sem pagamentos, usuários ou
+          configurações).{' '}
+          {equipe.length > 0 ? `Hoje: ${equipe.map((e) => e.nome).join(', ')}.` : 'Ninguém ainda.'}
+        </p>
+        <FormularioAcao acao={alterarAcessoCrescimento} rotuloBotao="Salvar acesso" className="mt-3">
+          <div className="flex flex-wrap gap-2">
+            <input name="email" type="email" required placeholder="E-mail da conta da pessoa" aria-label="E-mail" className="h-11 min-w-0 flex-1 rounded-xl border border-barro-200 bg-superficie px-3" />
+            <select name="acao" aria-label="Ação" className="h-11 rounded-xl border border-barro-200 bg-superficie px-3">
+              <option value="conceder">Dar acesso</option>
+              <option value="remover">Tirar acesso</option>
+            </select>
+          </div>
+        </FormularioAcao>
+      </section>
       <form method="get" className="mt-4 flex flex-wrap gap-2">
         <input name="q" defaultValue={searchParams.q} placeholder="Nome ou e-mail" aria-label="Nome ou e-mail" className="h-11 min-w-0 flex-1 rounded-xl border border-barro-200 bg-superficie px-3" />
         <label className="flex items-center gap-1.5 text-sm text-barro-800">

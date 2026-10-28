@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { verificarAdmin } from '@/lib/auth/require-admin'
+import { verificarCrescimento as verificarAdmin } from '@/lib/auth/require-admin'
 import { createServiceClient } from '@/lib/supabase/server'
 import { lerPrecoCentavos } from '@/lib/admin/configuracoes'
 
@@ -20,5 +20,6 @@ export async function registrarInvestimento(formData: FormData) {
     .insert({ canal, valor_centavos: valor, mes, observacao: String(formData.get('observacao') ?? '').trim().slice(0, 200) || null })
   if (error) return { erro: 'Não foi possível salvar.' }
   revalidatePath('/painel/admin/crescimento')
+  revalidatePath('/painel/crescimento')
   return { erro: null }
 }

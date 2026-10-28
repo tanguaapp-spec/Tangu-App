@@ -135,6 +135,7 @@ export default async function PaginaVoce({ searchParams }: { searchParams: { sen
     { data: negocioProprio },
     { data: membro },
     { data: ehAdmin },
+    { data: ehCrescimento },
   ] = await Promise.all([
     supabase.from('avaliacoes').select('*', { count: 'exact', head: true }).eq('autor_id', user.id),
     supabase.from('favoritos').select('*', { count: 'exact', head: true }).eq('perfil_id', user.id),
@@ -147,6 +148,7 @@ export default async function PaginaVoce({ searchParams }: { searchParams: { sen
     supabase.from('negocios').select('id, nome').eq('reivindicado_por', user.id).order('criado_em'),
     supabase.from('membros_negocio').select('negocio:negocios(id, nome)').eq('perfil_id', user.id).limit(1).maybeSingle(),
     supabase.rpc('eh_admin'),
+    supabase.rpc('eh_crescimento'),
   ])
   const proprios = (negocioProprio ?? []) as { id: string; nome: string }[]
   const negocio = proprios[0] ?? ((membro as { negocio?: { id: string; nome: string } } | null)?.negocio ?? null)
@@ -168,6 +170,19 @@ export default async function PaginaVoce({ searchParams }: { searchParams: { sen
         <p role="status" className="rounded-[14px] bg-mata-100 p-3 text-sm font-semibold text-mata-700">
           Senha alterada com sucesso.
         </p>
+      )}
+
+      {ehAdmin !== true && ehCrescimento === true && (
+        <Link href="/painel/crescimento" className="flex items-center gap-3 rounded-[20px] border border-barro-200/80 bg-superficie p-4">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-barro-900 text-feira">
+            <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <span className="flex-1">
+            <b className="block text-barro-900">Painel de crescimento</b>
+            <span className="text-sm text-barro-600">Métricas do app e clientes para contatar</span>
+          </span>
+          <ChevronRight className="h-5 w-5 text-barro-400" aria-hidden="true" />
+        </Link>
       )}
 
       {ehAdmin === true && (

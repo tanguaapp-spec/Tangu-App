@@ -139,3 +139,15 @@ describe('categorias do BoraAli (0025)', () => {
     expect(rows[0]?.slug ?? 'sem-categoria').not.toBe('alimentacao')
   })
 })
+
+describe('acesso de crescimento (0026)', () => {
+  it('quem está na equipe é crescimento, mas não é admin', async () => {
+    const amigo = await criarUsuario(db)
+    await db.query(`insert into public.equipe_plataforma (perfil_id) values ($1)`, [amigo])
+    const r = await como(db, amigo, (tx) => tx.query<{ c: boolean; a: boolean }>('select public.eh_crescimento() as c, public.eh_admin() as a'))
+    expect(r.rows[0]).toEqual({ c: true, a: false })
+    const comum = await como(db, outro, (tx) => tx.query<{ c: boolean }>('select public.eh_crescimento() as c'))
+    expect(comum.rows[0].c).toBe(false)
+    await expect(como(db, amigo, (tx) => tx.query(`insert into public.equipe_plataforma (perfil_id) values ($1)`, [outro]))).rejects.toThrow(/permission denied/)
+  })
+})

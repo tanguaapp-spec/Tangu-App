@@ -258,3 +258,31 @@ export async function enviarComunicado(formData: FormData) {
   await auditar(auth.user.id, 'enviar_comunicado', 'comunicado', crypto.randomUUID(), { publico, bairro: bairro || null, titulo, total: ids.length })
   return { erro: null, total: ids.length }
 }
+
+// --- equipe de crescimento (0026) ---------------------------------------
+
+/** Dá ou tira o acesso "crescimento" (Crescimento + Leads) pelo e-mail da conta. */
+export async function alterarAcessoCrescimento(formData: FormData) {
+  const auth = await verificarAdmin()
+  if ('erro' in auth) return { erro: auth.erro }
+  const email = String(formData.get('email') ?? '').trim().toLowerCase()
+  const acao = formData.get('acao') === 'remover' ? 'remover' : 'conceder'
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { erro: 'Digite o e-mail da conta da pessoa.' }
+  const db = createServiceClient()
+  let perfilId: string | null = null
+  for (let pagina = 1; pagina <= 30 && !perfilId; pagina++) {
+    const { data, error } = await db.auth.admin.listUsers({ page: pagina, perPage: 1000 })
+    if (error) return { erro: 'Não foi possível procurar a conta agora.' }
+    perfilId = data.users.find((u) => u.email?.toLowerCase() === email)?.id ?? null
+    if (data.users.length < 1000) break
+  }
+  if (!perfilId) return { erro: 'Nenhuma conta com esse e-mail. A pessoa precisa se cadastrar no app primeiro.' }
+  const { error } =
+    acao === 'conceder'
+      ? await db.from('equipe_plataforma').upsert({ perfil_id: perfilId, papel: 'crescimento', concedido_por: auth.user.id }, { onConflict: 'perfil_id' })
+      : await db.from('equipe_plataforma').delete().eq('perfil_id', perfilId)
+  if (error) return { erro: 'Não foi possível salvar (a migration 0026 já rodou?).' }
+  await auditar(auth.user.id, `crescimento_${acao}`, 'perfil', perfilId, { email })
+  revalidatePath('/painel/admin/usuarios')
+  return { erro: null }
+}

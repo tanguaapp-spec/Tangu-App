@@ -28,3 +28,21 @@ export async function requireAdminOrRedirect() {
   if ('erro' in resultado) redirect('/')
   return resultado
 }
+
+/**
+ * Admin ou pessoa da equipe de crescimento (0026): pode ver métricas e
+ * trabalhar os leads. Antes da 0026, só admin passa.
+ */
+export async function verificarCrescimento() {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Não autenticado.' as const }
+  const { data, error } = await supabase.rpc('eh_crescimento')
+  if (error || data !== true) {
+    const { data: admin } = await supabase.rpc('eh_admin')
+    if (admin !== true) return { erro: 'Acesso negado.' as const }
+  }
+  return { supabase, user } as const
+}

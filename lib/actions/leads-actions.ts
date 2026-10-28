@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { verificarAdmin } from '@/lib/auth/require-admin'
+import { verificarCrescimento as verificarAdmin } from '@/lib/auth/require-admin'
 import { createServiceClient } from '@/lib/supabase/server'
 import { ETAPAS, type Etapa } from '@/lib/leads/segmentos'
 
@@ -49,5 +49,6 @@ export async function atualizarLead(formData: FormData) {
   if (registros.length) await db.from('interacoes_lead').insert(registros)
 
   revalidatePath('/painel/admin/leads')
+  revalidatePath('/painel/crescimento/leads')
   return { erro: null }
 }
