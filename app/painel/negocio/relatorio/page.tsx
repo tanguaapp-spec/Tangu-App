@@ -7,6 +7,7 @@ import { mesValido, montarRelatorioMensal } from '@/lib/relatorios/mensal'
 import { TituloPainel, CartaoPainel } from '@/components/painel/titulo-painel'
 import { RecursoBloqueado } from '@/components/painel/recurso-bloqueado'
 import { cn } from '@/lib/utils'
+import { BotaoImprimir } from '@/components/painel/botao-imprimir'
 
 export const metadata: Metadata = { title: 'Relatório mensal', robots: { index: false } }
 export const dynamic = 'force-dynamic'
@@ -54,12 +55,15 @@ export default async function PaginaRelatorio({ searchParams }: { searchParams: 
         descricao="Os números do mês do seu negócio. Baixe a planilha para guardar ou mostrar pra quem trabalha com você."
         voltar="/painel/negocio/mais"
         acao={
+          <div className="flex flex-wrap gap-2 print:hidden">
+          <BotaoImprimir rotulo="Salvar em PDF" />
           <a href={`/api/painel/relatorio?mes=${mes}`} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-laranja px-4 font-bold text-tinta">
             <Download className="h-4 w-4" aria-hidden="true" /> Baixar planilha
           </a>
+          </div>
         }
       />
-      <nav aria-label="Mês" className="-mx-1 flex gap-2 overflow-x-auto px-1 [scrollbar-width:none]">
+      <nav aria-label="Mês" className="-mx-1 flex print:hidden gap-2 overflow-x-auto px-1 [scrollbar-width:none]">
         {meses.map((m) => (
           <Link
             key={m}

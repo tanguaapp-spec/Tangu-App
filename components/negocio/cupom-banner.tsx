@@ -1,4 +1,5 @@
 import { BotaoPegarCupom } from '@/components/negocio/botao-pegar-cupom'
+import { BotaoCompartilhar } from '@/components/ui/botao-compartilhar'
 import { prazoCurto, precoCurto, restantesOferta, seloOferta } from '@/lib/ui/apresentacao'
 import { cn } from '@/lib/utils'
 import type { Cupom } from '@/lib/types/database'
@@ -10,12 +11,15 @@ export function CupomBanner({
   codigoExistente,
   voltarPara,
   className,
+  linkCompartilhar,
 }: {
   cupom: Cupom
   logado: boolean
   codigoExistente?: string | null
   voltarPara?: string
   className?: string
+  /** endereço completo da oferta (perfil + #oferta) pro botão de compartilhar */
+  linkCompartilhar?: string
 }) {
   const oferta = { ...cupom, negocio: null }
   const selo = seloOferta(oferta)
@@ -55,6 +59,15 @@ export function CupomBanner({
           {restantes !== null && <span className="md:hidden"> · {restantes} {restantes === 1 ? 'cupom restante' : 'cupons restantes'}</span>}
         </p>
         {cupom.condicoes && <p className="text-sm text-barro-700">{cupom.condicoes}</p>}
+        {linkCompartilhar && (
+          <BotaoCompartilhar
+            url={linkCompartilhar}
+            titulo={cupom.titulo}
+            texto={`Oferta no Tanguá App: ${cupom.titulo}`}
+            rotulo="Compartilhar oferta"
+            className="self-start"
+          />
+        )}
       </div>
       <div className="md:min-w-[220px]">
         {cupom.limite_resgates ? (

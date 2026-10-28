@@ -186,6 +186,16 @@ export default async function PaginaAgenda() {
                     >
                       <CalendarPlus className="h-4 w-4" aria-hidden="true" /> Salvar na agenda
                     </a>
+                    {e.local_evento && (
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${e.local_evento}, ${e.bairro ? `${e.bairro}, ` : ''}Tanguá - RJ`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex h-11 items-center gap-1.5 rounded-[14px] border-[1.5px] border-barro-200 px-3.5 text-sm font-semibold text-barro-900"
+                      >
+                        <MapPin className="h-4 w-4" aria-hidden="true" /> Como chegar
+                      </a>
+                    )}
                     <a
                       href={linkGoogleAgenda({ titulo: e.titulo, conteudo: e.conteudo, local: e.local_evento, inicio: e.data_evento })}
                       target="_blank"

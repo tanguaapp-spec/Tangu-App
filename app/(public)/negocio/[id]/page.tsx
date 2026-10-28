@@ -328,7 +328,7 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
           </div>
 
           <div className="flex flex-col gap-4 px-4 pt-4 md:gap-6 md:p-0">
-            {cupomAtivo && <CupomBanner cupom={cupomAtivo} logado={!!user} codigoExistente={meuResgate?.codigo ?? null} voltarPara={caminho} />}
+            {cupomAtivo && <CupomBanner cupom={cupomAtivo} logado={!!user} codigoExistente={meuResgate?.codigo ?? null} voltarPara={caminho} linkCompartilhar={`${urlPublica}#oferta`} />}
 
             {(podePedido || podeAgenda) && (
               <div className="flex flex-col gap-2 md:flex-row">
