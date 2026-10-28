@@ -10,6 +10,11 @@ import {
   LogOut,
   Megaphone,
   QrCode,
+  CalendarX,
+  ShoppingBag,
+  FileSpreadsheet,
+  Plus,
+  Sparkles,
   Rocket,
   ShieldCheck,
   Stamp,
@@ -36,6 +41,8 @@ const GRUPOS: { titulo: string; itens: Item[] }[] = [
     titulo: 'Seu perfil',
     itens: [
       { href: '/painel/negocio/perfil', rotulo: 'Perfil do negócio', detalhe: 'Nome, contato, horário e fotos', icone: Store },
+      { href: '/painel/negocio/horarios', rotulo: 'Feriados e horários especiais', detalhe: 'Avise quando abrir diferente', icone: CalendarX },
+      { href: '/painel/negocio/vendas', rotulo: 'Pedidos e agenda pelo WhatsApp', detalhe: 'Carrinho no catálogo e pedido de horário', icone: ShoppingBag },
       { href: '/painel/negocio/novidades', rotulo: 'Novidades', detalhe: 'Publique e avise quem favoritou', icone: Megaphone },
       { href: '/painel/negocio/avaliacoes', rotulo: 'Avaliações', detalhe: 'Leia e responda', icone: Star },
     ],
@@ -44,6 +51,7 @@ const GRUPOS: { titulo: string; itens: Item[] }[] = [
     titulo: 'Crescer',
     itens: [
       { href: '/painel/negocio/estatisticas', rotulo: 'Estatísticas', detalhe: 'Visitas, WhatsApp e de onde vêm', icone: BarChart3 },
+      { href: '/painel/negocio/relatorio', rotulo: 'Relatório mensal', detalhe: 'Planilha com os números do mês', icone: FileSpreadsheet },
       { href: '/painel/negocio/divulgacao', rotulo: 'Anunciar no Tanguá App', detalhe: 'Banner, destaque na busca e Instagram', icone: Rocket },
       { href: '/painel/negocio/divulgar', rotulo: 'Divulgar', detalhe: 'QR code, cartaz e indicação', icone: QrCode },
       { href: '/painel/negocio/fidelidade', rotulo: 'Cartão fidelidade', detalhe: 'Carimbe quem volta', icone: Stamp },
@@ -55,6 +63,8 @@ const GRUPOS: { titulo: string; itens: Item[] }[] = [
     itens: [
       { href: '/painel/negocio/equipe', rotulo: 'Equipe', detalhe: 'Quem ajuda a cuidar do perfil', icone: Users },
       { href: '/painel/negocio/assinatura', rotulo: 'Plano e assinatura', detalhe: 'Limites, pagamento e recibos', icone: CreditCard, soDono: true },
+      { href: '/painel/negocio/cadastrar', rotulo: 'Cadastrar outro negócio', detalhe: 'Cuide de vários negócios na mesma conta', icone: Plus, soDono: true },
+      { href: '/ferramentas', rotulo: 'Ferramentas completas', detalhe: 'Beloo (agenda) e Freguês (pedidos)', icone: Sparkles },
       { href: '/ajuda', rotulo: 'Ajuda e suporte', detalhe: 'Dúvidas e chamados', icone: LifeBuoy },
       { href: '/perfil', rotulo: 'Sua conta pessoal', detalhe: 'Favoritos, cupons e preferências', icone: User },
     ],

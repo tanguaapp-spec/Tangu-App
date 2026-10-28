@@ -23,6 +23,10 @@ import { BotaoCompartilhar } from '@/components/ui/botao-compartilhar'
 import { FotoNegocio } from '@/components/vitrine/foto-negocio'
 import { RegistrarVisto } from '@/components/home/vistos-recentemente'
 import { BarraContato } from '@/components/negocio/barra-contato'
+import { PedidoWhatsapp } from '@/components/negocio/pedido-whatsapp'
+import { AgendaWhatsapp } from '@/components/negocio/agenda-whatsapp'
+import { lerConfig } from '@/lib/config/ler'
+import { recursosDoNegocio } from '@/lib/planos/recursos'
 import type { Negocio } from '@/lib/types/database'
 
 export const dynamic = 'force-dynamic'
@@ -116,6 +120,13 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
       user ? buscarCartaoFidelidade(id, user.id) : Promise.resolve(null),
       user ? supabase.from('favoritos_produtos').select('produto_id').eq('perfil_id', user.id) : Promise.resolve({ data: [] as { produto_id: string }[] }),
     ])
+
+  // pedidos e agenda pelo WhatsApp: módulo ligado no admin + recurso do plano + dono ativou + tem WhatsApp
+  const [modulos, recursos] = await Promise.all([lerConfig('modulos_ativos'), recursosDoNegocio(id)])
+  const zap = negocio.whatsapp
+  const podePedido = !!zap && modulos.pedidos_whatsapp !== false && recursos.recursos.pedidos_whatsapp === true && !!negocio.pedidos_whatsapp && (produtos ?? []).length > 0
+  const podeAgenda = !!zap && modulos.agenda_whatsapp !== false && recursos.recursos.agenda_whatsapp === true && !!negocio.agenda_whatsapp
+  const precoCentavos = (preco: number | null) => (preco === null || preco === undefined ? null : Math.round(Number(preco) * 100))
 
   const { data: meuResgate } =
     cupomAtivo && user
@@ -311,6 +322,33 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
 
           <div className="flex flex-col gap-4 px-4 pt-4 md:gap-6 md:p-0">
             {cupomAtivo && <CupomBanner cupom={cupomAtivo} logado={!!user} codigoExistente={meuResgate?.codigo ?? null} voltarPara={caminho} />}
+
+            {(podePedido || podeAgenda) && (
+              <div className="flex flex-col gap-2 md:flex-row">
+                {podePedido && (
+                  <PedidoWhatsapp
+                    negocioId={id}
+                    negocio={negocio.nome}
+                    whatsapp={zap!}
+                    config={negocio.config_pedidos ?? {}}
+                    produtos={(produtos ?? []).map((p) => ({ id: p.id, nome: p.nome, precoCentavos: p.preco_a_partir_de ? null : precoCentavos(p.preco) }))}
+                  />
+                )}
+                {podeAgenda && (
+                  <AgendaWhatsapp
+                    negocioId={id}
+                    negocio={negocio.nome}
+                    whatsapp={zap!}
+                    horario={negocio.horario_funcionamento ?? null}
+                    servicos={
+                      (produtos ?? []).filter((p) => p.duracao_min).length
+                        ? (produtos ?? []).filter((p) => p.duracao_min).map((p) => ({ id: p.id, nome: p.nome, duracao: p.duracao_min as number }))
+                        : [{ id: 'atendimento', nome: 'Atendimento', duracao: 30 }]
+                    }
+                  />
+                )}
+              </div>
+            )}
 
             {produtos && produtos.length > 0 && (
               <section aria-labelledby="t-catalogo" className="rounded-[22px] border border-barro-200/80 bg-superficie px-4 py-1 md:rounded-[24px] md:px-6 md:py-2">

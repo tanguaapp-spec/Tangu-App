@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { lerConfig } from '@/lib/config/ler'
 import { ArrowUpRight, CalendarCheck, ShoppingBag, Sparkles } from 'lucide-react'
 import { Botao } from '@/components/ui/botao'
 
@@ -28,8 +29,8 @@ const ferramentas = [
     url: 'https://beloo-xzdr.vercel.app',
   },
   {
-    nome: 'CatalogAI',
-    slug: 'catalogai',
+    nome: 'Freguês',
+    slug: 'fregues',
     icone: ShoppingBag,
     cor: 'mata' as const,
     titulo: 'Cardápio digital com pedido direto no seu WhatsApp',
@@ -53,7 +54,11 @@ const coresFerramenta = {
   mata: { bg: 'bg-mata-100', texto: 'text-mata-600', selo: 'bg-mata-50 text-mata-700' },
 }
 
-export default function PaginaFerramentas() {
+export const revalidate = 600
+
+export default async function PaginaFerramentas() {
+  const [beloo, fregues] = await Promise.all([lerConfig('link_beloo'), lerConfig('link_fregues')])
+  const links: Record<string, string> = { beloo: String(beloo), fregues: String(fregues) }
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
       <span className="inline-flex items-center gap-1.5 rounded-full bg-casca-100 px-3 py-1 text-sm font-semibold text-casca-700">
@@ -101,7 +106,7 @@ export default function PaginaFerramentas() {
                 ))}
               </ul>
 
-              <a href={f.url} target="_blank" rel="noopener noreferrer" className="mt-6 inline-block">
+              <a href={links[f.slug] ?? f.url} target="_blank" rel="noopener noreferrer" className="mt-6 inline-block">
                 <Botao className="w-full sm:w-auto">
                   {f.cta} <ArrowUpRight className="h-4 w-4" />
                 </Botao>

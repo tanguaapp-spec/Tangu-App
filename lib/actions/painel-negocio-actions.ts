@@ -437,6 +437,12 @@ function revalidarCatalogo() {
   revalidatePath('/negocio/[id]', 'page')
 }
 
+/** Duração do serviço na agenda (5 a 600 min, de 5 em 5); vazio ou inválido = sem duração. */
+function lerDuracao(bruto: FormDataEntryValue | null) {
+  const n = Math.round(Number(String(bruto ?? '').trim()) / 5) * 5
+  return Number.isFinite(n) && n >= 5 && n <= 600 ? n : null
+}
+
 export async function criarProduto(negocioId: string, formData: FormData) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -467,6 +473,7 @@ export async function criarProduto(negocioId: string, formData: FormData) {
     preco: validado.data.preco,
     preco_a_partir_de: formData.get('preco_a_partir_de') === 'on',
     imagem_url: imagemUrl,
+    duracao_min: lerDuracao(formData.get('duracao_min')),
   })
 
   if (error) return { erro: traduzirErroBanco(error) }
@@ -496,6 +503,7 @@ export async function atualizarProduto(produtoId: string, formData: FormData) {
     descricao: validado.data.descricao || null,
     preco: validado.data.preco,
     preco_a_partir_de: formData.get('preco_a_partir_de') === 'on',
+    duracao_min: lerDuracao(formData.get('duracao_min')),
   }
   const foto = formData.get('foto')
   if (foto instanceof File && foto.size > 0) {

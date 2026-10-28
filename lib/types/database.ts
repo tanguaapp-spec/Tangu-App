@@ -80,6 +80,12 @@ export type Negocio = {
   total_avaliacoes?: number
   verificado_em?: string | null
   respostas_prontas?: string[]
+  // migration 0023 (opcionais até ela rodar)
+  pedidos_whatsapp?: boolean
+  agenda_whatsapp?: boolean
+  config_pedidos?: import('@/lib/vendas/whatsapp').ConfigPedidos | null
+  import_ref?: string | null
+  pausado_em?: string | null
 }
 
 export type SolicitacaoReivindicacao = {

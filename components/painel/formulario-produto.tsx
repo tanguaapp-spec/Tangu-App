@@ -90,6 +90,21 @@ export function FormularioProduto({
               <input type="checkbox" name="preco_a_partir_de" defaultChecked={produto?.preco_a_partir_de} className="h-4 w-4 rounded" />a partir de
             </label>
           </div>
+          <label className="flex items-center gap-2 text-[13px] text-barro-700">
+            Duração na agenda
+            <input
+              name="duracao_min"
+              type="number"
+              min={5}
+              max={600}
+              step={5}
+              inputMode="numeric"
+              defaultValue={(produto as { duracao_min?: number | null } | undefined)?.duracao_min ?? ''}
+              placeholder="min"
+              className={`${campo} w-24 font-mono`}
+            />
+            <span className="text-barro-500">min (opcional, para agendamento)</span>
+          </label>
         </div>
       </div>
       <label className="sr-only" htmlFor={`descricao-${id}`}>
