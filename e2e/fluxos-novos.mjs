@@ -92,6 +92,12 @@ console.log('\n▶ Lojista com dois negócios (ana)')
   }
   await foto(p, 'ana-02-mais')
 
+  // perfil com Facebook e "hora marcada" salva (com ou sem a migration 0026)
+  await p.goto(`${BASE}/painel/negocio/perfil`)
+  await p.fill('#facebook', 'facebook.com/salaodaana')
+  await p.locator('form button[type=submit]').last().click()
+  await ver(p, 'salv', 'perfil do negócio salva com o campo Facebook')
+
   // pausar e reativar
   await p.goto(`${BASE}/painel/negocio`)
   await p.getByRole('button', { name: 'Pausar perfil' }).click()

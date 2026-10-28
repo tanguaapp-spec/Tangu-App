@@ -270,11 +270,16 @@ export async function atualizarNegocio(negocioId: string, formData: FormData) {
     atualizacoes.galeria = [...galeriaAtual, ...urlsNovas]
   }
 
-  const { error } = await supabase
+  let { error } = await supabase
     .from('negocios')
     .update(atualizacoes)
     .eq('id', negocioId)
     .eq('reivindicado_por', user.id)
+  // banco ainda sem a migration 0026: salva o resto sem Facebook/hora marcada
+  if (error && /facebook|so_hora_marcada/.test(error.message)) {
+    const { facebook: _f, so_hora_marcada: _h, ...semNovos } = atualizacoes
+    ;({ error } = await supabase.from('negocios').update(semNovos).eq('id', negocioId).eq('reivindicado_por', user.id))
+  }
 
   if (error) {
     console.error('Falha ao atualizar negócio:', error.message)
