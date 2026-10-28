@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { CampoBusca } from '@/components/busca/campo-busca'
 import { useEffect, useState } from 'react'
 import { Search } from 'lucide-react'
 import { MarcaTangua } from '@/components/marca/logo-tangua'
@@ -38,14 +39,11 @@ export function TopoInicio() {
         <p className="mt-0.5 font-display text-[26px] font-bold leading-[1.15]">O que você procura hoje?</p>
       </div>
       <form action="/buscar" method="get" role="search">
-        <label className="flex h-[50px] items-center gap-2.5 rounded-2xl bg-white px-3.5">
+        <label className="relative flex h-[50px] items-center gap-2.5 rounded-2xl bg-white px-3.5">
           <Search className="h-[18px] w-[18px] shrink-0 text-[#55655D]" aria-hidden="true" />
-          <input
-            name="q"
-            type="search"
-            enterKeyHint="search"
+          <CampoBusca
             placeholder="Pizza, eletricista, farmácia…"
-            aria-label="Buscar em Tanguá"
+            rotulo="Buscar em Tanguá"
             className="min-w-0 flex-1 bg-transparent text-[15px] text-[#13241D] placeholder:text-[#6B7A72] focus:outline-none"
           />
         </label>

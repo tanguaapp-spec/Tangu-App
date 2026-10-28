@@ -1,5 +1,6 @@
 import { VitrineBanners } from '@/components/divulgacao/vitrine-banners'
 import Link from 'next/link'
+import { CampoBusca } from '@/components/busca/campo-busca'
 import { Search } from 'lucide-react'
 import { TopoInicio } from '@/components/home/topo-inicio'
 import { ParaVoce } from '@/components/home/para-voce'
@@ -71,13 +72,11 @@ export default async function PaginaInicial() {
               Comércios, profissionais, ofertas e o que acontece na cidade. Fale direto no WhatsApp, sem intermediário.
             </p>
             <form action="/buscar" method="get" role="search" className="flex max-w-[620px] flex-wrap gap-2.5">
-              <label className="flex h-14 min-w-0 flex-[1_1_260px] items-center gap-2.5 rounded-2xl bg-white px-4">
+              <label className="relative flex h-14 min-w-0 flex-[1_1_260px] items-center gap-2.5 rounded-2xl bg-white px-4">
                 <Search className="h-5 w-5 shrink-0 text-[#55655D]" aria-hidden="true" />
-                <input
-                  name="q"
-                  type="search"
+                <CampoBusca
                   placeholder="Pizza, eletricista, farmácia…"
-                  aria-label="Buscar em Tanguá"
+                  rotulo="Buscar em Tanguá"
                   className="min-w-0 flex-1 bg-transparent text-base text-[#13241D] placeholder:text-[#6B7A72] focus:outline-none"
                 />
               </label>

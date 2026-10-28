@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { buscarBairros, buscarCategorias, buscarNegocios, type OrdemBusca } from '@/lib/queries/negocios'
 import { LinhaNegocio } from '@/components/vitrine/linha-negocio'
+import { CampoBusca } from '@/components/busca/campo-busca'
 import { SeletorFiltro } from '@/components/busca/seletor-filtro'
 import { cn } from '@/lib/utils'
 import type { ModalidadeAtendimento } from '@/lib/types/database'
@@ -109,15 +110,12 @@ export async function TelaExplorar({
           {CHAVES.filter((k) => k !== 'q' && !(k in fixos) && params[k]).map((k) => (
             <input key={k} type="hidden" name={k} value={params[k]} />
           ))}
-          <label className="flex h-12 items-center gap-2.5 rounded-[14px] border-[1.5px] border-serra bg-feira px-3.5">
+          <label className="relative flex h-12 items-center gap-2.5 rounded-[14px] border-[1.5px] border-serra bg-feira px-3.5">
             <Search className="h-[18px] w-[18px] shrink-0 text-mata-700" aria-hidden="true" />
-            <input
-              name="q"
-              type="search"
-              enterKeyHint="search"
-              defaultValue={params.q ?? ''}
+            <CampoBusca
+              valorInicial={params.q ?? ''}
               placeholder={categoriaAtual ? `Buscar em ${categoriaAtual.nome}` : 'Nome, serviço ou produto'}
-              aria-label="Buscar"
+              rotulo="Buscar"
               className="min-w-0 flex-1 bg-transparent text-[15px] font-medium text-barro-900 placeholder:font-normal placeholder:text-barro-400 focus:outline-none"
             />
           </label>
