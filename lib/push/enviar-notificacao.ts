@@ -92,14 +92,6 @@ export async function enviarNotificacaoParaVisitantes(payload: PayloadNotificaca
   await enviarParaInscricoes(data ?? [], payload)
 }
 
-/** Notifica todo mundo que já ativou notificação, com ou sem conta (mural da cidade) */
-export async function enviarNotificacaoParaTodosInscritos(payload: PayloadNotificacao) {
-  if (!garantirVapidConfigurado()) return
-  const { data, error } = await createServiceClient().from('push_subscriptions').select('id, endpoint, p256dh, auth').limit(50000)
-  if (error) return
-  await enviarParaInscricoes(data ?? [], payload)
-}
-
 /** Notificação de confirmação logo depois de ativar (só pra aquele aparelho). */
 export async function enviarBoasVindasPush(inscricao: { endpoint: string; p256dh: string; auth: string }) {
   if (!garantirVapidConfigurado()) return false

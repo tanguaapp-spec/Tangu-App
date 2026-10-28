@@ -32,7 +32,7 @@ export function CartaoNegocio({
         <span className="flex items-center gap-1.5">
           <span className="truncate text-[15px] font-bold">{negocio.nome}</span>
           {negocio.destaque_ativo && (
-            <span className="shrink-0 rounded-full bg-casca-100 px-1.5 py-px text-[10px] font-bold text-casca-800">Destaque</span>
+            <span className="shrink-0 rounded-full bg-casca-100 px-1.5 py-px text-xs font-bold text-casca-800">Destaque</span>
           )}
         </span>
         <span className="block truncate text-xs text-barro-600 md:text-[13px]">{metaNegocio(negocio, { comBairro: true })}</span>

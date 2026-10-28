@@ -34,7 +34,7 @@ export function Cabecalho() {
       {/* computador */}
       <header className="sticky top-0 z-50 hidden border-b border-barro-200/80 bg-superficie md:block">
         <div className="mx-auto flex max-w-[1200px] items-center gap-7 px-6 py-3.5">
-          <Link href="/" className="text-mata-700">
+          <Link href="/" className="flex min-h-11 items-center text-mata-700">
             <MarcaTangua tamanho="md" />
             <span className="sr-only">Tanguá App — página inicial</span>
           </Link>
@@ -112,7 +112,7 @@ export function Cabecalho() {
       {!topoProprio && (
         <header className="sticky top-0 z-40 flex items-center gap-2 border-b border-barro-200/80 bg-superficie/95 px-4 py-2.5 backdrop-blur md:hidden">
           {eAba ? (
-            <Link href="/" className="text-mata-700">
+            <Link href="/" className="flex min-h-11 items-center text-mata-700">
               <MarcaTangua tamanho="sm" />
               <span className="sr-only">Página inicial</span>
             </Link>
@@ -127,7 +127,7 @@ export function Cabecalho() {
             </button>
           )}
           {!eAba && (
-            <Link href="/" className="text-mata-700">
+            <Link href="/" className="flex min-h-11 items-center text-mata-700">
               <MarcaTangua tamanho="sm" />
               <span className="sr-only">Página inicial</span>
             </Link>

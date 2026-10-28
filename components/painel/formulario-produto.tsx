@@ -53,7 +53,7 @@ export function FormularioProduto({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={previa} alt="" className="h-full w-full object-cover" />
           ) : (
-            <span className="flex flex-col items-center gap-0.5 text-[11px] font-semibold">
+            <span className="flex flex-col items-center gap-0.5 text-xs font-semibold">
               <Camera className="h-5 w-5" aria-hidden="true" /> Foto
             </span>
           )}

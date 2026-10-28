@@ -104,7 +104,7 @@ export default async function PaginaAgenda() {
                       }`}
                     >
                       <b className="text-xl leading-none">{fmt(e.data_evento, { day: '2-digit' })}</b>
-                      <span className="text-[11px] font-bold uppercase">{fmt(e.data_evento, { month: 'short' }).replace('.', '')}</span>
+                      <span className="text-xs font-bold uppercase">{fmt(e.data_evento, { month: 'short' }).replace('.', '')}</span>
                     </span>
                     <div className="min-w-0">
                       <h3 className="font-display text-lg font-bold leading-snug text-barro-900">{e.titulo}</h3>

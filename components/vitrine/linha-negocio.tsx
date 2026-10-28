@@ -10,7 +10,7 @@ export function LinhaNegocio({ negocio, oferta, origem = 'busca' }: { negocio: N
   return (
     <Link
       href={`${urlNegocio(negocio)}?origem=${origem}`}
-      className="flex gap-3 rounded-[20px] border border-barro-200/80 bg-superficie p-3 text-barro-900 transition-transform active:scale-[0.99]"
+      className="flex min-w-0 gap-3 rounded-[20px] border border-barro-200/80 bg-superficie p-3 text-barro-900 transition-transform active:scale-[0.99]"
     >
       <FotoNegocio
         id={negocio.id}
@@ -25,19 +25,19 @@ export function LinhaNegocio({ negocio, oferta, origem = 'busca' }: { negocio: N
           <span className="truncate text-base font-bold">{negocio.nome}</span>
           {negocio.verificado && <BadgeCheck className="h-4 w-4 shrink-0 text-mata-700" aria-label="Verificado" />}
           {negocio.destaque_ativo && (
-            <span className="shrink-0 rounded-full bg-casca-100 px-2 py-0.5 text-[11px] font-bold text-casca-800">Destaque</span>
+            <span className="shrink-0 rounded-full bg-casca-100 px-2 py-0.5 text-xs font-bold text-casca-800">Destaque</span>
           )}
         </span>
         <span className="truncate text-[13px] text-barro-600">{metaNegocio(negocio, { comBairro: true })}</span>
         {(horario.aberto !== null || oferta) && (
           <span className="flex flex-wrap gap-1.5">
             {horario.aberto === true && (
-              <span className="rounded-full bg-mata-100 px-2 py-0.5 text-[11px] font-bold text-mata-700">{horario.rotulo}</span>
+              <span className="rounded-full bg-mata-100 px-2 py-0.5 text-xs font-bold text-mata-700">{horario.rotulo}</span>
             )}
             {horario.aberto === false && (
-              <span className="rounded-full bg-barro-100 px-2 py-0.5 text-[11px] font-semibold text-barro-700">{horario.rotulo}</span>
+              <span className="rounded-full bg-barro-100 px-2 py-0.5 text-xs font-semibold text-barro-700">{horario.rotulo}</span>
             )}
-            {oferta && <span className="rounded-full bg-barro-900 px-2 py-0.5 font-mono text-[11px] font-bold text-feira">{oferta}</span>}
+            {oferta && <span className="rounded-full bg-barro-900 px-2 py-0.5 font-mono text-xs font-bold text-feira">{oferta}</span>}
           </span>
         )}
       </span>

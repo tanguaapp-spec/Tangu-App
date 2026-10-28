@@ -35,7 +35,7 @@ export function TopoInicio() {
         <p className="min-h-[20px] text-sm text-white/75">
           {ola ? `${ola}${primeiroNome ? `, ${primeiroNome}` : ''}` : ''} · Tanguá
         </p>
-        <h1 className="mt-0.5 font-display text-[26px] font-bold leading-[1.15]">O que você procura hoje?</h1>
+        <p className="mt-0.5 font-display text-[26px] font-bold leading-[1.15]">O que você procura hoje?</p>
       </div>
       <form action="/buscar" method="get" role="search">
         <label className="flex h-[50px] items-center gap-2.5 rounded-2xl bg-white px-3.5">

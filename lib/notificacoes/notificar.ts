@@ -14,7 +14,7 @@ export type Notificacao = {
 }
 
 /** Remove quem desligou a categoria. Sem categoria = essencial, ninguém é removido. */
-export async function filtrarPorPreferencia(perfilIds: string[], categoria?: CategoriaOpcional) {
+async function filtrarPorPreferencia(perfilIds: string[], categoria?: CategoriaOpcional) {
   const unicos = Array.from(new Set(perfilIds))
   if (!categoria || unicos.length === 0) return unicos
   const { data } = await createServiceClient().from('perfis').select('id, preferencias_notificacao').in('id', unicos)

@@ -188,7 +188,7 @@ export async function TelaExplorar({
             : quem atende responde pelo app.
           </div>
         ) : (
-          <div className="grid gap-3 md:grid-cols-2 md:gap-4 lg:grid-cols-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2 md:gap-4 lg:grid-cols-3">
             {negocios.map((n) => (
               <LinhaNegocio key={n.id} negocio={n} oferta={n.oferta} />
             ))}

@@ -6,6 +6,7 @@ import { RegistrarServiceWorker } from '@/components/pwa/registrar-service-worke
 import { SplashScreen } from '@/components/pwa/splash-screen'
 import { SCRIPT_TEMA_INICIAL } from '@/lib/tema/preferencia'
 import { SincronizarTema } from '@/components/tema/sincronizar-tema'
+import { BarraProgresso } from '@/components/layout/barra-progresso'
 import './globals.css'
 
 // Identidade "Tanguá" (out/2026): títulos, texto e números/códigos.
@@ -95,6 +96,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="font-body antialiased">
         <SincronizarTema />
+        <BarraProgresso />
         <SplashScreen />
         <RegistrarServiceWorker />
         {children}

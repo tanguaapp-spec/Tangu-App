@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { createClient, createPublicClient, createServiceClient } from '@/lib/supabase/server'
 import type { ModalidadeAtendimento, Negocio } from '@/lib/types/database'
 
@@ -228,7 +229,8 @@ export async function buscarNegocioPorId(id: string): Promise<Negocio | null> {
 }
 
 /** Aceita o endereço amigável (slug) ou o id antigo (links já compartilhados). */
-export async function buscarNegocioPorSlugOuId(chave: string): Promise<Negocio | null> {
+/** Com cache por requisição: a página e o generateMetadata compartilham a mesma consulta. */
+export const buscarNegocioPorSlugOuId = cache(async function buscarNegocioPorSlugOuId(chave: string): Promise<Negocio | null> {
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(chave)) return buscarNegocioPorId(chave)
   if (!/^[a-z0-9-]{1,80}$/.test(chave)) return null
   const { data, error } = await createClient().from('negocios').select('*, categoria:categorias(*)').eq('slug', chave).maybeSingle()
@@ -237,7 +239,7 @@ export async function buscarNegocioPorSlugOuId(chave: string): Promise<Negocio |
     return null
   }
   return data as unknown as Negocio | null
-}
+})
 
 export async function buscarCategorias() {
   const supabase = createClient()

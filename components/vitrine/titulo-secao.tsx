@@ -25,7 +25,7 @@ export function TituloSecao({
         {descricao && <p className="mt-0.5 text-[13px] text-barro-600 md:mt-1 md:text-base">{descricao}</p>}
       </div>
       {href && (
-        <Link href={href} className="shrink-0 text-sm font-bold text-casca-700 hover:underline md:text-base">
+        <Link href={href} className="-my-3 inline-flex min-h-11 shrink-0 items-center px-1 text-sm font-bold text-casca-700 hover:underline md:text-base">
           {rotuloLink}
         </Link>
       )}

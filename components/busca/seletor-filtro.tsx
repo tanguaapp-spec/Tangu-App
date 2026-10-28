@@ -23,7 +23,7 @@ export function SeletorFiltro({
   return (
     <label
       className={cn(
-        'relative flex h-10 shrink-0 items-center gap-1 rounded-full pl-3.5 pr-2.5 text-[13px]',
+        'relative flex h-11 shrink-0 items-center gap-1 rounded-full pl-3.5 pr-2.5 text-[13px]',
         ativo ? 'bg-serra font-bold text-white' : 'border border-barro-200 bg-superficie font-semibold text-barro-900'
       )}
     >

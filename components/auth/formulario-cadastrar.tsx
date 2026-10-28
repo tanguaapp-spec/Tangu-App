@@ -72,13 +72,13 @@ export function FormularioCadastrar({
       <Campo type="email" name="email" id="email" rotulo="E-mail" placeholder="voce@email.com" required />
       <Campo type="password" name="senha" id="senha" rotulo="Senha" placeholder="Mínimo 8 caracteres" minLength={8} autoComplete="new-password" required />
 
-      <label htmlFor="aceite-termos" className="flex items-start gap-2 text-sm text-barro-600">
+      <label htmlFor="aceite-termos" className="flex items-start gap-3 py-1 text-sm text-barro-600">
         <input
           type="checkbox"
           id="aceite-termos"
           name="aceiteTermos"
           required
-          className="mt-0.5 h-4 w-4 shrink-0 rounded border-barro-300 text-casca-600 focus:ring-casca-500"
+          className="mt-0.5 h-5 w-5 shrink-0 rounded border-barro-300 text-casca-600 focus:ring-casca-500"
         />
         <span>
           Li e concordo com os{' '}

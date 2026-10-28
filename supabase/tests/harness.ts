@@ -85,7 +85,7 @@ function adaptarParaPglite(sql: string) {
     .replace(/using gist\s*\(localizacao\)/gi, 'using btree(localizacao)')
 }
 
-export function listarMigrations() {
+function listarMigrations() {
   return readdirSync(PASTA_MIGRATIONS)
     .filter((f) => /^\d{4}_.*\.sql$/.test(f))
     .sort()

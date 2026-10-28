@@ -1,4 +1,3 @@
-import { rotuloModalidade } from '@/lib/modalidades'
 import { percentualDesconto } from '@/lib/ofertas/desconto'
 import type { ModalidadeAtendimento } from '@/lib/types/database'
 
@@ -53,10 +52,6 @@ export function metaNegocio(n: NegocioResumo, { comBairro = false } = {}) {
   else if (n.modalidades_atendimento?.includes('atende_domicilio')) partes.push('Vai até você')
   else if (!comBairro && n.bairro) partes.push(n.bairro)
   return partes.join(' · ')
-}
-
-export function rotuloModalidades(mods: ModalidadeAtendimento[] | null | undefined) {
-  return (mods ?? []).map(rotuloModalidade)
 }
 
 /** Prazo curto de oferta: "hoje", "amanhã", "3 dias", "5h". */

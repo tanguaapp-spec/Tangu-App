@@ -56,6 +56,8 @@ export default async function PaginaInicial() {
 
   return (
     <>
+      {/* um único H1 pra buscadores e leitores de tela; os títulos visíveis mudam entre celular e computador */}
+      <h1 className="sr-only">Tanguá App: tudo de Tanguá, perto de você</h1>
       <TopoInicio />
 
       {/* computador: herói verde do protótipo "Início — desktop" */}
@@ -63,7 +65,7 @@ export default async function PaginaInicial() {
         <div className="flex flex-wrap items-center gap-8 rounded-[32px] bg-serra p-[clamp(24px,5vw,56px)] text-white">
           <div className="flex min-w-0 flex-[999_1_420px] flex-col gap-[18px]">
             <p className="text-[15px] font-semibold text-white/75">Tanguá · RJ</p>
-            <h1 className="font-display text-[clamp(36px,5vw,60px)] font-bold leading-[1.02]">Tudo de Tanguá, perto de você.</h1>
+            <p className="font-display text-[clamp(36px,5vw,60px)] font-bold leading-[1.02]">Tudo de Tanguá, perto de você.</p>
             <p className="max-w-[560px] text-lg leading-relaxed text-white/85">
               Comércios, profissionais, ofertas e o que acontece na cidade. Fale direto no WhatsApp, sem intermediário.
             </p>

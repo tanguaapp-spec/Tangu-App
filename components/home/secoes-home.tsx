@@ -163,7 +163,7 @@ export function SecaoEventos({ eventos }: { eventos: EventoHome[] }) {
                     }`}
                   >
                     <b className="text-xl leading-none">{d.dia}</b>
-                    <span className="text-[11px] font-bold">{d.mes}</span>
+                    <span className="text-xs font-bold">{d.mes}</span>
                   </span>
                   <span className="min-w-0">
                     <b className="block truncate">{e.titulo}</b>

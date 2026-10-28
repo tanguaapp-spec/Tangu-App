@@ -88,7 +88,11 @@ type Avaliacao = {
 const botaoCapa = 'flex h-11 w-11 items-center justify-center rounded-[14px] bg-white text-[#13241D] shadow-sm'
 
 export default async function PaginaNegocio({ params, searchParams }: { params: { id: string }; searchParams: { origem?: string } }) {
-  const negocio = await buscarNegocioPorSlugOuId(params.id)
+  const supabase = createClient()
+  // negócio e sessão em paralelo: cada ida ao banco custa uma viagem de rede
+  const [negocio, {
+    data: { user },
+  }] = await Promise.all([buscarNegocioPorSlugOuId(params.id), supabase.auth.getUser()])
   if (!negocio) notFound()
   // link antigo (/negocio/<id>) → endereço amigável, sem perder a origem
   if (negocio.slug && params.id !== negocio.slug) {
@@ -97,10 +101,6 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
 
   const id = negocio.id
   const caminho = urlNegocio(negocio)
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
   const eDono = !!user && negocio.reivindicado_por === user.id
 
   const [, isFav, { data: avaliacoesBrutas }, { data: posts }, { data: produtos }, { count: totalFavoritos }, cupomAtivo, cartaoFidelidade, salvos] =
@@ -357,7 +357,7 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
               </div>
               {user && !eDono && <FormularioAvaliacao negocioId={id} />}
               {!user && (
-                <Link href={`/entrar?next=${encodeURIComponent(caminho)}`} className="text-sm font-bold text-casca-700 underline">
+                <Link href={`/entrar?next=${encodeURIComponent(caminho)}`} className="inline-flex min-h-11 items-center text-sm font-bold text-casca-700 underline">
                   Entre pra avaliar
                 </Link>
               )}

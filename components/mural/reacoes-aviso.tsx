@@ -43,7 +43,7 @@ export function ReacoesAviso({ avisoId, contagens, minhaReacao, logado }: Props)
             onClick={() => reagir(opcao.tipo)}
             disabled={!logado}
             title={logado ? opcao.rotulo : 'Entre pra reagir'}
-            className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+            className={`flex items-center gap-1 min-h-10 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
               ativa ? 'border-casca-400 bg-casca-50 text-casca-700' : 'border-barro-200 text-barro-600 hover:bg-barro-50'
             }`}
           >

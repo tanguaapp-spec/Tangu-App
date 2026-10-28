@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils'
-import { BadgeCheck } from 'lucide-react'
 import { ReactNode } from 'react'
 
 export function Selo({
@@ -31,11 +30,4 @@ export function Selo({
   )
 }
 
-export function SeloVerificado() {
-  return (
-    <Selo tom="verde">
-      <BadgeCheck className="h-3.5 w-3.5" />
-      Verificado
-    </Selo>
-  )
-}
+
