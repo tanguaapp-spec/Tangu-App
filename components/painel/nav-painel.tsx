@@ -25,6 +25,12 @@ import {
   Users,
   Tags,
   Send,
+  TrendingUp,
+  Target,
+  Rocket,
+  Upload,
+  Newspaper,
+  ToggleRight,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -47,6 +53,12 @@ const LINKS_PROFISSIONAL: LinkPainel[] = [
 ]
 const LINKS_ADMIN: LinkPainel[] = [
   { href: '/painel/admin', rotulo: 'Visão geral', icone: LayoutDashboard },
+  { href: '/painel/admin/crescimento', rotulo: 'Crescimento (métricas)', icone: TrendingUp },
+  { href: '/painel/admin/leads', rotulo: 'Leads (quem contatar)', icone: Target },
+  { href: '/painel/admin/divulgacao', rotulo: 'Divulgação paga', icone: Rocket },
+  { href: '/painel/admin/importar', rotulo: 'Importar comércios', icone: Upload },
+  { href: '/painel/admin/conteudo', rotulo: 'Notícias, eventos e serviços', icone: Newspaper },
+  { href: '/painel/admin/recursos', rotulo: 'Recursos do app', icone: ToggleRight },
   { href: '/painel/admin/logs', rotulo: 'Logs de erro', icone: AlertTriangle, contador: 'erros' },
   { href: '/painel/admin/negocios-pendentes', rotulo: 'Cadastros sinalizados', icone: Store },
   { href: '/painel/admin/negocios', rotulo: 'Negócios (destaque e verificação)', icone: Sparkles },
@@ -60,7 +72,7 @@ const LINKS_ADMIN: LinkPainel[] = [
   { href: '/painel/admin/prospeccao', rotulo: 'Prospecção (Google Maps)', icone: Radar },
   { href: '/painel/admin/suporte', rotulo: 'Chamados de suporte', icone: LifeBuoy },
   { href: '/painel/admin/assinaturas', rotulo: 'Assinaturas e pagamentos', icone: CreditCard },
-  { href: '/painel/admin/planos', rotulo: 'Planos e limites', icone: Layers },
+  { href: '/painel/admin/planos', rotulo: 'Planos e recursos', icone: Layers },
   { href: '/painel/admin/configuracoes', rotulo: 'Configurações', icone: Settings },
   { href: '/painel/admin/auditoria', rotulo: 'Auditoria', icone: ScrollText },
   { href: '/painel/negocio', rotulo: 'Meu negócio', icone: Store },

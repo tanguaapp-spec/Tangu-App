@@ -63,6 +63,42 @@ export const DEFINICOES_CONFIG = {
     tipo: 'inteiro',
     validador: z.number().int().min(0).max(180),
   },
+  max_negocios_por_dono: {
+    rotulo: 'Quantos negócios uma mesma conta pode ter',
+    ajuda: 'O dono troca entre eles em "Meus negócios" no painel.',
+    tipo: 'inteiro',
+    validador: z.number().int().min(1).max(50),
+  },
+  whatsapp_comercial: {
+    rotulo: 'WhatsApp do time (recebe quem comprou divulgação)',
+    ajuda: 'Só números com DDD. Ex.: 21999998888.',
+    tipo: 'texto',
+    validador: z.union([z.literal(''), z.string().trim().regex(/^\d{10,13}$/, 'Só números, com DDD.')]),
+  },
+  max_push_opcional_dia: {
+    rotulo: 'Máximo de notificações opcionais por pessoa por dia',
+    ajuda: 'Ofertas e novidades. Avisos essenciais (pagamento, orçamento) não contam.',
+    tipo: 'inteiro',
+    validador: z.number().int().min(0).max(20),
+  },
+  fontes_noticias: {
+    rotulo: 'Fontes de notícias (RSS)',
+    ajuda: 'Um endereço por linha. Lidas 1 vez por dia; as notícias entram como rascunho para revisão.',
+    tipo: 'lista_urls',
+    validador: z.array(z.string().url().startsWith('https://')).max(20),
+  },
+  link_beloo: {
+    rotulo: 'Endereço da Beloo (agenda completa)',
+    ajuda: 'Sugerido a quem precisa de agenda com confirmação, lembretes e financeiro.',
+    tipo: 'texto',
+    validador: z.string().trim().url().startsWith('https://'),
+  },
+  link_fregues: {
+    rotulo: 'Endereço do Freguês (cardápio e pedidos completos)',
+    ajuda: 'Sugerido a quem precisa de pedidos com controle total.',
+    tipo: 'texto',
+    validador: z.string().trim().url().startsWith('https://'),
+  },
 } as const
 
 export type ChaveConfig = keyof typeof DEFINICOES_CONFIG
@@ -81,6 +117,9 @@ export function interpretarConfig(chave: string, bruto: string): { valor: unknow
       break
     case 'lista':
       valor = Array.from(new Set(bruto.split(/\r?\n/).map((l) => l.trim().toLowerCase()).filter(Boolean)))
+      break
+    case 'lista_urls':
+      valor = Array.from(new Set(bruto.split(/\r?\n/).map((l) => l.trim()).filter(Boolean)))
       break
     default:
       valor = bruto.trim()

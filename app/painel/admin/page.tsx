@@ -3,6 +3,8 @@ import { AlertTriangle, CheckCircle2, XCircle } from 'lucide-react'
 import { metricasCrescimento, metricasFunil, metricasModeracao, metricasReceita, metricasSaude, type PeriodoDias } from '@/lib/queries/admin-metricas'
 import { formatarCentavos } from '@/lib/queries/planos'
 import { cn } from '@/lib/utils'
+import { createServiceClient } from '@/lib/supabase/server'
+import { contarLeadsHoje } from '@/lib/leads/dados'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,12 +41,21 @@ function Secao({ titulo, children, descricao }: { titulo: string; descricao?: st
 export default async function PainelAdminVisaoGeral({ searchParams }: { searchParams: { periodo?: string } }) {
   const dias = (PERIODOS.includes(Number(searchParams.periodo) as PeriodoDias) ? Number(searchParams.periodo) : 30) as PeriodoDias
 
-  const [crescimento, receita, saude, moderacao, funil] = await Promise.all([
+  const db = createServiceClient()
+  const conta = async (q: PromiseLike<{ count: number | null }>) => (await q).count ?? 0
+  const [crescimento, receita, saude, moderacao, funil, vendasProduzir, pedidosOcultar, sugestoes, leadsHoje] = await Promise.all([
     metricasCrescimento(dias),
     metricasReceita(dias),
     metricasSaude(),
     metricasModeracao(),
     metricasFunil(dias),
+    conta(db.from('compras_servicos').select('id', { count: 'exact', head: true }).eq('status', 'pago')),
+    conta(db.from('pedidos_ocultar').select('id', { count: 'exact', head: true }).eq('status', 'aberto')),
+    Promise.all([
+      conta(db.from('sugestoes_evento').select('id', { count: 'exact', head: true }).eq('status', 'aberta')),
+      conta(db.from('noticias').select('id', { count: 'exact', head: true }).in('status', ['sugerida', 'rascunho'])),
+    ]).then(([a, b]) => a + b),
+    contarLeadsHoje().catch(() => 0),
   ])
 
   const integracoes: [string, boolean, string][] = [
@@ -60,7 +71,10 @@ export default async function PainelAdminVisaoGeral({ searchParams }: { searchPa
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-barro-900">Visão geral</h1>
-          <p className="text-barro-600">Operação do Tanguá App — números calculados direto do banco.</p>
+          <p className="text-barro-600">
+            Operação do Tanguá App, com números direto do banco. Para o diagnóstico completo, veja{' '}
+            <Link href="/painel/admin/crescimento" className="font-semibold text-mata-700 underline">Crescimento</Link>.
+          </p>
         </div>
         <nav aria-label="Período" className="flex gap-1 rounded-xl bg-superficie p-1 shadow-sm">
           {PERIODOS.map((p) => (
@@ -81,6 +95,10 @@ export default async function PainelAdminVisaoGeral({ searchParams }: { searchPa
         <Cartao rotulo="Denúncias pendentes" valor={moderacao.denunciasPendentes} href="/painel/admin/denuncias" alerta={moderacao.denunciasPendentes > 0} />
         <Cartao rotulo="Chamados de suporte abertos" valor={moderacao.chamadosAbertos} href="/painel/admin/suporte" alerta={moderacao.chamadosAbertos > 0} />
         <Cartao rotulo="Reivindicações de perfil" valor={moderacao.reivindicacoesPendentes} href="/painel/admin/reivindicacoes" />
+        <Cartao rotulo="Divulgação paga para pôr no ar" valor={vendasProduzir} href="/painel/admin/divulgacao" alerta={vendasProduzir > 0} />
+        <Cartao rotulo="Donos pedindo para ocultar o perfil" valor={pedidosOcultar} href="/painel/admin/importar#ocultar" alerta={pedidosOcultar > 0} />
+        <Cartao rotulo="Notícias e eventos para revisar" valor={sugestoes} href="/painel/admin/conteudo" />
+        <Cartao rotulo="Leads para contatar hoje" valor={leadsHoje} href="/painel/admin/leads?lista=hoje" />
       </Secao>
 
       <Secao titulo="Crescimento" descricao={`Últimos ${dias} dias, quando indicado.`}>

@@ -6,7 +6,7 @@ import { DEFINICOES_CONFIG, type ChaveConfig } from '@/lib/admin/configuracoes'
 export const dynamic = 'force-dynamic'
 
 function valorParaTexto(tipo: string, valor: unknown) {
-  if (tipo === 'lista') return Array.isArray(valor) ? valor.join('\n') : ''
+  if (tipo === 'lista' || tipo === 'lista_urls') return Array.isArray(valor) ? valor.join('\n') : ''
   if (valor === null || valor === undefined) return ''
   return String(valor)
 }
@@ -33,13 +33,13 @@ export default async function PaginaAdminConfiguracoes() {
                 </label>
                 <p className="text-sm text-barro-500">{def.ajuda}</p>
                 {!atual ? (
-                  <p className="mt-2 text-sm text-red-600">Chave ausente no banco — aplique a migration 0017.</p>
+                  <p className="mt-2 text-sm text-red-600">Chave ausente no banco: aplique as migrations (0017 e 0023).</p>
                 ) : def.tipo === 'booleano' ? (
                   <select id={`cfg-${chave}`} name="valor" defaultValue={String(atual.valor)} className="mt-2 rounded-lg border border-barro-300 px-3 py-1.5 text-sm">
                     <option value="false">Desligado</option>
                     <option value="true">Ligado</option>
                   </select>
-                ) : def.tipo === 'lista' ? (
+                ) : def.tipo === 'lista' || def.tipo === 'lista_urls' ? (
                   <textarea
                     id={`cfg-${chave}`}
                     name="valor"
