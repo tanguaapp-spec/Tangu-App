@@ -46,7 +46,7 @@ const CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://maps.googleapis.com",
+  "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://maps.googleapis.com https://tile.openstreetmap.org",
   "font-src 'self' data:",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io",
   "frame-ancestors 'none'",
@@ -59,7 +59,8 @@ const securityHeaders = [
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+  // geolocalização só do próprio site: "Perto de mim" no mapa
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
 ]
 
 const nextConfig = {

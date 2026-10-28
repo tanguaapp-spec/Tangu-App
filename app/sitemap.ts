@@ -12,6 +12,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/agenda`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.6 },
     { url: `${SITE_URL}/vagas`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE_URL}/mural`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${SITE_URL}/cidade`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
+    { url: `${SITE_URL}/noticias`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.7 },
+    { url: `${SITE_URL}/servicos-uteis`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
+    { url: `${SITE_URL}/mapa`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.5 },
     { url: `${SITE_URL}/ferramentas`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
     { url: `${SITE_URL}/planos`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${SITE_URL}/ajuda`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
@@ -19,6 +23,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   const supabase = createPublicClient()
+  // antes da migration 0023 a tabela não existe: só fica sem as notícias
+  const { data: noticias } = await supabase.from('noticias').select('slug, atualizado_em').eq('status', 'publicada').limit(2000)
+  const paginasNoticias: MetadataRoute.Sitemap = (noticias ?? []).map((n) => ({
+    url: `${SITE_URL}/noticias/${n.slug}`,
+    lastModified: new Date(n.atualizado_em),
+    changeFrequency: 'monthly',
+    priority: 0.5,
+  }))
   const { data: categorias } = await supabase.from('categorias').select('slug')
   const paginasCategorias: MetadataRoute.Sitemap = (categorias ?? []).map((c) => ({
     url: `${SITE_URL}/categoria/${c.slug}`,
@@ -40,5 +52,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  return [...paginasEstaticas, ...paginasCategorias, ...paginasNegocios]
+  return [...paginasEstaticas, ...paginasCategorias, ...paginasNegocios, ...paginasNoticias]
 }
