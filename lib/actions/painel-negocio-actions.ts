@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers'
 import { lerConfig } from '@/lib/config/ler'
+import { recursoLiberado } from '@/lib/planos/recursos'
 import { COOKIE_NEGOCIO_ATIVO } from '@/lib/painel/negocio-atual'
 import { traduzirErroBanco } from '@/lib/planos/limites'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
@@ -298,24 +299,6 @@ export async function removerFotoGaleria(negocioId: string, url: string) {
   return { erro: null }
 }
 
-export async function alternarAbertoAgora(negocioId: string, valor: boolean) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { erro: 'Não autenticado.' }
-
-  const { error } = await supabase
-    .from('negocios')
-    .update({ aberto_agora: valor })
-    .eq('id', negocioId)
-    .eq('reivindicado_por', user.id)
-
-  if (error) return { erro: traduzirErroBanco(error) }
-
-  revalidatePath('/painel/negocio')
-  revalidatePath(`/negocio/${negocioId}`)
-  return { erro: null }
-}
-
 export async function reenviarCadastroNegocio(negocioId: string) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -334,6 +317,7 @@ export async function reenviarCadastroNegocio(negocioId: string) {
   return { erro: null }
 }
 
+/** Pausar (férias, reforma) tira o perfil das buscas sem apagar nada; reativar volta na hora. Só o dono. */
 export async function alternarNegocioAtivo(negocioId: string, valor: boolean) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -341,7 +325,7 @@ export async function alternarNegocioAtivo(negocioId: string, valor: boolean) {
 
   const { error } = await supabase
     .from('negocios')
-    .update({ ativo: valor })
+    .update({ ativo: valor, pausado_em: valor ? null : new Date().toISOString() })
     .eq('id', negocioId)
     .eq('reivindicado_por', user.id)
 
@@ -702,6 +686,7 @@ export async function encerrarCupom(cupomId: string, negocioId: string) {
 // procurar qualquer perfil ao acaso.
 // ---------------------------------------------------------------------
 export async function adicionarCarimbo(negocioId: string, perfilId: string) {
+  if (!(await recursoLiberado(negocioId, 'fidelidade'))) return { erro: 'Seu plano não inclui o cartão fidelidade.' }
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { erro: 'Não autenticado.' }

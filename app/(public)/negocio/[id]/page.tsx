@@ -167,6 +167,8 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
         ? encodeURIComponent(`${negocio.endereco}${negocio.bairro ? `, ${negocio.bairro}` : ''}, Tanguá - RJ`)
         : null
   const avisoHorario = (negocio as { aviso_horario?: string | null }).aviso_horario ?? null
+  const redesLiberadas = recursos.recursos.redes_sociais !== false
+  const parceiro = recursos.recursos.selo_profissional === true
 
   const quadroHorario = (semana.length > 0 || negocio.endereco || negocio.area_atendimento) && (
     <div className="flex flex-col gap-2.5 rounded-[24px] border border-barro-200/80 bg-superficie p-5 text-[15px] text-barro-900">
@@ -215,7 +217,7 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
           )}
         </>
       )}
-      {(negocio.instagram || urlSegura(negocio.site)) && (
+      {redesLiberadas && (negocio.instagram || urlSegura(negocio.site)) && (
         <div className="mt-1 flex flex-wrap gap-2">
           {negocio.instagram && (
             <a
@@ -292,6 +294,11 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
               {negocio.verificado && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-serra px-2.5 py-0.5 text-xs font-bold text-white md:px-3 md:py-1 md:text-[13px]">
                   <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" /> Verificado
+                </span>
+              )}
+              {parceiro && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-laranja px-2.5 py-0.5 text-xs font-bold text-tinta md:px-3 md:py-1 md:text-[13px]">
+                  <Star className="h-3.5 w-3.5" aria-hidden="true" /> Parceiro Tanguá
                 </span>
               )}
               {horario.aberto !== null && (

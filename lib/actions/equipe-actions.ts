@@ -1,6 +1,7 @@
 'use server'
 
 import { negocioDoPainel } from '@/lib/painel/negocio-atual'
+import { recursoLiberado } from '@/lib/planos/recursos'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
@@ -25,6 +26,7 @@ async function negocioDoTitular() {
 export async function adicionarMembro(formData: FormData) {
   const r = await negocioDoTitular()
   if ('erro' in r) return { erro: r.erro }
+  if (!(await recursoLiberado(r.negocio.id, 'equipe'))) return { erro: 'Seu plano não inclui equipe. Veja os planos em Plano e assinatura.' }
   const email = z.string().trim().email('Digite um e-mail válido.').safeParse(formData.get('email'))
   if (!email.success) return { erro: email.error.issues[0].message }
   const papel = formData.get('papel') === 'gerente' ? 'gerente' : 'atendente'

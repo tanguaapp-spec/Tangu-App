@@ -8,6 +8,7 @@ import { negocioDoPainel } from '@/lib/painel/negocio-atual'
 import { montarChecklistNegocio, progressoChecklist } from '@/lib/onboarding/checklist-negocio'
 import { CHAVES_LIMITE, ROTULO_LIMITE, formatarLimite, situacaoLimite } from '@/lib/planos/limites'
 import { reenviarCadastroNegocio } from '@/lib/actions/painel-negocio-actions'
+import { PausarPerfil } from '@/components/painel/pausar-perfil'
 import { FormularioEditarNegocio } from '@/components/painel/formulario-editar-negocio'
 import { BotaoSino } from '@/components/layout/botao-sino'
 import { ProvedorSessao } from '@/components/layout/sessao'
@@ -122,6 +123,9 @@ export default async function PainelNegocio() {
     planos,
     { data: pedidos },
     { data: respondidos },
+    { count: ofertasAcabando },
+    { count: avaliacoesSemResposta },
+    { data: comprasPagas },
   ] = await Promise.all([
     supabase.from('produtos_servicos').select('id', { count: 'exact', head: true }).eq('negocio_id', negocio.id),
     supabase.from('posts_negocio').select('id', { count: 'exact', head: true }).eq('negocio_id', negocio.id),
@@ -136,6 +140,15 @@ export default async function PainelNegocio() {
       .order('criado_em', { ascending: false })
       .limit(20),
     supabase.from('respostas_orcamento').select('pedido_id').eq('negocio_id', negocio.id),
+    supabase
+      .from('cupons')
+      .select('id', { count: 'exact', head: true })
+      .eq('negocio_id', negocio.id)
+      .eq('ativo', true)
+      .gt('expira_em', new Date().toISOString())
+      .lt('expira_em', new Date(Date.now() + 2 * 86400e3).toISOString()),
+    supabase.from('avaliacoes').select('id', { count: 'exact', head: true }).eq('negocio_id', negocio.id).is('resposta_profissional', null).gte('criado_em', new Date(Date.now() - 30 * 86400e3).toISOString()),
+    supabase.from('compras_servicos').select('id, nome_servico').eq('negocio_id', negocio.id).eq('status', 'pago'),
   ])
 
   const idsCupons = (cupons ?? []).map((c) => c.id)
@@ -249,6 +262,32 @@ export default async function PainelNegocio() {
             </Link>
           </section>
         )}
+
+        {(() => {
+          const itens: { href: string; texto: string; tom: 'alerta' | 'info' }[] = []
+          if (!negocio.ativo) itens.push({ href: '#pausar', texto: 'Seu perfil está pausado e não aparece nas buscas. Reative quando quiser.', tom: 'alerta' })
+          if (aguardando.length) itens.push({ href: '/painel/negocio/orcamentos', texto: `${aguardando.length} pedido(s) de orçamento esperando sua resposta`, tom: 'alerta' })
+          if (comprasPagas?.length) itens.push({ href: '/painel/negocio/divulgacao', texto: `Pagamento aprovado: combine a arte de "${comprasPagas[0].nome_servico}" no WhatsApp`, tom: 'alerta' })
+          if (avaliacoesSemResposta) itens.push({ href: '/painel/negocio/avaliacoes', texto: `${avaliacoesSemResposta} avaliação(ões) sem resposta. Responder mostra que você se importa`, tom: 'info' })
+          if (ofertasAcabando) itens.push({ href: '/painel/negocio/ofertas', texto: `${ofertasAcabando} oferta(s) terminam em menos de 48 h`, tom: 'info' })
+          if (!itens.length) return null
+          return (
+            <section aria-label="Precisa da sua atenção" className="flex flex-col gap-2 rounded-[24px] border border-casca-200 bg-casca-50 p-4 md:p-5">
+              <h2 className="font-display text-lg font-bold text-barro-900">Precisa da sua atenção</h2>
+              <ul className="flex flex-col gap-1.5">
+                {itens.map((i) => (
+                  <li key={i.texto}>
+                    <Link href={i.href} className="flex min-h-11 items-center gap-2 rounded-xl px-2 text-[15px] text-barro-900 hover:bg-white/60">
+                      <span className={cn('h-2.5 w-2.5 shrink-0 rounded-full', i.tom === 'alerta' ? 'bg-laranja' : 'bg-mata-600')} aria-hidden="true" />
+                      <span className="min-w-0 flex-1">{i.texto}</span>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-barro-400" aria-hidden="true" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        })()}
 
         <section aria-label="Últimos 7 dias" className="grid grid-cols-3 gap-2.5 md:grid-cols-[repeat(auto-fit,minmax(190px,1fr))] md:gap-3.5">
           {metricas.map((m) => (
@@ -379,6 +418,7 @@ export default async function PainelNegocio() {
             </section>
           )}
         </div>
+        {papel === 'dono' && <PausarPerfil negocioId={negocio.id} ativo={negocio.ativo} />}
       </div>
     </ProvedorSessao>
   )
