@@ -94,6 +94,11 @@ async function aplicar(deps: Deps, compra: Compra, pagamento: PagamentoMP) {
     await deps.db.from('negocios').update({ destaque_ativo: true, destaque_expira_em: fim.toISOString() }).eq('id', compra.negocio_id)
   }
 
+  // estorno de destaque comprado: sai da vitrine na hora (o plano, se tiver destaque, religa na rotina diária)
+  if (patch.status === 'estornada' && compra.servico_id === 'destaque_busca' && compra.negocio_id) {
+    await deps.db.from('negocios').update({ destaque_ativo: false, destaque_expira_em: deps.agora().toISOString() }).eq('id', compra.negocio_id)
+  }
+
   await deps.db.from('registros_auditoria').insert({
     acao: 'compra.status',
     entidade: 'compra_servico',
