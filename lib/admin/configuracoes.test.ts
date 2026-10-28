@@ -1,3 +1,4 @@
+import { CHAVES_RECURSO } from '@/lib/planos/limites'
 import { describe, expect, it } from 'vitest'
 import { interpretarConfig, lerLimite, lerPrecoCentavos, schemaPlano } from './configuracoes'
 
@@ -44,7 +45,7 @@ describe('leitura de formulário de plano', () => {
       ativo: true,
       ordem: 1,
       limites: { max_produtos: 1, max_cupons_ativos: 1, max_posts_mes: 1, max_fotos_galeria: 1 },
-      recursos: { estatisticas_avancadas: false, destaque_busca: false },
+      recursos: Object.fromEntries(CHAVES_RECURSO.map((c) => [c, false])),
     }
     expect(schemaPlano.safeParse(base).success).toBe(true)
     expect(schemaPlano.safeParse({ ...base, preco_centavos: -1 }).success).toBe(false)

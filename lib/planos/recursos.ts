@@ -1,4 +1,4 @@
-import { cache } from 'react'
+import { cacheRequisicao as cache } from '@/lib/cache-requisicao'
 import { createServiceClient } from '@/lib/supabase/server'
 import { temRecurso, type ChaveRecurso } from '@/lib/planos/limites'
 

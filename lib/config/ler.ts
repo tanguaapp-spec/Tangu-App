@@ -1,4 +1,4 @@
-import { cache } from 'react'
+import { cacheRequisicao as cache } from '@/lib/cache-requisicao'
 import { notFound } from 'next/navigation'
 import { createServiceClient } from '@/lib/supabase/server'
 
