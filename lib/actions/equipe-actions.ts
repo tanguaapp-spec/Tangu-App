@@ -1,5 +1,6 @@
 'use server'
 
+import { negocioDoPainel } from '@/lib/painel/negocio-atual'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
@@ -15,8 +16,9 @@ async function negocioDoTitular() {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return { erro: 'Entre na sua conta.' as const }
-  const { data: negocio } = await supabase.from('negocios').select('id, nome').eq('reivindicado_por', user.id).maybeSingle()
-  if (!negocio) return { erro: 'Só a pessoa dona do negócio pode mudar a equipe.' as const }
+  const { negocio: atual, papel } = await negocioDoPainel()
+  if (!atual || papel !== 'dono') return { erro: 'Só a pessoa dona do negócio pode mudar a equipe.' as const }
+  const negocio = { id: atual.id, nome: atual.nome }
   return { user, negocio }
 }
 

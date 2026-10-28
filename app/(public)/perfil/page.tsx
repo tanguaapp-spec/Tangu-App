@@ -144,11 +144,12 @@ export default async function PaginaVoce({ searchParams }: { searchParams: { sen
     supabase.from('favoritos_produtos').select('*', { count: 'exact', head: true }).eq('perfil_id', user.id),
     buscarSaldoLaranjas(user.id),
     buscarCartoesFidelidadeDoUsuario(user.id),
-    supabase.from('negocios').select('id, nome').eq('reivindicado_por', user.id).maybeSingle(),
+    supabase.from('negocios').select('id, nome').eq('reivindicado_por', user.id).order('criado_em'),
     supabase.from('membros_negocio').select('negocio:negocios(id, nome)').eq('perfil_id', user.id).limit(1).maybeSingle(),
     supabase.rpc('eh_admin'),
   ])
-  const negocio = negocioProprio ?? ((membro as { negocio?: { id: string; nome: string } } | null)?.negocio ?? null)
+  const proprios = (negocioProprio ?? []) as { id: string; nome: string }[]
+  const negocio = proprios[0] ?? ((membro as { negocio?: { id: string; nome: string } } | null)?.negocio ?? null)
 
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-5 px-5 pb-8 pt-5 md:pt-10">
@@ -188,8 +189,8 @@ export default async function PaginaVoce({ searchParams }: { searchParams: { sen
             <Store className="h-5 w-5" aria-hidden="true" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[13px] text-white/75">Seu negócio</span>
-            <b className="block truncate text-lg">{negocio.nome}</b>
+            <span className="block text-[13px] text-white/75">{proprios.length > 1 ? `Seus ${proprios.length} negócios` : 'Seu negócio'}</span>
+            <b className="block truncate text-lg">{proprios.length > 1 ? proprios.map((n) => n.nome).join(' · ') : negocio.nome}</b>
           </span>
           <span className="shrink-0 font-bold">Abrir painel</span>
         </Link>
@@ -239,7 +240,7 @@ export default async function PaginaVoce({ searchParams }: { searchParams: { sen
           <SeletorTema />
         </Painel>
         <Painel id="privacidade" titulo="Privacidade e dados" descricao="Baixar seus dados ou excluir a conta">
-          <PrivacidadeDados temNegocio={!!negocioProprio} />
+          <PrivacidadeDados temNegocio={proprios.length > 0} />
         </Painel>
       </section>
 

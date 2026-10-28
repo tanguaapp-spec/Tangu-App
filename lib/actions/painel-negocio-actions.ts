@@ -1,5 +1,8 @@
 'use server'
 
+import { cookies } from 'next/headers'
+import { lerConfig } from '@/lib/config/ler'
+import { COOKIE_NEGOCIO_ATIVO } from '@/lib/painel/negocio-atual'
 import { traduzirErroBanco } from '@/lib/planos/limites'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
@@ -126,14 +129,11 @@ export async function cadastrarNegocio(formData: FormData) {
     return { erro: 'Muitas tentativas de cadastro hoje. Tente de novo amanhã ou fale com o suporte.' }
   }
 
-  const { data: existente } = await supabase
-    .from('negocios')
-    .select('id')
-    .eq('reivindicado_por', user.id)
-    .maybeSingle()
-
-  if (existente) {
-    return { erro: 'Você já tem um negócio cadastrado neste perfil.' }
+  // uma conta pode cuidar de vários negócios, até o limite do admin (o banco confere de novo)
+  const { count: jaTem } = await supabase.from('negocios').select('id', { count: 'exact', head: true }).eq('reivindicado_por', user.id)
+  const maximo = Number(await lerConfig('max_negocios_por_dono'))
+  if ((jaTem ?? 0) >= maximo) {
+    return { erro: `Esta conta já tem ${jaTem} negócios, o máximo permitido. Fale com o suporte se precisar de mais.` }
   }
 
   const autonomo = dados.tipoPerfil === 'autonomo'
@@ -176,6 +176,8 @@ export async function cadastrarNegocio(formData: FormData) {
     }).catch((err) => console.error('Falha ao notificar admins:', err))
   }
 
+  // o painel passa a mostrar o negócio recém-cadastrado
+  cookies().set(COOKIE_NEGOCIO_ATIVO, negocio.id, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 60 * 60 * 24 * 365 })
   revalidatePath('/painel/negocio')
   revalidatePath('/buscar')
   return { erro: null, negocioId: negocio.id, status: negocio.status_cadastro }

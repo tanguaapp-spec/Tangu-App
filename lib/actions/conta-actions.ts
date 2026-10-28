@@ -87,10 +87,10 @@ export async function excluirConta(formData: FormData) {
   }
 
   const admin = createServiceClient()
-  const { data: negocio } = await admin.from('negocios').select('id').eq('reivindicado_por', user.id).maybeSingle()
+  const { data: negocios } = await admin.from('negocios').select('id').eq('reivindicado_por', user.id)
 
   try {
-    if (negocio) {
+    for (const negocio of negocios ?? []) {
       const { data: abertas } = await admin
         .from('assinaturas')
         .select('id, provedor_assinatura_id')
@@ -122,7 +122,7 @@ export async function excluirConta(formData: FormData) {
     entidade: 'perfil',
     // identificador irreversível: prova que aconteceu, sem guardar quem era
     entidade_id: createHash('sha256').update(user.id).digest('hex').slice(0, 16),
-    dados: { tinha_negocio: !!negocio },
+    dados: { tinha_negocio: (negocios ?? []).length > 0, negocios: (negocios ?? []).length },
   })
 
   await supabase.auth.signOut().catch(() => undefined)

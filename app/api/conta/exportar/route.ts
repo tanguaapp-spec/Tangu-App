@@ -23,16 +23,17 @@ export async function GET() {
     supabase.rpc('meu_perfil').maybeSingle(),
     supabase.from('avaliacoes').select('negocio_id, nota, comentario, foto_url, criado_em').eq('autor_id', user.id),
     supabase.from('favoritos').select('negocio_id, criado_em').eq('perfil_id', user.id),
-    supabase.from('negocios').select('*').eq('reivindicado_por', user.id).maybeSingle(),
+    supabase.from('negocios').select('*').eq('reivindicado_por', user.id),
     supabase.from('chamados_suporte').select('id, categoria, assunto, status, criado_em, mensagens:mensagens_chamado(corpo, do_suporte, criado_em)').eq('perfil_id', user.id),
     supabase.from('notificacoes').select('tipo, titulo, corpo, criado_em, lida_em').eq('perfil_id', user.id).limit(1000),
     supabase.from('pontos_laranjas').select('quantidade, motivo, criado_em').eq('perfil_id', user.id),
     supabase.from('cartoes_fidelidade').select('negocio_id, carimbos, meta, completos, atualizado_em').eq('perfil_id', user.id),
   ])
 
-  let dadosNegocio: Record<string, unknown> | null = null
-  if (negocio.data) {
-    const id = negocio.data.id
+  // um bloco por negócio da conta
+  const dadosNegocios: Record<string, unknown>[] = []
+  for (const perfilNegocio of negocio.data ?? []) {
+    const id = perfilNegocio.id
     const [produtos, posts, cupons, assinaturas, pagamentos] = await Promise.all([
       supabase.from('produtos_servicos').select('*').eq('negocio_id', id),
       supabase.from('posts_negocio').select('*').eq('negocio_id', id),
@@ -40,14 +41,14 @@ export async function GET() {
       supabase.from('assinaturas').select('plano_id, status, valor_centavos, periodo_atual_inicio, periodo_atual_fim, criado_em, cancelada_em').eq('negocio_id', id),
       supabase.from('pagamentos').select('status, valor_centavos, pago_em, criado_em').eq('negocio_id', id),
     ])
-    dadosNegocio = {
-      perfil: negocio.data,
+    dadosNegocios.push({
+      perfil: perfilNegocio,
       produtos: produtos.data ?? [],
       novidades: posts.data ?? [],
       ofertas: cupons.data ?? [],
       assinaturas: assinaturas.data ?? [],
       pagamentos: pagamentos.data ?? [],
-    }
+    })
   }
 
   const { data: denuncias } = await createServiceClient()
@@ -62,7 +63,7 @@ export async function GET() {
     perfil: perfil.data ?? null,
     avaliacoes: avaliacoes.data ?? [],
     favoritos: favoritos.data ?? [],
-    negocio: dadosNegocio,
+    negocios: dadosNegocios,
     chamados_suporte: chamados.data ?? [],
     notificacoes: notificacoes.data ?? [],
     pontos_laranjas: pontos.data ?? [],

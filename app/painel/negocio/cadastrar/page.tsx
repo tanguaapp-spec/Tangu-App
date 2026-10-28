@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { lerConfig } from '@/lib/config/ler'
 import { buscarCategorias } from '@/lib/queries/negocios'
 import { FormularioCadastrarNegocio } from '@/components/painel/formulario-cadastrar-negocio'
 import { redirect } from 'next/navigation'
@@ -10,13 +11,13 @@ export default async function CadastrarNegocioPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/entrar?next=/painel/negocio/cadastrar')
 
-  const { data: existente } = await supabase
-    .from('negocios')
-    .select('id')
-    .eq('reivindicado_por', user.id)
-    .maybeSingle()
-
-  if (existente) redirect('/painel/negocio')
+  // vários negócios por conta, até o limite do admin
+  const [{ count: jaTem }, maximo] = await Promise.all([
+    supabase.from('negocios').select('id', { count: 'exact', head: true }).eq('reivindicado_por', user.id),
+    lerConfig('max_negocios_por_dono'),
+  ])
+  if ((jaTem ?? 0) >= Number(maximo)) redirect('/painel/negocio')
+  const outro = (jaTem ?? 0) > 0
 
   const categorias = await buscarCategorias()
 
@@ -34,8 +35,12 @@ export default async function CadastrarNegocioPage() {
           <Store className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="font-display text-2xl font-medium text-barro-900">Cadastrar meu negócio</h1>
-          <p className="text-barro-600">Tem um estabelecimento ou atua como autônomo? Apareça no diretório de Tanguá.</p>
+          <h1 className="font-display text-2xl font-medium text-barro-900">{outro ? 'Cadastrar outro negócio' : 'Cadastrar meu negócio'}</h1>
+          <p className="text-barro-600">
+            {outro
+              ? 'Ele fica separado do outro, com perfil, catálogo e plano próprios. Você troca entre eles em "Meus negócios" no painel.'
+              : 'Tem um estabelecimento ou atua como autônomo? Apareça no diretório de Tanguá.'}
+          </p>
         </div>
       </div>
 

@@ -63,12 +63,15 @@ export function NavNegocio({
   acaoSair,
   temNegocio,
   ehAdmin = false,
+  seletor,
 }: {
   pendentes: number
   urlPublica: string | null
   acaoSair: () => void
   temNegocio: boolean
   ehAdmin?: boolean
+  /** "Meus negócios" (montado no servidor) */
+  seletor?: React.ReactNode
 }) {
   const pathname = usePathname()
   const teclado = useTecladoAberto()
@@ -86,6 +89,7 @@ export function NavNegocio({
           <span className="font-display text-[22px] font-bold">tanguá</span>
           <span className="rounded-full border border-[#2E5C4C] px-2 py-0.5 text-[11px] font-bold text-[#A9D9BC]">negócios</span>
         </Link>
+        {seletor}
         {temNegocio && (
           <nav aria-label="Seções" className="flex flex-col gap-0.5 text-[15px] font-semibold">
             {LATERAL.map((item) => {

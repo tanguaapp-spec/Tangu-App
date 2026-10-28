@@ -1,3 +1,4 @@
+import { negocioDoPainel } from '@/lib/painel/negocio-atual'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -35,12 +36,9 @@ export default async function PaginaAssinatura({ searchParams }: { searchParams:
   } = await supabase.auth.getUser()
   if (!user) redirect('/entrar?next=/painel/negocio/assinatura')
 
-  const { data: negocio } = await supabase
-    .from('negocios')
-    .select('id, nome, status_cadastro')
-    .eq('reivindicado_por', user.id)
-    .maybeSingle()
-  if (!negocio) redirect('/painel/negocio')
+  const { negocio: atual, papel } = await negocioDoPainel()
+  if (!atual || papel !== 'dono') redirect('/painel/negocio')
+  const negocio = { id: atual.id, nome: atual.nome, status_cadastro: atual.status_cadastro }
 
   const [planos, uso, assinatura, pagamentos] = await Promise.all([
     listarPlanos(),

@@ -1,5 +1,6 @@
 'use server'
 
+import { negocioDoPainel } from '@/lib/painel/negocio-atual'
 import { revalidatePath } from 'next/cache'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { dentroDoLimite } from '@/lib/seguranca/rate-limit'
@@ -25,12 +26,11 @@ async function contexto() {
   } = await supabase.auth.getUser()
   if (!user) return { erro: 'Entre na sua conta pra continuar.' as const }
 
-  const { data: negocio } = await supabase
-    .from('negocios')
-    .select('id, nome, status_cadastro')
-    .eq('reivindicado_por', user.id)
-    .maybeSingle()
-  if (!negocio) return { erro: 'Cadastre seu negócio antes de escolher um plano.' as const }
+  // cada negócio tem o próprio plano: vale o que está aberto no painel, e só a dona contrata
+  const { negocio: atual, papel } = await negocioDoPainel()
+  if (!atual) return { erro: 'Cadastre seu negócio antes de escolher um plano.' as const }
+  if (papel !== 'dono') return { erro: 'Só a pessoa dona do negócio pode mudar o plano.' as const }
+  const negocio = { id: atual.id, nome: atual.nome, status_cadastro: atual.status_cadastro }
   if (negocio.status_cadastro !== 'aprovado') {
     return { erro: 'Seu cadastro ainda está em análise. Assim que for liberado, você pode contratar um plano.' as const }
   }

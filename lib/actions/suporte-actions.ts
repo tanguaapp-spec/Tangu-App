@@ -1,5 +1,6 @@
 'use server'
 
+import { negocioDoPainel } from '@/lib/painel/negocio-atual'
 import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -38,7 +39,7 @@ export async function abrirChamado(formData: FormData) {
     return { erro: 'Você já abriu vários chamados hoje. Acompanhe as respostas em "Meus chamados".' }
   }
 
-  const { data: negocio } = await supabase.from('negocios').select('id').eq('reivindicado_por', user.id).maybeSingle()
+  const { negocio } = await negocioDoPainel()
 
   // contexto técnico mínimo — nada de cookies/tokens
   const contexto = {

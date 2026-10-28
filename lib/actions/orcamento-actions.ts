@@ -221,7 +221,9 @@ export async function salvarRespostasProntas(formData: FormData) {
     .map((r) => String(r).trim().slice(0, 500))
     .filter(Boolean)
     .slice(0, 6)
-  const { error } = await supabase.from('negocios').update({ respostas_prontas: lista }).eq('reivindicado_por', user.id)
+  const { negocio } = await negocioDoPainel()
+  if (!negocio) return { erro: 'Negócio não encontrado.' }
+  const { error } = await supabase.from('negocios').update({ respostas_prontas: lista }).eq('id', negocio.id)
   if (error) return { erro: 'Não foi possível salvar agora.' }
   revalidatePath('/painel/negocio/orcamentos')
   return { erro: null }
