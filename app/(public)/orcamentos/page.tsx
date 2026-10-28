@@ -1,3 +1,4 @@
+import { exigirModulo } from '@/lib/config/ler'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
@@ -14,6 +15,7 @@ const PASSOS = [
 ]
 
 export default async function PaginaOrcamentos() {
+  await exigirModulo('orcamentos')
   const supabase = createClient()
   const {
     data: { user },

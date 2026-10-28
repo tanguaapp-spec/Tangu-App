@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { enviarNotificacaoParaPerfis } from '@/lib/push/enviar-notificacao'
 import { enviarLembretesAvaliacao, enviarLembretesEventos, enviarResumoSemanalLojistas } from '@/lib/cron/lembretes'
+import { importarNoticiasRss } from '@/lib/conteudo/importar-rss'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,6 +32,7 @@ export async function GET(request: NextRequest) {
     ['avaliacao', enviarLembretesAvaliacao],
     ['eventos', enviarLembretesEventos],
     ['resumo_semanal_lojistas', enviarResumoSemanalLojistas],
+    ['noticias_rss', importarNoticiasRss],
   ] as const) {
     try {
       lembretes[nome] = await tarefa()

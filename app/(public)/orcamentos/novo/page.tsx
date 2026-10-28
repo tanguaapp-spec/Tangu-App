@@ -1,3 +1,4 @@
+import { exigirModulo } from '@/lib/config/ler'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -11,6 +12,7 @@ export const metadata: Metadata = { title: 'Pedir orçamento', robots: { index: 
 export const dynamic = 'force-dynamic'
 
 export default async function PaginaNovoOrcamento({ searchParams }: { searchParams: { negocio?: string } }) {
+  await exigirModulo('orcamentos')
   const supabase = createClient()
   const {
     data: { user },

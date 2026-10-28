@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CalendarPlus, MapPin } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { SugerirEvento } from '@/components/agenda/sugerir-evento'
 import { BotaoInteresse } from '@/components/agenda/botao-interesse'
 import { linkGoogleAgenda } from '@/lib/agenda/ics'
 
@@ -22,6 +23,57 @@ type Evento = {
 
 const fuso = { timeZone: 'America/Sao_Paulo' } as const
 const fmt = (iso: string, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('pt-BR', { ...fuso, ...o }).format(new Date(iso))
+
+/** AAAA-MM-DD no fuso de Tanguá (âncora do calendário). */
+function chaveDia(iso: string) {
+  return new Intl.DateTimeFormat('en-CA', fuso).format(new Date(iso))
+}
+
+/** Mês atual em grade: dias com evento viram atalho para a lista. */
+function CalendarioMes({ diasComEvento }: { diasComEvento: Set<string> }) {
+  const hoje = chaveDia(new Date().toISOString())
+  const [ano, mes] = hoje.split('-').map(Number)
+  const primeiro = new Date(Date.UTC(ano, mes - 1, 1, 12))
+  const diasNoMes = new Date(Date.UTC(ano, mes, 0, 12)).getUTCDate()
+  const inicio = primeiro.getUTCDay()
+  const celulas: (number | null)[] = [...Array(inicio).fill(null), ...Array.from({ length: diasNoMes }, (_, i) => i + 1)]
+  const nomeMes = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(primeiro)
+  return (
+    <section aria-label={`Calendário de ${nomeMes}`} className="mt-5 rounded-[22px] border border-barro-200/80 bg-superficie p-4">
+      <h2 className="font-display text-base font-bold capitalize text-barro-900">{nomeMes}</h2>
+      <div className="mt-2 grid grid-cols-7 gap-1 text-center text-xs font-semibold text-barro-500" aria-hidden="true">
+        {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((d, i) => (
+          <span key={i}>{d}</span>
+        ))}
+      </div>
+      <div className="mt-1 grid grid-cols-7 gap-1">
+        {celulas.map((d, i) => {
+          if (d === null) return <span key={i} />
+          const chave = `${ano}-${String(mes).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+          const tem = diasComEvento.has(chave)
+          const passado = chave < hoje
+          return tem ? (
+            <a
+              key={i}
+              href={`#dia-${chave}`}
+              aria-label={`Eventos no dia ${d}`}
+              className="flex h-10 items-center justify-center rounded-xl bg-casca-500 font-mono text-sm font-bold text-tinta"
+            >
+              {d}
+            </a>
+          ) : (
+            <span
+              key={i}
+              className={`flex h-10 items-center justify-center rounded-xl font-mono text-sm ${chave === hoje ? 'border-2 border-mata-700 font-bold text-mata-800' : passado ? 'text-barro-300' : 'text-barro-700'}`}
+            >
+              {d}
+            </span>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
 
 function rotuloDia(iso: string) {
   const dia = fmt(iso, { year: 'numeric', month: '2-digit', day: '2-digit' })
@@ -54,23 +106,26 @@ export default async function PaginaAgenda() {
   const eventos = (data ?? []) as Evento[]
   const ids = eventos.map((e) => e.id)
 
-  const [totais, meus] = await Promise.all([
-    Promise.all(ids.map((id) => supabase.rpc('total_interessados', { p_aviso: id }).then((r) => [id, (r.data as number) ?? 0] as const))),
+  // uma consulta só para todos os eventos (antes era uma por evento)
+  const [interesses, meus] = await Promise.all([
+    ids.length ? createServiceClient().from('interesses_evento').select('aviso_id').in('aviso_id', ids).limit(20000) : Promise.resolve({ data: [] as { aviso_id: string }[] }),
     user && ids.length
       ? supabase.from('interesses_evento').select('aviso_id').eq('perfil_id', user.id).in('aviso_id', ids)
       : Promise.resolve({ data: [] as { aviso_id: string }[] }),
   ])
-  const totalPor = new Map(totais)
+  const totalPor = new Map<string, number>()
+  for (const i of interesses.data ?? []) totalPor.set(i.aviso_id, (totalPor.get(i.aviso_id) ?? 0) + 1)
   const meusIds = new Set((meus.data ?? []).map((m) => m.aviso_id))
 
   // agrupa por dia
-  const grupos: { dia: string; eventos: Evento[] }[] = []
+  const grupos: { dia: string; chave: string; eventos: Evento[] }[] = []
   for (const e of eventos) {
     const dia = rotuloDia(e.data_evento)
     const ultimo = grupos[grupos.length - 1]
     if (ultimo?.dia === dia) ultimo.eventos.push(e)
-    else grupos.push({ dia, eventos: [e] })
+    else grupos.push({ dia, chave: chaveDia(e.data_evento), eventos: [e] })
   }
+  const diasComEvento = new Set(grupos.map((g) => g.chave))
 
   return (
     <div className="mx-auto max-w-3xl px-5 pb-8 pt-5 md:px-6 md:pt-10">
@@ -78,18 +133,19 @@ export default async function PaginaAgenda() {
       <p className="mt-1 text-sm text-barro-600 md:text-base">
         O que vai acontecer em Tanguá. Toque em “Tenho interesse” e a gente te lembra na véspera.
       </p>
+      <div className="mt-4">
+        <SugerirEvento logado={!!user} />
+      </div>
+      {grupos.length > 0 && <CalendarioMes diasComEvento={diasComEvento} />}
 
       {grupos.length === 0 ? (
         <div className="mt-6 rounded-[20px] border-[1.5px] border-dashed border-barro-200 p-6 text-center text-sm text-barro-700">
-          Nenhum evento marcado por enquanto. Sabe de algum?{' '}
-          <Link href="/mural" className="font-bold text-casca-700 underline">
-            Conte no mural da cidade.
-          </Link>
+          Nenhum evento marcado por enquanto. Sabe de algum? Toque em “Sugerir um evento” aqui em cima.
         </div>
       ) : (
         <div className="mt-6 flex flex-col gap-7">
           {grupos.map((g) => (
-            <section key={g.dia} aria-label={g.dia} className="flex flex-col gap-3">
+            <section key={g.dia} id={`dia-${g.chave}`} aria-label={g.dia} className="flex scroll-mt-24 flex-col gap-3">
               <h2 className="font-display text-lg font-bold text-barro-900">{g.dia}</h2>
               {g.eventos.map((e, i) => (
                 <article

@@ -13,8 +13,8 @@ const LINKS = [
   { href: '/buscar', rotulo: 'Explorar' },
   { href: '/ofertas', rotulo: 'Ofertas' },
   { href: '/agenda', rotulo: 'Agenda' },
-  { href: '/vagas', rotulo: 'Vagas' },
-  { href: '/mural', rotulo: 'Mural' },
+  // notícias, serviços úteis, mapa, vagas e mural ficam reunidos em /cidade
+  { href: '/cidade', rotulo: 'Na cidade' },
 ]
 
 // Telas que desenham o próprio topo no celular (como no protótipo).

@@ -1,3 +1,4 @@
+import { exigirModulo } from '@/lib/config/ler'
 import { buscarAvisosCidade, buscarRespostasPerguntas, buscarReacoes } from '@/lib/queries/cidade'
 import { createClient } from '@/lib/supabase/server'
 import { CardAviso } from '@/components/negocio/card-aviso'
@@ -7,6 +8,7 @@ import { Megaphone } from 'lucide-react'
 export const revalidate = 60
 
 export default async function PaginaMural() {
+  await exigirModulo('mural')
   const supabase = createClient()
   const [avisos, { data: { user } }] = await Promise.all([buscarAvisosCidade(), supabase.auth.getUser()])
 

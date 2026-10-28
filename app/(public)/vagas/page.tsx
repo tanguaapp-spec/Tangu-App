@@ -1,3 +1,4 @@
+import { exigirModulo } from '@/lib/config/ler'
 import { buscarVagas } from '@/lib/queries/cidade'
 import { CardVaga } from '@/components/negocio/card-vaga'
 import { Briefcase } from 'lucide-react'
@@ -5,6 +6,7 @@ import { Briefcase } from 'lucide-react'
 export const revalidate = 60
 
 export default async function PaginaVagas() {
+  await exigirModulo('vagas')
   const vagas = await buscarVagas()
 
   return (

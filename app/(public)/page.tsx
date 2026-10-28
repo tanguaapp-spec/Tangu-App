@@ -143,6 +143,26 @@ export default async function PaginaInicial() {
 
         <VitrineBanners posicao="banner_home" className="px-5 md:px-0" />
 
+        {/* atalhos da cidade: no celular a barra de baixo só tem 5 lugares */}
+        <nav aria-label="Na cidade" className="flex gap-2.5 overflow-x-auto px-5 [scrollbar-width:none] md:px-0">
+          {[
+            ['/cidade', 'Na cidade'],
+            ['/noticias', 'Notícias'],
+            ['/servicos-uteis', 'Farmácia de plantão e telefones'],
+            ['/agenda', 'Agenda'],
+            ['/mapa', 'Mapa'],
+            ['/vagas', 'Vagas'],
+          ].map(([href, rotulo], i) => (
+            <Link
+              key={href}
+              href={href}
+              className={`flex h-11 shrink-0 items-center rounded-full px-4 text-sm font-semibold ${i === 0 ? 'bg-serra text-white' : 'border border-barro-200/80 bg-superficie text-barro-900'}`}
+            >
+              {rotulo}
+            </Link>
+          ))}
+        </nav>
+
         {ordem.map((secao, i) => {
           if (secao === 'eventos' || secao === 'anuncie') {
             if (i !== posicaoDupla) return null

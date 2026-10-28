@@ -1,4 +1,5 @@
 import { cache } from 'react'
+import { notFound } from 'next/navigation'
 import { createServiceClient } from '@/lib/supabase/server'
 
 /** Valores usados enquanto a migration 0023 não rodou (ou a chave foi apagada). */
@@ -40,4 +41,9 @@ export async function lerConfig<K extends ChaveConfigLida>(chave: K): Promise<(t
 export async function moduloAtivo(modulo: string) {
   const modulos = await lerConfig('modulos_ativos')
   return modulos[modulo] !== false
+}
+
+/** Página de um módulo desligado responde "não encontrado" (como se não existisse). */
+export async function exigirModulo(modulo: string) {
+  if (!(await moduloAtivo(modulo))) notFound()
 }

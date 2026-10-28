@@ -1,3 +1,4 @@
+import { exigirModulo } from '@/lib/config/ler'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
@@ -21,6 +22,7 @@ type Resposta = {
 }
 
 export default async function PaginaPedido({ params, searchParams }: { params: { id: string }; searchParams: { enviado?: string } }) {
+  await exigirModulo('orcamentos')
   const supabase = createClient()
   const {
     data: { user },
