@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import Link from 'next/link'
 import { Heart } from 'lucide-react'
 import { useState, useTransition } from 'react'
@@ -52,7 +53,7 @@ export function BotaoFavoritar({
         iniciar(async () => {
           const antes = favorito
           setFavorito(!antes)
-          const r = await alternarFavorito(negocioId)
+          const r = await chamarAcao(alternarFavorito(negocioId))
           if (r.erro) setFavorito(antes)
         })
       }}

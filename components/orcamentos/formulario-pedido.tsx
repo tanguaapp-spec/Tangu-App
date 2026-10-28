@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Campo, AreaTexto } from '@/components/ui/campo'
@@ -24,7 +25,7 @@ export function FormularioPedido({
       action={async (formData) => {
         setCarregando(true)
         setErro(null)
-        const r = await criarPedidoOrcamento(formData)
+        const r = await chamarAcao(criarPedidoOrcamento(formData))
         if (r.erro) {
           setErro(r.erro)
           setCarregando(false)

@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Camera, Loader2 } from 'lucide-react'
@@ -32,7 +33,7 @@ export function FormularioProduto({
       action={async (dados) => {
         setEnviando(true)
         setErro(null)
-        const r = produto ? await atualizarProduto(produto.id, dados) : await criarProduto(negocioId, dados)
+        const r = await chamarAcao(produto ? atualizarProduto(produto.id, dados) : criarProduto(negocioId, dados))
         setEnviando(false)
         if (r.erro) {
           setErro(r.erro)

@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { Botao } from '@/components/ui/botao'
 import { encerrarVaga } from '@/lib/actions/admin-actions'
@@ -29,7 +30,7 @@ export function BotaoEncerrarVaga({
     setSucesso(null)
 
     const acao = origem === 'propria' ? encerrarVagaPropria : encerrarVaga
-    const resultado = await acao(vagaId)
+    const resultado = await chamarAcao(acao(vagaId))
     if (resultado.erro) {
       setErro(resultado.erro)
     } else {

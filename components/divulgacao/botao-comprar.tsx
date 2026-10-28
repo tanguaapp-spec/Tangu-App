@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { Botao } from '@/components/ui/botao'
 import { comprarDivulgacao } from '@/lib/actions/divulgacao-actions'
@@ -46,7 +47,7 @@ export function BotaoComprar({ servicoId, opcoes }: { servicoId: string; opcoes:
           const fd = new FormData()
           fd.set('servico_id', servicoId)
           fd.set('dias', String(escolhida.dias))
-          const r = await comprarDivulgacao(fd)
+          const r = await chamarAcao(comprarDivulgacao(fd))
           if (r.erro || !('urlPagamento' in r) || !r.urlPagamento) {
             setErro(r.erro ?? 'Não foi possível abrir o pagamento.')
             setCarregando(false)

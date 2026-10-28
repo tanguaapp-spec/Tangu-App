@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { RefreshCw } from 'lucide-react'
@@ -16,7 +17,7 @@ export function SincronizarProspeccao() {
     setCarregando(true)
     setErro(null)
     setResultado(null)
-    const resposta = await sincronizarProspeccoes()
+    const resposta = await chamarAcao(sincronizarProspeccoes())
     setCarregando(false)
     if (resposta.erro) {
       setErro(resposta.erro)

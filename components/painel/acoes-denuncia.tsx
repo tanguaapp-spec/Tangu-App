@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Botao } from '@/components/ui/botao'
@@ -13,7 +14,7 @@ export function AcoesDenuncia({ denunciaId }: { denunciaId: string }) {
   async function agir(acao: 'remover' | 'arquivar') {
     setCarregando(acao)
     setErro(null)
-    const resultado = await revisarDenuncia(denunciaId, acao)
+    const resultado = await chamarAcao(revisarDenuncia(denunciaId, acao))
     setCarregando(null)
     if (resultado.erro) {
       setErro(resultado.erro)

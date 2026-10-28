@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Botao } from '@/components/ui/botao'
@@ -26,7 +27,7 @@ export function BotaoAssinar({
     if (confirmacao && !window.confirm(confirmacao)) return
     setCarregando(true)
     setErro(null)
-    const resultado = await iniciarAssinatura(planoId)
+    const resultado = await chamarAcao(iniciarAssinatura(planoId))
     if (resultado.erro) {
       setErro(resultado.erro)
       setCarregando(false)

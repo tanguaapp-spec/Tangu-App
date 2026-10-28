@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import Link from 'next/link'
 import { useState, useTransition } from 'react'
 import { Bookmark } from 'lucide-react'
@@ -29,7 +30,7 @@ export function BotaoSalvarProduto({ produtoId, nome, inicial, logado, voltarPar
           vibrar(10)
           const antes = salvo
           setSalvo(!antes)
-          const r = await alternarFavoritoProduto(produtoId)
+          const r = await chamarAcao(alternarFavoritoProduto(produtoId))
           if (r.erro) setSalvo(antes)
         })
       }

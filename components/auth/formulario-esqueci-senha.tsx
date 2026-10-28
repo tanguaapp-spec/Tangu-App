@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { MailCheck } from 'lucide-react'
 import { Campo } from '@/components/ui/campo'
@@ -14,7 +15,7 @@ export function FormularioEsqueciSenha() {
   async function handleSubmit(formData: FormData) {
     setCarregando(true)
     setErro(null)
-    const resultado = await solicitarRedefinicaoSenha(formData)
+    const resultado = await chamarAcao(solicitarRedefinicaoSenha(formData))
     setCarregando(false)
     if (resultado.erro) setErro(resultado.erro)
     if (resultado.enviado) setEnviado(true)

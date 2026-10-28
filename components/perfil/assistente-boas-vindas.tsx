@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -23,7 +24,7 @@ export function AssistenteBoasVindas({ categorias, bairroAtual }: { categorias: 
       action={async (formData) => {
         setCarregando(true)
         setErro(null)
-        const r = await salvarInteresses(formData)
+        const r = await chamarAcao(salvarInteresses(formData))
         if (r.erro) {
           setErro(r.erro)
           setCarregando(false)

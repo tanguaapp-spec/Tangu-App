@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { Botao } from '@/components/ui/botao'
 import { aprovarReivindicacao, rejeitarReivindicacao } from '@/lib/actions/admin-actions'
@@ -22,7 +23,7 @@ export function AcoesReivindicacao({
     setErro(null)
     setSucesso(null)
 
-    const resultado = await aprovarReivindicacao(solicitacaoId, negocioId, solicitanteId)
+    const resultado = await chamarAcao(aprovarReivindicacao(solicitacaoId, negocioId, solicitanteId))
     if (resultado.erro) {
       setErro(resultado.erro)
     } else {
@@ -37,7 +38,7 @@ export function AcoesReivindicacao({
     setErro(null)
     setSucesso(null)
 
-    const resultado = await rejeitarReivindicacao(solicitacaoId)
+    const resultado = await chamarAcao(rejeitarReivindicacao(solicitacaoId))
     if (resultado.erro) {
       setErro(resultado.erro)
     } else {

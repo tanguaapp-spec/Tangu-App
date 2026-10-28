@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Botao } from '@/components/ui/botao'
@@ -17,7 +18,7 @@ export function FormularioImportar() {
     const fd = new FormData(form.current)
     fd.set('acao', acao)
     setCarregando(acao)
-    const r = await importarLista(fd)
+    const r = await chamarAcao(importarLista(fd))
     setCarregando(null)
     setRel(r)
     if (!r.simulacao && !r.erro) router.refresh()

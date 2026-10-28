@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { Star } from 'lucide-react'
 import { avaliarAtendimento } from '@/lib/actions/suporte-actions'
@@ -29,7 +30,7 @@ export function AvaliarAtendimento({ chamadoId }: { chamadoId: string }) {
               const fd = new FormData()
               fd.set('chamado_id', chamadoId)
               fd.set('nota', String(n))
-              const r = await avaliarAtendimento(fd)
+              const r = await chamarAcao(avaliarAtendimento(fd))
               if (r.erro) {
                 setErro(r.erro)
                 setEstado('aberto')

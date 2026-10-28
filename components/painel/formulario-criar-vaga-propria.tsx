@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Campo, AreaTexto } from '@/components/ui/campo'
@@ -15,7 +16,7 @@ export function FormularioCriarVagaPropria({ negocioId }: { negocioId: string })
   async function handleSubmit(formData: FormData) {
     setCarregando(true)
     setErro(null)
-    const resultado = await criarVagaProfissional(negocioId, formData)
+    const resultado = await chamarAcao(criarVagaProfissional(negocioId, formData))
     setCarregando(false)
     if (resultado?.erro) {
       setErro(resultado.erro)

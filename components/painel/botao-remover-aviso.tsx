@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { Botao } from '@/components/ui/botao'
 import { removerAviso } from '@/lib/actions/admin-actions'
@@ -17,7 +18,7 @@ export function BotaoRemoverAviso({ avisoId }: { avisoId: string }) {
     setErro(null)
     setSucesso(null)
 
-    const resultado = await removerAviso(avisoId)
+    const resultado = await chamarAcao(removerAviso(avisoId))
     if (resultado.erro) {
       setErro(resultado.erro)
     } else {

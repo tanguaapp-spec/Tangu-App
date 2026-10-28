@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import Link from 'next/link'
 import { CalendarPlus } from 'lucide-react'
@@ -44,7 +45,7 @@ export function SugerirEvento({ logado }: { logado: boolean }) {
             action={async (fd) => {
               setEnviando(true)
               setErro(null)
-              const r = await sugerirEvento(fd)
+              const r = await chamarAcao(sugerirEvento(fd))
               setEnviando(false)
               if (r.erro) setErro(r.erro)
               else setOk(true)

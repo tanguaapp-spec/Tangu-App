@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Stamp, Gift } from 'lucide-react'
@@ -20,7 +21,7 @@ export function CartaoFidelidadeClientes({ negocioId, clientes, meta = 10 }: { n
   async function carimbar(perfilId: string) {
     setCarregandoId(perfilId)
     setErro(null)
-    const resultado = await adicionarCarimbo(negocioId, perfilId)
+    const resultado = await chamarAcao(adicionarCarimbo(negocioId, perfilId))
     setCarregandoId(null)
     if (resultado.erro) return setErro(resultado.erro)
     vibrar(12)
@@ -30,7 +31,7 @@ export function CartaoFidelidadeClientes({ negocioId, clientes, meta = 10 }: { n
   async function resgatar(perfilId: string) {
     setCarregandoId(perfilId)
     setErro(null)
-    const resultado = await confirmarResgateFidelidade(negocioId, perfilId)
+    const resultado = await chamarAcao(confirmarResgateFidelidade(negocioId, perfilId))
     setCarregandoId(null)
     if (resultado.erro) return setErro(resultado.erro)
     vibrar([15, 60, 15])

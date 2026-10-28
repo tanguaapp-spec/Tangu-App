@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Botao } from '@/components/ui/botao'
@@ -20,7 +21,7 @@ export function ResponderChamado({ chamadoId, fechado }: { chamadoId: string; fe
         action={async (formData) => {
           setCarregando(true)
           setErro(null)
-          const r = await responderMeuChamado(chamadoId, formData)
+          const r = await chamarAcao(responderMeuChamado(chamadoId, formData))
           setCarregando(false)
           if (r.erro) setErro(r.erro)
           else {

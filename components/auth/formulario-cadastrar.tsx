@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { Campo } from '@/components/ui/campo'
 import { Botao } from '@/components/ui/botao'
@@ -27,8 +28,7 @@ export function FormularioCadastrar({
     if (codigoConvite) formData.set('codigo_convite', codigoConvite)
     if (origem) formData.set('origem', origem)
 
-    const resultado = await cadastrarComEmail(formData)
-
+    const resultado = await chamarAcao(cadastrarComEmail(formData))
     if (resultado?.erro) {
       setErro(resultado.erro)
       setCarregando(false)

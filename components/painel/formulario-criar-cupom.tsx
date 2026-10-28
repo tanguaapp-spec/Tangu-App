@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Campo, AreaTexto } from '@/components/ui/campo'
@@ -30,7 +31,7 @@ export function FormularioCriarCupom({ negocioId }: { negocioId: string }) {
     setErro(null)
     formData.set('expira_em_iso', paraIso(formData.get('expira_em')))
     formData.set('inicia_em_iso', paraIso(formData.get('inicia_em')))
-    const resultado = await criarCupom(negocioId, formData)
+    const resultado = await chamarAcao(criarCupom(negocioId, formData))
     setCarregando(false)
     if (resultado?.erro) {
       setErro(resultado.erro)

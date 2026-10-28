@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useRef, useState } from 'react'
 import { CheckCircle2, Loader2, XCircle } from 'lucide-react'
 import { validarCodigoCupom } from '@/lib/actions/painel-negocio-actions'
@@ -15,7 +16,7 @@ export function ValidarCupom() {
       ref={form}
       action={async (formData) => {
         setCarregando(true)
-        const r = await validarCodigoCupom(formData)
+        const r = await chamarAcao(validarCodigoCupom(formData))
         setCarregando(false)
         setResultado(r.erro ? { ok: false, texto: r.erro } : { ok: true, texto: r.mensagem ?? 'Válido.' })
         vibrar(r.erro ? [30, 60, 30] : 20)

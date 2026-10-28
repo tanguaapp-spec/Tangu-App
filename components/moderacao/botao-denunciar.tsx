@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { Flag } from 'lucide-react'
 import { Botao } from '@/components/ui/botao'
@@ -35,7 +36,7 @@ export function BotaoDenunciar({
   async function enviar() {
     setEnviando(true)
     setErro(null)
-    const resultado = await denunciarConteudo(tipoConteudo, conteudoId, motivo, negocioId)
+    const resultado = await chamarAcao(denunciarConteudo(tipoConteudo, conteudoId, motivo, negocioId))
     setEnviando(false)
     if (resultado.erro) {
       setErro(resultado.erro)

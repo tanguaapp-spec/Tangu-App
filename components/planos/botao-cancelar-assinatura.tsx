@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Botao } from '@/components/ui/botao'
@@ -14,7 +15,7 @@ export function BotaoCancelarAssinatura({ validoAte }: { validoAte: string | nul
   async function cancelar() {
     setCarregando(true)
     setErro(null)
-    const resultado = await cancelarAssinatura()
+    const resultado = await chamarAcao(cancelarAssinatura())
     setCarregando(false)
     if (resultado.erro) {
       setErro(resultado.erro)

@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { PauseCircle, PlayCircle } from 'lucide-react'
@@ -16,7 +17,7 @@ export function PausarPerfil({ negocioId, ativo }: { negocioId: string; ativo: b
   async function alternar(valor: boolean) {
     setCarregando(true)
     setErro(null)
-    const r = await alternarNegocioAtivo(negocioId, valor)
+    const r = await chamarAcao(alternarNegocioAtivo(negocioId, valor))
     setCarregando(false)
     setConfirmando(false)
     if (r.erro) setErro(r.erro)

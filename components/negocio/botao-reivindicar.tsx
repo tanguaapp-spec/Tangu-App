@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useMemo, useState } from 'react'
 import { ShieldCheck } from 'lucide-react'
 import { Botao } from '@/components/ui/botao'
@@ -30,7 +31,7 @@ export function BotaoReivindicar({ negocioId }: { negocioId: string }) {
 
   async function enviar() {
     setEnviando(true)
-    const resultado = await solicitarReivindicacao(negocioId, mensagem)
+    const resultado = await chamarAcao(solicitarReivindicacao(negocioId, mensagem))
     setEnviando(false)
     if (resultado.erro) {
       setErro(resultado.erro)

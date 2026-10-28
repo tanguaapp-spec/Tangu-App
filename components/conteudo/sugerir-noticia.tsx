@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import Link from 'next/link'
 import { Newspaper } from 'lucide-react'
@@ -44,7 +45,7 @@ export function SugerirNoticia({ logado }: { logado: boolean }) {
             action={async (fd) => {
               setEnviando(true)
               setErro(null)
-              const r = await sugerirNoticia(fd)
+              const r = await chamarAcao(sugerirNoticia(fd))
               setEnviando(false)
               if (r.erro) setErro(r.erro)
               else setOk(true)

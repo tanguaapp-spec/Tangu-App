@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
@@ -32,7 +33,7 @@ export function FormularioResponderPergunta({ avisoId, logado }: { avisoId: stri
   async function indicar(negocioId: string) {
     setEnviandoId(negocioId)
     setErro(null)
-    const resultado = await responderPergunta(avisoId, negocioId)
+    const resultado = await chamarAcao(responderPergunta(avisoId, negocioId))
     setEnviandoId(null)
     if (resultado.erro) {
       setErro(resultado.erro)

@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Store, UserRound } from 'lucide-react'
@@ -35,8 +36,7 @@ export function FormularioCadastrarNegocio({ categorias }: { categorias: Categor
     setErro(null)
     formData.set('tipo_perfil', tipo)
 
-    const resultado = await cadastrarNegocio(formData)
-
+    const resultado = await chamarAcao(cadastrarNegocio(formData))
     if (resultado?.erro) {
       setErro(resultado.erro)
       setCarregando(false)

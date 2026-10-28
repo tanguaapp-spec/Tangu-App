@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import Link from 'next/link'
 import { useState, useTransition } from 'react'
 import { Star } from 'lucide-react'
@@ -48,7 +49,7 @@ export function BotaoInteresse({
             setInteressado(!antes)
             setContagem((c) => c + (antes ? -1 : 1))
             vibrar()
-            const r = await alternarInteresseEvento(avisoId)
+            const r = await chamarAcao(alternarInteresseEvento(avisoId))
             if (r.erro) {
               setInteressado(antes)
               setContagem((c) => c + (antes ? 1 : -1))

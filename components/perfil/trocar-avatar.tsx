@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useRef, useState } from 'react'
 import { Camera, Loader2 } from 'lucide-react'
 import { atualizarAvatar } from '@/lib/actions/perfil-actions'
@@ -44,7 +45,7 @@ export function TrocarAvatar({ url, nome }: { url: string | null; nome: string }
           setErro(null)
           const dados = new FormData()
           dados.set('foto', arquivo)
-          const r = await atualizarAvatar(dados)
+          const r = await chamarAcao(atualizarAvatar(dados))
           setEnviando(false)
           if (r.erro) setErro(r.erro)
           else {

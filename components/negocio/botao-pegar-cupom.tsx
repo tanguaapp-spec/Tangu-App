@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import QRCode from 'qrcode'
@@ -67,7 +68,7 @@ export function BotaoPegarCupom({
         onClick={async () => {
           setCarregando(true)
           setErro(null)
-          const r = await resgatarCupom(cupomId)
+          const r = await chamarAcao(resgatarCupom(cupomId))
           setCarregando(false)
           if (r.erro) setErro(r.erro)
           else {

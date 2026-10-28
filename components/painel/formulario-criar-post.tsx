@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Camera, Loader2 } from 'lucide-react'
@@ -30,7 +31,7 @@ export function FormularioCriarPost({ negocioId }: { negocioId: string }) {
         setCarregando(true)
         setErro(null)
         dados.set('tipo', tipo)
-        const r = await criarPost(negocioId, dados)
+        const r = await chamarAcao(criarPost(negocioId, dados))
         setCarregando(false)
         if (r?.erro) {
           setErro(r.erro)

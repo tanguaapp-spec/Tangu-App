@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { HeartHandshake } from 'lucide-react'
 import { BottomSheet } from '@/components/ui/bottom-sheet'
@@ -59,7 +60,7 @@ export function AvisoNaoReivindicado({ negocioId, nome }: { negocioId: string; n
             action={async (fd) => {
               setEnviando(true)
               setErro(null)
-              const r = await pedirOcultarPerfil(fd)
+              const r = await chamarAcao(pedirOcultarPerfil(fd))
               setEnviando(false)
               if (r.erro) setErro(r.erro)
               else setOk(true)

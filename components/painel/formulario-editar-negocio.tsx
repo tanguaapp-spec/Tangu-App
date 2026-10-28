@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Campo, AreaTexto } from '@/components/ui/campo'
@@ -28,8 +29,7 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
     setSalvo(false)
     setErro(null)
 
-    const resultado = await atualizarNegocio(negocio.id, formData)
-
+    const resultado = await chamarAcao(atualizarNegocio(negocio.id, formData))
     setCarregando(false)
     if (resultado?.erro) {
       setErro(resultado.erro)

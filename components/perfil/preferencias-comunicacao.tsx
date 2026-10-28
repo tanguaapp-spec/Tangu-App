@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { Botao } from '@/components/ui/botao'
 import { salvarPreferenciasComunicacao } from '@/lib/actions/conta-actions'
@@ -20,7 +21,7 @@ export function PreferenciasComunicacao({
     <form
       action={async (formData) => {
         setEstado('salvando')
-        const r = await salvarPreferenciasComunicacao(formData)
+        const r = await chamarAcao(salvarPreferenciasComunicacao(formData))
         setEstado(r.erro ? 'erro' : 'salvo')
       }}
       className="space-y-3"

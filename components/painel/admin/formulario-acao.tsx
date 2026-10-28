@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Botao } from '@/components/ui/botao'
@@ -31,7 +32,7 @@ export function FormularioAcao({
         setCarregando(true)
         setErro(null)
         setOk(false)
-        const r = await acao(formData)
+        const r = await chamarAcao(acao(formData))
         setCarregando(false)
         if (r.erro) setErro(r.erro)
         else {

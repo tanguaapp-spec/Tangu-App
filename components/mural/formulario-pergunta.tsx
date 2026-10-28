@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Campo } from '@/components/ui/campo'
@@ -16,7 +17,7 @@ export function FormularioPergunta() {
   async function handleSubmit(formData: FormData) {
     setCarregando(true)
     setErro(null)
-    const resultado = await criarPergunta(formData)
+    const resultado = await chamarAcao(criarPergunta(formData))
     setCarregando(false)
     if (resultado?.erro) {
       setErro(resultado.erro)

@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Check, Copy, Loader2, RotateCcw } from 'lucide-react'
@@ -41,7 +42,7 @@ export function AcoesErro({ ids, resolvido, relatorio }: { ids: string[]; resolv
           disabled={carregando}
           onClick={async () => {
             setCarregando(true)
-            const r = await reabrirErros(ids)
+            const r = await chamarAcao(reabrirErros(ids))
             setCarregando(false)
             if (r.erro) setErro(r.erro)
             else router.refresh()
@@ -70,7 +71,7 @@ export function AcoesErro({ ids, resolvido, relatorio }: { ids: string[]; resolv
           action={async (dados) => {
             setCarregando(true)
             setErro(null)
-            const r = await marcarErrosResolvidos(ids, dados)
+            const r = await chamarAcao(marcarErrosResolvidos(ids, dados))
             setCarregando(false)
             if (r.erro) setErro(r.erro)
             else router.refresh()

@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Archive, ArchiveRestore, Package, Pencil, Trash2 } from 'lucide-react'
@@ -20,7 +21,7 @@ export function ListaProdutos({ produtos, negocioId }: { produtos: ProdutoServic
   async function executar(id: string, acao: () => Promise<{ erro: string | null }>) {
     setOcupado(id)
     setErro(null)
-    const r = await acao()
+    const r = await chamarAcao(acao())
     setOcupado(null)
     if (r.erro) setErro(r.erro)
     else router.refresh()

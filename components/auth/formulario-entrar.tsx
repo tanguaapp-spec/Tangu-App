@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { Campo } from '@/components/ui/campo'
 import { Botao } from '@/components/ui/botao'
@@ -12,7 +13,7 @@ export function FormularioEntrar({ proximo }: { proximo?: string }) {
   async function handleSubmit(formData: FormData) {
     setCarregando(true)
     setErro(null)
-    const resultado = await entrarComEmail(formData)
+    const resultado = await chamarAcao(entrarComEmail(formData))
     if (resultado?.erro) {
       setErro(resultado.erro)
       setCarregando(false)

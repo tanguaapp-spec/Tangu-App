@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -29,7 +30,7 @@ export function FormularioChamado({ categoriaInicial, paginaOrigem }: { categori
       action={async (formData) => {
         setCarregando(true)
         setErro(null)
-        const r = await abrirChamado(formData)
+        const r = await chamarAcao(abrirChamado(formData))
         if (r.erro) {
           setErro(r.erro)
           setCarregando(false)

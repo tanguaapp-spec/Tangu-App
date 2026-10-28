@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
@@ -21,7 +22,7 @@ export function ResponderOrcamento({ pedidoId, prontas, podeEditarProntas }: { p
       action={async (dados) => {
         setEnviando(true)
         setErro(null)
-        const r = await responderPedidoOrcamento(pedidoId, dados)
+        const r = await chamarAcao(responderPedidoOrcamento(pedidoId, dados))
         setEnviando(false)
         if (r.erro) setErro(r.erro)
         else {

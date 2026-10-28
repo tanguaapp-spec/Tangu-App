@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -39,7 +40,7 @@ export function InterruptorAcao({
           setEstado(!estado)
           const fd = new FormData()
           for (const [k, v] of Object.entries(campos)) fd.set(k, v)
-          const r = await acao(fd)
+          const r = await chamarAcao(acao(fd))
           if (r.erro) {
             setEstado(estado)
             setErro(r.erro)

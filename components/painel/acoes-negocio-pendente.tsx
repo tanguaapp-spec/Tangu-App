@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { Botao } from '@/components/ui/botao'
 import { AreaTexto } from '@/components/ui/campo'
@@ -15,7 +16,7 @@ export function AcoesNegocioPendente({ negocioId }: { negocioId: string }) {
   async function aprovar() {
     setCarregando('aprovar')
     setErro(null)
-    const resultado = await aprovarNegocioPendente(negocioId)
+    const resultado = await chamarAcao(aprovarNegocioPendente(negocioId))
     if (resultado.erro) setErro(resultado.erro)
     else setSucesso('Negócio aprovado e publicado no diretório.')
     setCarregando(null)
@@ -24,7 +25,7 @@ export function AcoesNegocioPendente({ negocioId }: { negocioId: string }) {
   async function rejeitar() {
     setCarregando('rejeitar')
     setErro(null)
-    const resultado = await rejeitarNegocioPendente(negocioId, motivo)
+    const resultado = await chamarAcao(rejeitarNegocioPendente(negocioId, motivo))
     if (resultado.erro) setErro(resultado.erro)
     else setSucesso('Cadastro rejeitado.')
     setCarregando(null)

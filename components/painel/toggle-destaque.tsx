@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Sparkles } from 'lucide-react'
@@ -23,7 +24,7 @@ export function ToggleDestaque({
   async function agir(novoAtivo: boolean) {
     setCarregando(true)
     setErro(null)
-    const resultado = await alternarDestaque(negocioId, novoAtivo, novoAtivo ? Number(dias) || undefined : undefined)
+    const resultado = await chamarAcao(alternarDestaque(negocioId, novoAtivo, novoAtivo ? Number(dias) || undefined : undefined))
     setCarregando(false)
     if (resultado.erro) {
       setErro(resultado.erro)

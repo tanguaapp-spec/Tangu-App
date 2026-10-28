@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useRef, useState } from 'react'
 import { Loader2, UserMinus } from 'lucide-react'
 import { adicionarMembro, removerMembro } from '@/lib/actions/equipe-actions'
@@ -34,7 +35,7 @@ export function GerenciarEquipe({ membros, podeEditar }: { membros: Membro[]; po
                   onClick={async () => {
                     if (!window.confirm(`Tirar ${m.nome} da equipe?`)) return
                     setRemovendo(m.perfil_id)
-                    const r = await removerMembro(m.perfil_id)
+                    const r = await chamarAcao(removerMembro(m.perfil_id))
                     setRemovendo(null)
                     if (r.erro) setErro(r.erro)
                   }}
@@ -55,7 +56,7 @@ export function GerenciarEquipe({ membros, podeEditar }: { membros: Membro[]; po
             setEnviando(true)
             setErro(null)
             setOk(false)
-            const r = await adicionarMembro(dados)
+            const r = await chamarAcao(adicionarMembro(dados))
             setEnviando(false)
             if (r.erro) setErro(r.erro)
             else {

@@ -1,5 +1,6 @@
 'use client'
 
+import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import Link from 'next/link'
 import { Download, Trash2 } from 'lucide-react'
@@ -35,7 +36,7 @@ export function PrivacidadeDados({ temNegocio }: { temNegocio: boolean }) {
           action={async (formData) => {
             setCarregando(true)
             setErro(null)
-            const r = await excluirConta(formData)
+            const r = await chamarAcao(excluirConta(formData))
             // em caso de sucesso a action redireciona
             if (r?.erro) {
               setErro(r.erro)
