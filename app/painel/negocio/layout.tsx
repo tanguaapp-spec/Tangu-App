@@ -7,6 +7,7 @@ import { lerConfig } from '@/lib/config/ler'
 import { SeletorNegocio } from '@/components/painel/seletor-negocio'
 import { urlNegocio } from '@/lib/ui/apresentacao'
 import { ConviteApp } from '@/components/pwa/convite-app'
+import { RegistrarAtividade } from '@/components/metricas/registrar-atividade'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,6 +47,7 @@ export default async function LayoutNegocio({ children }: { children: React.Reac
       </main>
       {/* lojista também: aviso de pedido de orçamento e de avaliação chega no celular */}
       <ConviteApp />
+      <RegistrarAtividade />
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { NavInferior } from '@/components/layout/nav-inferior'
 import { ProvedorSessao } from '@/components/layout/sessao'
 import { PullToRefresh } from '@/components/pwa/pull-to-refresh'
 import { ConviteApp } from '@/components/pwa/convite-app'
+import { RegistrarAtividade } from '@/components/metricas/registrar-atividade'
 
 export default function LayoutPublico({ children }: { children: React.ReactNode }) {
   return (
@@ -17,6 +18,7 @@ export default function LayoutPublico({ children }: { children: React.ReactNode 
         </PullToRefresh>
         <NavInferior />
         <ConviteApp />
+        <RegistrarAtividade />
       </div>
     </ProvedorSessao>
   )
