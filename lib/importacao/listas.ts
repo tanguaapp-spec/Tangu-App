@@ -28,32 +28,74 @@ export const normalizar = (t: string) =>
     .toLowerCase()
     .trim()
 
-/** Regras em ordem: a primeira que casar vence (ex.: posto com restaurante → automotivo). */
+/**
+ * Regras em ordem (a primeira que casar vence), as mesmas do BoraAli e já
+ * apontando para as categorias/subcategorias da 0025.
+ * Ex.: posto com restaurante → posto; salão de beleza → subcategoria.
+ */
+const N = (categoriaSlug: string): Destino => ({ tipo: 'negocio', categoriaSlug })
 const REGRAS: [RegExp, Destino][] = [
   [/\b(igreja|templo|paroquia)\b/, { tipo: 'ignorar', motivo: 'instituição religiosa' }],
   [
-    /prefeitura|secretaria municipal|guarda municipal|reparticao publica|saude publica|hospital publico|centro medico publico|central de regulacao|escola publica|posto de saude|conselho tutelar|cartorio eleitoral/,
+    /prefeitura|secretaria municipal|guarda municipal|reparticao publica|saude publica|hospital publico|centro medico publico|central de regulacao|escola publica|escola de ensino|escola de educacao geral|posto de saude|conselho tutelar/,
     { tipo: 'servico_util' },
   ],
-  [/marco historico|organizacao nao governamental/, { tipo: 'ignorar', motivo: 'não é comércio' }],
+  [/marco historico|organizacao nao governamental/, { tipo: 'ignorar', motivo: 'não é estabelecimento comercial' }],
   [/^caixa eletronico$/, { tipo: 'ignorar', motivo: 'caixa eletrônico' }],
-  [/posto de combustivel|oficina|mecanic|troca de oleo|autopecas|pneu|borracharia|alinhamento|lava-rapido|lava jato|som para carros|inspecao veicular/, { tipo: 'negocio', categoriaSlug: 'automotivo' }],
-  [
-    /pizza|hamburgueria|lanchonete|sanduich|pastelaria|fast-food|acai|sorvet|confeitaria|doceria|bolos|biscoito|padaria|panificadora|restaurante|churrascaria|diner|cafeteria|\bcafe\b|\bbar(es)?\b|hortifrut|acougue|carnes|supermercado|mercado|comidas naturais|produtos naturais|bebida|distribuidora/,
-    { tipo: 'negocio', categoriaSlug: 'alimentacao' },
-  ],
-  [/barbearia|salao de beleza|cabeleireir|sobrancelha|manicure|estetica|depilacao|maquiag/, { tipo: 'negocio', categoriaSlug: 'beleza-estetica' }],
-  [
-    /drogaria|farmacia|farmaceutica|dentista|odontolog|ortodont|otica|oftalmolog|laboratorio|policlinica|centro medico|consultorio|medico|fisioterap|clinica|academia|fitness|pilates|artes marciais|nutricion|psicolog/,
-    { tipo: 'negocio', categoriaSlug: 'saude-bem-estar' },
-  ],
-  [/roupa|moda|calcado|outlet|artigos esportivos|relojoaria|joia|bijuteria|boutique/, { tipo: 'negocio', categoriaSlug: 'moda-vestuario' }],
-  [/celular|informatica|eletronicos|assistencia tecnica|computador/, { tipo: 'negocio', categoriaSlug: 'tecnologia' }],
-  [/materiais de construcao|construcenter|ferramentas|tintas|reforma|marmoraria|vidracaria|tijolo|ceramicas|moveis|moveleiro|eletricista|encanador|serralheria/, { tipo: 'negocio', categoriaSlug: 'casa-construcao' }],
-  [/escola|educacional|curso|creche|reforco escolar/, { tipo: 'negocio', categoriaSlug: 'educacao' }],
-  [/agricultura|pecuaria|fazenda|agropecuaria|racao|sitio|haras/, { tipo: 'negocio', categoriaSlug: 'agro-producao-rural' }],
-  [/eventos|casamento|buffet|festa|decoracao de festas/, { tipo: 'negocio', categoriaSlug: 'eventos-festas' }],
-  [/imobiliari|advogad|juridic|contabil|loterica|banco|correspondente|seguro|despachante|grafica|papelaria/, { tipo: 'negocio', categoriaSlug: 'servicos-profissionais' }],
+  [/posto de combustivel/, N('postos-de-combustivel')],
+  [/pizza/, N('pizzarias')],
+  [/hamburgueria|lanchonete|sanduich|pastelaria|fast-food/, N('lanchonetes')],
+  [/acai|sorvet/, N('acai-e-sorveterias')],
+  [/confeitaria|doceria|bolos|biscoito/, N('doces-e-confeitarias')],
+  [/padaria|panificadora/, N('padarias')],
+  [/barbearia/, N('barbearias')],
+  [/salao de beleza|cabeleireir|sobrancelha|saude e beleza/, N('saloes-de-beleza')],
+  [/manicure/, N('manicure-e-pedicure')],
+  [/estetica|depilacao/, N('estetica-e-depilacao')],
+  [/restaurante|churrascaria|diner|cafeteria|\bcafe\b/, N('restaurantes')],
+  [/\bbar(es)?\b/, N('bares-e-petiscos')],
+  [/roupa|moda|calcado|outlet|artigos esportivos|atividades ao ar livre/, N('roupas-e-calcados')],
+  [/hortifrut/, N('hortifruti')],
+  [/acougue|carnes|peixaria/, N('acougues-e-peixarias')],
+  [/supermercado|mercado/, N('supermercados')],
+  [/comidas naturais|produtos naturais|mercearia|conveniencia/, N('mercearias-e-conveniencia')],
+  [/bebida|distribuidora/, N('bebidas-e-distribuidoras')],
+  [/farmacia veterinaria|veterinari/, N('veterinarias')],
+  [/drogaria|farmacia|farmaceutica/, N('farmacias')],
+  [/pet shop|racao|animais de estimacao|banho e tosa/, N('pet-shop')],
+  [/dentista|odontolog|ortodont/, N('dentistas')],
+  [/otica|oftalmolog/, N('oticas')],
+  [/laboratorio|policlinica|centro medico|consultorio|medico|fisioterap|clinica|nutricion|psicolog/, N('clinicas-e-consultorios')],
+  [/academia|fitness|artes marciais|pilates/, N('academias-e-esportes')],
+  [/assistencia tecnica/, N('assistencia-tecnica')],
+  [/celular|informatica/, N('celulares-e-informatica')],
+  [/som para carros|autopecas|pneu/, N('autopecas')],
+  [/eletronicos|eletrodomestico/, N('eletronicos-e-eletrodomesticos')],
+  [/relojoaria|joia|bijuteria/, N('acessorios-e-bijuterias')],
+  [/moveis|moveleiro|decoracao/, N('moveis-e-decoracao')],
+  [/papelaria|grafica/, N('papelarias-e-graficas')],
+  [/floricultura|flores/, N('floriculturas')],
+  [/lava-rapido|lava jato/, N('lava-jato')],
+  [/borracharia|alinhamento/, N('borracharias')],
+  [/oficina|mecanic|troca de oleo|inspecao veicular|tratores/, N('mecanicos')],
+  [/materiais de construcao|construcenter|ferramentas|tintas|reforma|marmoraria|vidracaria|tijolo|ceramicas/, N('material-de-construcao')],
+  [/eletricista/, N('eletricistas')],
+  [/encanador/, N('encanadores')],
+  [/chaveiro/, N('chaveiros')],
+  [/lavanderia/, N('lavanderias')],
+  [/dedetiz/, N('dedetizacao')],
+  [/fotograf/, N('fotografia')],
+  [/mudanca|frete/, N('fretes-e-mudancas')],
+  [/imobiliari/, N('imobiliarias')],
+  [/advogad|juridic/, N('advocacia')],
+  [/contabil/, N('contabilidade')],
+  [/escola|educacional|curso/, N('escolas-e-cursos')],
+  [/hotel|hospedaria|cama e cafe|pousada|dude ranch|alojamento|retiro/, N('hoteis-e-pousadas')],
+  [/eventos|casamento|buffet/, N('festas-e-eventos')],
+  [/banco|loterica|correspondente/, N('lotericas-e-correspondentes')],
+  [/agricultura|pecuaria|fazenda|fabrica|agropecuaria/, N('agropecuaria')],
+  [/presente|artigos domesticos|ceramica|utensilios|bicicleta/, N('presentes-e-variedades')],
+  [/^loja$|^loja,|, loja$/, N('presentes-e-variedades')],
 ]
 
 export function mapearCategoria(categoria: string, nome = ''): Destino {
@@ -61,7 +103,8 @@ export function mapearCategoria(categoria: string, nome = ''): Destino {
   // órgão público identificado pelo nome vale mais que a categoria
   const peloNome = casar(nome)
   if (peloNome?.tipo === 'servico_util') return peloNome
-  return casar(categoria) ?? peloNome ?? { tipo: 'negocio', categoriaSlug: 'outros' }
+  // sem regra: entra em Serviços para o admin revisar
+  return casar(categoria) ?? peloNome ?? N('servicos')
 }
 
 const DIAS: Record<string, string> = {

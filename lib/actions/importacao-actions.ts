@@ -99,7 +99,7 @@ export async function importarLista(formData: FormData): Promise<RelatorioImport
     const existente = (l.place_id && porPlace.get(l.place_id)) || porRef.get(ref) || porNome.get(normalizar(l.nome))
     const dados = {
       nome: l.nome.slice(0, 120),
-      categoria_id: idCategoria.get(destino.categoriaSlug) ?? idCategoria.get('outros') ?? null,
+      categoria_id: idCategoria.get(destino.categoriaSlug) ?? idCategoria.get('servicos') ?? null,
       endereco: enderecoCurto(l.endereco),
       bairro: bairroCanonico(l.bairro),
       telefone,
@@ -108,7 +108,7 @@ export async function importarLista(formData: FormData): Promise<RelatorioImport
       latitude: l.lat,
       longitude: l.lng,
     }
-    const cat = nomeCategoria.get(destino.categoriaSlug) ?? 'Outros'
+    const cat = nomeCategoria.get(destino.categoriaSlug) ?? 'Serviços'
     if (existente) {
       if (existente.reivindicado_por) {
         r.reivindicados++

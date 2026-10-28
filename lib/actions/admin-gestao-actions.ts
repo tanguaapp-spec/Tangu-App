@@ -90,38 +90,109 @@ export async function alternarVerificado(negocioId: string, formData: FormData) 
 // --- categorias --------------------------------------------------------
 
 const schemaCategoria = z.object({
-  nome: z.string().trim().min(2, 'Nome muito curto.').max(60),
-  slug: z
-    .string()
-    .trim()
-    .regex(/^[a-z0-9-]{2,60}$/, 'Endereço só com letras minúsculas, números e hífen (ex: casa-construcao).'),
-  icone: z
-    .string()
-    .trim()
-    .regex(/^[a-z0-9-]{0,40}$/, 'Ícone: nome do Lucide em minúsculas (ex: scissors).')
-    .optional(),
-  ordem: z.coerce.number().int().min(0).max(999),
+  nome: z.string().trim().min(2, 'Nome muito curto.').max(60, 'Nome muito longo.'),
+  icone: z.string().trim().regex(/^[a-z0-9-]{1,40}$/).optional(),
+  parent_id: z.string().uuid().nullable(),
 })
 
+/** "Açaí e sorveterias" → "acai-e-sorveterias" */
+function slugCategoria(nome: string) {
+  return nome
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+}
+
+function revalidarCategorias() {
+  revalidatePath('/painel/admin/categorias')
+  revalidatePath('/', 'layout')
+}
+
+/**
+ * Criar/editar categoria só com nome, ícone e (opcional) categoria-mãe.
+ * O endereço (/categoria/...) é gerado do nome ao criar e não muda depois,
+ * pra não quebrar link já compartilhado.
+ */
 export async function salvarCategoria(categoriaId: string | null, formData: FormData) {
   const auth = await verificarAdmin()
   if ('erro' in auth) return { erro: auth.erro }
+  const mae = String(formData.get('parent_id') ?? '')
   const v = schemaCategoria.safeParse({
     nome: formData.get('nome'),
-    slug: formData.get('slug'),
     icone: formData.get('icone') || undefined,
-    ordem: formData.get('ordem') || 0,
+    parent_id: mae || null,
   })
   if (!v.success) return { erro: v.error.issues[0].message }
   const db = createServiceClient()
-  const dados = { nome: v.data.nome, slug: v.data.slug, icone: v.data.icone || null, ordem: v.data.ordem }
-  const { data, error } = categoriaId
-    ? await db.from('categorias').update(dados).eq('id', categoriaId).select('id').single()
-    : await db.from('categorias').insert(dados).select('id').single()
-  if (error) return { erro: error.code === '23505' ? 'Já existe uma categoria com esse endereço.' : error.message }
-  await auditar(auth.user.id, categoriaId ? 'editar_categoria' : 'criar_categoria', 'categoria', data.id, dados)
-  revalidatePath('/painel/admin/categorias')
-  revalidatePath('/')
+  if (v.data.parent_id) {
+    if (v.data.parent_id === categoriaId) return { erro: 'Uma categoria não pode ser mãe dela mesma.' }
+    const { data: m } = await db.from('categorias').select('parent_id').eq('id', v.data.parent_id).maybeSingle()
+    if (!m) return { erro: 'Categoria-mãe não encontrada.' }
+    if (m.parent_id) return { erro: 'Escolha uma categoria principal como mãe (subcategoria não tem filhas).' }
+    if (categoriaId) {
+      const { count } = await db.from('categorias').select('id', { count: 'exact', head: true }).eq('parent_id', categoriaId)
+      if (count) return { erro: 'Esta categoria tem subcategorias; ela precisa continuar principal.' }
+    }
+  }
+  const dados: Record<string, unknown> = { nome: v.data.nome, icone: v.data.icone ?? 'store', parent_id: v.data.parent_id }
+  let resposta
+  if (categoriaId) {
+    resposta = await db.from('categorias').update(dados).eq('id', categoriaId).select('id').single()
+  } else {
+    const base = slugCategoria(v.data.nome)
+    if (base.length < 2) return { erro: 'Use um nome com letras.' }
+    const { data: ultima } = await db.from('categorias').select('ordem').order('ordem', { ascending: false }).limit(1).maybeSingle()
+    let slug = base
+    for (let i = 2; i < 50; i++) {
+      const { count } = await db.from('categorias').select('id', { count: 'exact', head: true }).eq('slug', slug)
+      if (!count) break
+      slug = `${base}-${i}`
+    }
+    resposta = await db.from('categorias').insert({ ...dados, slug, ordem: (ultima?.ordem ?? 0) + 1 }).select('id').single()
+  }
+  if (resposta.error) return { erro: resposta.error.code === '23505' ? 'Já existe uma categoria com esse nome.' : 'Não foi possível salvar.' }
+  await auditar(auth.user.id, categoriaId ? 'editar_categoria' : 'criar_categoria', 'categoria', resposta.data.id, dados)
+  revalidarCategorias()
+  return { erro: null }
+}
+
+/** Liga/desliga "ativa" ou "atalho na página inicial" com um toque. */
+export async function alternarCampoCategoria(formData: FormData) {
+  const auth = await verificarAdmin()
+  if ('erro' in auth) return { erro: auth.erro }
+  const id = String(formData.get('id') ?? '')
+  const campo = String(formData.get('campo') ?? '')
+  if (!uuid(id) || !['ativo', 'mostrar_inicio'].includes(campo)) return { erro: 'Pedido inválido.' }
+  const db = createServiceClient()
+  const { data } = await db.from('categorias').select('ativo, mostrar_inicio').eq('id', id).maybeSingle()
+  if (!data) return { erro: 'Categoria não encontrada.' }
+  const valor = !(data as Record<string, boolean>)[campo]
+  const { error } = await db.from('categorias').update({ [campo]: valor }).eq('id', id)
+  if (error) return { erro: 'Não foi possível salvar.' }
+  await auditar(auth.user.id, `categoria_${campo}`, 'categoria', id, { [campo]: valor })
+  revalidarCategorias()
+  return { erro: null }
+}
+
+/** Sobe ou desce na ordem (troca de lugar com a vizinha do mesmo nível). */
+export async function moverCategoria(categoriaId: string, direcao: 'subir' | 'descer') {
+  const auth = await verificarAdmin()
+  if ('erro' in auth) return { erro: auth.erro }
+  if (!uuid(categoriaId)) return { erro: 'Categoria inválida.' }
+  const db = createServiceClient()
+  const { data: atual } = await db.from('categorias').select('id, ordem, parent_id').eq('id', categoriaId).maybeSingle()
+  if (!atual) return { erro: 'Categoria não encontrada.' }
+  let q = db.from('categorias').select('id, ordem')
+  q = atual.parent_id ? q.eq('parent_id', atual.parent_id) : q.is('parent_id', null)
+  q = direcao === 'subir' ? q.lt('ordem', atual.ordem).order('ordem', { ascending: false }) : q.gt('ordem', atual.ordem).order('ordem')
+  const { data: vizinha } = await q.limit(1).maybeSingle()
+  if (!vizinha) return { erro: null }
+  await db.from('categorias').update({ ordem: vizinha.ordem }).eq('id', atual.id)
+  await db.from('categorias').update({ ordem: atual.ordem }).eq('id', vizinha.id)
+  revalidarCategorias()
   return { erro: null }
 }
 
@@ -130,12 +201,16 @@ export async function removerCategoria(categoriaId: string) {
   if ('erro' in auth) return { erro: auth.erro }
   if (!uuid(categoriaId)) return { erro: 'Categoria inválida.' }
   const db = createServiceClient()
-  const { count } = await db.from('negocios').select('id', { count: 'exact', head: true }).eq('categoria_id', categoriaId)
-  if ((count ?? 0) > 0) return { erro: `${count} negócio(s) usam essa categoria. Mude a categoria deles antes de apagar.` }
+  const [{ count }, { count: filhas }] = await Promise.all([
+    db.from('negocios').select('id', { count: 'exact', head: true }).eq('categoria_id', categoriaId),
+    db.from('categorias').select('id', { count: 'exact', head: true }).eq('parent_id', categoriaId),
+  ])
+  if ((count ?? 0) > 0) return { erro: `${count} negócio(s) usam essa categoria. Mude a categoria deles antes de apagar, ou só desative.` }
+  if ((filhas ?? 0) > 0) return { erro: 'Ela tem subcategorias. Apague ou mova as subcategorias antes.' }
   const { error } = await db.from('categorias').delete().eq('id', categoriaId)
-  if (error) return { erro: error.message }
+  if (error) return { erro: 'Não foi possível apagar.' }
   await auditar(auth.user.id, 'remover_categoria', 'categoria', categoriaId)
-  revalidatePath('/painel/admin/categorias')
+  revalidarCategorias()
   return { erro: null }
 }
 

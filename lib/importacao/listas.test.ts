@@ -3,12 +3,12 @@ import { bairroCanonico, converterHorarios, enderecoCurto, lerArquivoLista, limp
 
 describe('importação de comércios', () => {
   it('categoria do Google vira categoria do Tanguá', () => {
-    expect(mapearCategoria('Pizzaria')).toEqual({ tipo: 'negocio', categoriaSlug: 'alimentacao' })
-    expect(mapearCategoria('Salão de beleza')).toEqual({ tipo: 'negocio', categoriaSlug: 'beleza-estetica' })
-    expect(mapearCategoria('Posto de combustível, Restaurante')).toEqual({ tipo: 'negocio', categoriaSlug: 'automotivo' })
+    expect(mapearCategoria('Pizzaria')).toEqual({ tipo: 'negocio', categoriaSlug: 'pizzarias' })
+    expect(mapearCategoria('Salão de beleza')).toEqual({ tipo: 'negocio', categoriaSlug: 'saloes-de-beleza' })
+    expect(mapearCategoria('Posto de combustível, Restaurante')).toEqual({ tipo: 'negocio', categoriaSlug: 'postos-de-combustivel' })
     expect(mapearCategoria('Igreja')).toMatchObject({ tipo: 'ignorar' })
     expect(mapearCategoria('Organização não governamental', 'Secretaria Municipal de Saúde')).toEqual({ tipo: 'servico_util' })
-    expect(mapearCategoria('Escritório da empresa')).toEqual({ tipo: 'negocio', categoriaSlug: 'outros' })
+    expect(mapearCategoria('Escritório da empresa')).toEqual({ tipo: 'negocio', categoriaSlug: 'servicos' })
   })
 
   it('horários no formato do app', () => {

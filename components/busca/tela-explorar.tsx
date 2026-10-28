@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
-import { buscarBairros, buscarCategorias, buscarNegocios, type OrdemBusca } from '@/lib/queries/negocios'
+import { arvoreCategorias, buscarBairros, buscarCategorias, buscarNegocios, type OrdemBusca } from '@/lib/queries/negocios'
 import { LinhaNegocio } from '@/components/vitrine/linha-negocio'
 import { CampoBusca } from '@/components/busca/campo-busca'
 import { SeletorFiltro } from '@/components/busca/seletor-filtro'
@@ -98,6 +98,10 @@ export async function TelaExplorar({
       : `${total} ${total === 1 ? 'resultado' : 'resultados'}${p.q ? ` para “${p.q}”` : ''}${ordem === 'relevancia' ? ' · destaque pago aparece marcado' : ''}`
 
   const categoriaAtual = categorias.find((c) => c.slug === p.categoria)
+  const arvore = arvoreCategorias(categorias)
+  // subcategorias da categoria aberta (ou irmãs, quando a aberta já é uma subcategoria)
+  const mae = categoriaAtual ? arvore.find((m) => m.id === (categoriaAtual.parent_id ?? categoriaAtual.id)) : undefined
+  const linkCategoria = (slug: string) => ('categoria' in fixos ? `/categoria/${slug}` : url({ categoria: slug }))
 
   return (
     <div className="md:mx-auto md:max-w-[1200px] md:px-6 md:pt-8">
@@ -142,7 +146,10 @@ export async function TelaExplorar({
             <SeletorFiltro
               rotulo="Categoria"
               valor={params.categoria ?? ''}
-              opcoes={[{ valor: '', rotulo: 'Todas as categorias' }, ...categorias.map((c) => ({ valor: c.slug as string, rotulo: c.nome as string }))]}
+              opcoes={[
+                { valor: '', rotulo: 'Todas as categorias' },
+                ...arvore.flatMap((m) => [{ valor: m.slug, rotulo: m.nome }, ...m.filhas.map((f) => ({ valor: f.slug, rotulo: `  · ${f.nome}` }))]),
+              ]}
               urls={Object.fromEntries([['', url({ categoria: null })], ...categorias.map((c) => [c.slug, url({ categoria: c.slug })])])}
             />
           )}
@@ -179,6 +186,23 @@ export async function TelaExplorar({
 
       <div className="flex flex-col gap-3 px-5 pb-6 pt-3.5 md:px-0 md:pt-6">
         {topo}
+        {mae && mae.filhas.length > 0 && (
+          <nav aria-label={`Tipos de ${mae.nome}`} className="-mx-5 flex gap-2 overflow-x-auto px-5 [scrollbar-width:none] md:mx-0 md:flex-wrap md:px-0">
+            {[{ slug: mae.slug, nome: `Tudo em ${mae.nome}` }, ...mae.filhas].map((c) => {
+              const ativo = categoriaAtual?.slug === c.slug
+              return (
+                <Link
+                  key={c.slug}
+                  href={linkCategoria(c.slug)}
+                  aria-current={ativo ? 'page' : undefined}
+                  className={`flex h-11 shrink-0 items-center rounded-full px-4 text-sm ${ativo ? 'bg-serra font-bold text-white' : 'border border-barro-200 bg-superficie font-semibold text-barro-900'}`}
+                >
+                  {c.nome}
+                </Link>
+              )
+            })}
+          </nav>
+        )}
         <p className="text-[13px] text-barro-600" aria-live="polite">
           {resumo}
         </p>

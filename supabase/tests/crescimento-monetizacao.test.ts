@@ -118,3 +118,24 @@ describe('planos novos (0024)', () => {
     expect(rows.map((r) => r.preco_centavos)).toEqual([0, 3990, 8990, 14990])
   })
 })
+
+describe('categorias do BoraAli (0025)', () => {
+  it('principais e subcategorias; público não vê as antigas', async () => {
+    const { rows } = await como(db, null, (tx) =>
+      tx.query<{ slug: string; mae: string | null }>(
+        `select c.slug, m.slug as mae from public.categorias c left join public.categorias m on m.id = c.parent_id order by c.ordem`
+      )
+    )
+    expect(rows.filter((r) => !r.mae)).toHaveLength(38)
+    expect(rows.filter((r) => r.mae)).toHaveLength(24)
+    expect(rows.find((r) => r.slug === 'barbearias')?.mae).toBe('beleza-e-estetica')
+    expect(rows.some((r) => r.slug === 'alimentacao')).toBe(false)
+  })
+
+  it('negócio da categoria antiga foi para a nova', async () => {
+    const { rows } = await db.query<{ slug: string }>(
+      `select c.slug from public.negocios n join public.categorias c on c.id = n.categoria_id where n.nome = 'Padaria do Centro'`
+    )
+    expect(rows[0]?.slug ?? 'sem-categoria').not.toBe('alimentacao')
+  })
+})

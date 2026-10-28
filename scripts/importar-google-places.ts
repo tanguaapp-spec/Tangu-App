@@ -29,38 +29,8 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const GOOGLE_API_KEY = process.env.GOOGLE_PLACES_API_KEY!
 
-// Centro aproximado de Tanguá-RJ (ajuste conforme necessário)
-const CENTRO_TANGUA = { lat: -22.7423, lng: -42.7202 }
-const RAIO_METROS = 8000
-
-// Mapeamento: tipo do Google Places -> slug da categoria interna
-const MAPA_CATEGORIAS: Record<string, string> = {
-  restaurant: 'alimentacao',
-  bakery: 'alimentacao',
-  cafe: 'alimentacao',
-  meal_takeaway: 'alimentacao',
-  beauty_salon: 'beleza-estetica',
-  hair_care: 'beleza-estetica',
-  spa: 'beleza-estetica',
-  hardware_store: 'casa-construcao',
-  electrician: 'casa-construcao',
-  plumber: 'casa-construcao',
-  car_repair: 'automotivo',
-  car_dealer: 'automotivo',
-  gas_station: 'automotivo',
-  school: 'educacao',
-  doctor: 'saude-bem-estar',
-  dentist: 'saude-bem-estar',
-  pharmacy: 'saude-bem-estar',
-  physiotherapist: 'saude-bem-estar',
-  clothing_store: 'moda-vestuario',
-  lawyer: 'servicos-profissionais',
-  accounting: 'servicos-profissionais',
-  real_estate_agency: 'servicos-profissionais',
-  electronics_store: 'tecnologia',
-}
-
-const TIPOS_BUSCA = Object.keys(MAPA_CATEGORIAS)
+// mesmo centro, raio e mapeamento de categorias da prospecção do admin (uma fonte só)
+import { CENTRO_TANGUA, MAPA_CATEGORIAS, RAIO_METROS, TIPOS_BUSCA } from '../lib/integracao/google-places'
 
 async function buscarPlacesPorTipo(tipo: string) {
   const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json')

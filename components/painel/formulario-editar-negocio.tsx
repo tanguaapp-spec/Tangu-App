@@ -1,5 +1,6 @@
 'use client'
 
+import { OpcoesCategoria } from '@/components/ui/opcoes-categoria'
 import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -67,11 +68,7 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
             className="w-full rounded-xl border border-barro-300 bg-superficie px-4 py-2.5 text-barro-900 focus:border-casca-500 focus:ring-2 focus:ring-casca-100"
           >
             <option value="">Sem categoria</option>
-            {categorias.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nome}
-              </option>
-            ))}
+            <OpcoesCategoria categorias={categorias} />
           </select>
         </div>
       </div>

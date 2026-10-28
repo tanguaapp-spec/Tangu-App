@@ -38,7 +38,7 @@ export function AssistenteBoasVindas({ categorias, bairroAtual }: { categorias: 
         <legend className="font-semibold text-barro-900">O que você mais procura na cidade?</legend>
         <p className="text-sm text-barro-600">Escolha quantas quiser — dá pra mudar depois.</p>
         <div className="mt-3 flex flex-wrap gap-2">
-          {categorias.map((c) => {
+          {categorias.filter((c) => !c.parent_id).map((c) => {
             const ativa = escolhidas.includes(c.id)
             return (
               <label

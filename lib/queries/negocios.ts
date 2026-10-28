@@ -113,7 +113,9 @@ export async function buscarNegocios(
   if (filtros.categoriaSlug) {
     const { data: categoria } = await supabase.from('categorias').select('id').eq('slug', filtros.categoriaSlug).maybeSingle()
     if (!categoria) return { negocios: [], total: 0, porPagina }
-    query = query.eq('categoria_id', categoria.id)
+    // categoria principal inclui as subcategorias (Beleza → Barbearias, Salões…)
+    const { data: filhas } = await supabase.from('categorias').select('id').eq('parent_id', categoria.id)
+    query = query.in('categoria_id', [categoria.id, ...(filhas ?? []).map((f) => f.id)])
   }
   if (filtros.bairro) query = query.eq('bairro', filtros.bairro)
   if (filtros.modalidade) query = query.contains('modalidades_atendimento', [filtros.modalidade])
@@ -274,14 +276,24 @@ export const buscarNegocioPorSlugOuId = cache(async function buscarNegocioPorSlu
   return ajustado
 })
 
-export async function buscarCategorias() {
+export type Categoria = { id: string; nome: string; slug: string; icone: string | null; ordem: number; parent_id?: string | null; ativo?: boolean; mostrar_inicio?: boolean }
+
+/** Categorias ativas, em ordem (principais e subcategorias; use parent_id para montar a árvore). */
+export async function buscarCategorias(): Promise<Categoria[]> {
   const supabase = createClient()
   const { data, error } = await supabase.from('categorias').select('*').order('ordem')
   if (error) {
     console.error('Erro ao buscar categorias:', error.message)
     return []
   }
-  return data
+  // antes da 0025 não existe "ativo": todas valem
+  return ((data ?? []) as Categoria[]).filter((c) => c.ativo !== false)
+}
+
+/** Principais com as subcategorias embaixo — pro <select> agrupado e pros atalhos. */
+export function arvoreCategorias(lista: Categoria[]) {
+  const principais = lista.filter((c) => !c.parent_id)
+  return principais.map((p) => ({ ...p, filhas: lista.filter((c) => c.parent_id === p.id) }))
 }
 
 export async function buscarFavoritosUsuario() {

@@ -35,6 +35,10 @@ export type Categoria = {
   slug: string
   icone: string | null
   ordem: number
+  // migration 0025
+  parent_id?: string | null
+  ativo?: boolean
+  mostrar_inicio?: boolean
 }
 
 export type Negocio = {

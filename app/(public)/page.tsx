@@ -8,7 +8,7 @@ import { VistosRecentemente } from '@/components/home/vistos-recentemente'
 import { FotoNegocio } from '@/components/vitrine/foto-negocio'
 import { buscarAchadoDoDia, buscarNegociosVitrine } from '@/lib/queries/negocios'
 import {
-  categoriasOrdenadas,
+  categoriasInicio,
   negociosPopulares,
   novidadesRecentes,
   ofertasVigentes,
@@ -32,7 +32,7 @@ export const revalidate = 60
 export default async function PaginaInicial() {
   const achado = await buscarAchadoDoDia()
   const [categorias, ordem, ofertas, novidades, populares, profissionais, eventos, vitrine] = await Promise.all([
-    categoriasOrdenadas(),
+    categoriasInicio(),
     ordemSecoesHome(),
     ofertasVigentes(10),
     novidadesRecentes(),

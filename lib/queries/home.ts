@@ -52,11 +52,19 @@ export async function ofertasVigentes(limite = 8, categoriaSlug?: string): Promi
     .slice(0, limite)
 }
 
-export type CategoriaChip = { id: string; nome: string; slug: string; icone: string | null }
+export type CategoriaChip = { id: string; nome: string; slug: string; icone: string | null; parent_id?: string | null; mostrar_inicio?: boolean }
 
+/** Categorias principais ativas, em ordem (as subcategorias aparecem dentro de cada uma). */
 export async function categoriasOrdenadas(): Promise<CategoriaChip[]> {
-  const { data } = await createPublicClient().from('categorias').select('id, nome, slug, icone').order('ordem')
-  return (data ?? []) as CategoriaChip[]
+  const { data } = await createPublicClient().from('categorias').select('*').order('ordem')
+  return ((data ?? []) as (CategoriaChip & { ativo?: boolean })[]).filter((c) => c.ativo !== false && !c.parent_id)
+}
+
+/** Atalhos da página inicial: as marcadas no admin; sem nenhuma marcada, as 10 primeiras. */
+export async function categoriasInicio(): Promise<CategoriaChip[]> {
+  const todas = await categoriasOrdenadas()
+  const marcadas = todas.filter((c) => c.mostrar_inicio)
+  return marcadas.length ? marcadas : todas.slice(0, 10)
 }
 
 export type NovidadeHome = {
