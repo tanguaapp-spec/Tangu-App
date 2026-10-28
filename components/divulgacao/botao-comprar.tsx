@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Botao } from '@/components/ui/botao'
 import { comprarDivulgacao } from '@/lib/actions/divulgacao-actions'
-import { formatarCentavos } from '@/lib/queries/planos'
+import { reais as formatarCentavos } from '@/lib/vendas/whatsapp'
 import { rotuloPeriodo, type OpcaoServico } from '@/lib/divulgacao/servicos'
 import { cn } from '@/lib/utils'
 
