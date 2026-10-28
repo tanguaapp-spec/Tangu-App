@@ -1,3 +1,4 @@
+import { VitrineBanners } from '@/components/divulgacao/vitrine-banners'
 import Link from 'next/link'
 import { Search } from 'lucide-react'
 import { TopoInicio } from '@/components/home/topo-inicio'
@@ -139,6 +140,8 @@ export default async function PaginaInicial() {
             </Link>
           ))}
         </nav>
+
+        <VitrineBanners posicao="banner_home" className="px-5 md:px-0" />
 
         {ordem.map((secao, i) => {
           if (secao === 'eventos' || secao === 'anuncie') {

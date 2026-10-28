@@ -1,13 +1,14 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { createPublicClient } from '@/lib/supabase/server'
+import { VitrineBanners } from '@/components/divulgacao/vitrine-banners'
 import { TelaExplorar, type ParamsExplorar } from '@/components/busca/tela-explorar'
 
 export const dynamic = 'force-dynamic'
 
 async function categoria(slug: string) {
   if (!/^[a-z0-9-]{1,60}$/.test(slug)) return null
-  const { data } = await createPublicClient().from('categorias').select('nome, slug').eq('slug', slug).maybeSingle()
+  const { data } = await createPublicClient().from('categorias').select('id, nome, slug').eq('slug', slug).maybeSingle()
   return data
 }
 
@@ -31,6 +32,7 @@ export default async function PaginaCategoria({ params, searchParams }: { params
       base={`/categoria/${c.slug}`}
       titulo={`${c.nome} em Tanguá`}
       fixos={{ categoria: c.slug }}
+      topo={<VitrineBanners posicao="banner_categoria" categoriaId={c.id} />}
     />
   )
 }

@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createServiceClient } from '@/lib/supabase/server'
 import { notificar } from '@/lib/notificacoes/notificar'
+import { PREFIXO_COMPRA, processarPagamentoCompra } from './compras'
 import { clienteMercadoPago, type ClienteMercadoPago, type PreapprovalMP } from './mercadopago'
 import {
   aplicarPagamento,
@@ -245,6 +246,8 @@ export async function processarNotificacao(evento: { tipo: string; recursoId: st
 
     case 'payment': {
       const p = await deps.mp.buscarPagamento(evento.recursoId)
+      // compra avulsa de divulgação (Checkout Pro), não assinatura
+      if (p.external_reference?.startsWith(PREFIXO_COMPRA)) return processarPagamentoCompra(p, deps)
       const preapprovalId = typeof p.metadata?.preapproval_id === 'string' ? p.metadata.preapproval_id : null
       return registrarPagamento(deps, {
         pagamentoId: String(p.id),

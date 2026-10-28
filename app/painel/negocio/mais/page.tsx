@@ -10,6 +10,7 @@ import {
   LogOut,
   Megaphone,
   QrCode,
+  Rocket,
   ShieldCheck,
   Stamp,
   Star,
@@ -43,6 +44,7 @@ const GRUPOS: { titulo: string; itens: Item[] }[] = [
     titulo: 'Crescer',
     itens: [
       { href: '/painel/negocio/estatisticas', rotulo: 'Estatísticas', detalhe: 'Visitas, WhatsApp e de onde vêm', icone: BarChart3 },
+      { href: '/painel/negocio/divulgacao', rotulo: 'Anunciar no Tanguá App', detalhe: 'Banner, destaque na busca e Instagram', icone: Rocket },
       { href: '/painel/negocio/divulgar', rotulo: 'Divulgar', detalhe: 'QR code, cartaz e indicação', icone: QrCode },
       { href: '/painel/negocio/fidelidade', rotulo: 'Cartão fidelidade', detalhe: 'Carimbe quem volta', icone: Stamp },
       { href: '/painel/negocio/vagas', rotulo: 'Vagas', detalhe: 'Contrate gente da cidade', icone: Briefcase },

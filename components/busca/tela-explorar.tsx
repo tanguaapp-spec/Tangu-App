@@ -41,7 +41,10 @@ export async function TelaExplorar({
   titulo = 'Explorar',
   descricao,
   fixos = {},
+  topo,
 }: {
+  /** conteúdo acima da lista (ex.: banner pago da categoria) */
+  topo?: React.ReactNode
   params: ParamsExplorar
   base?: string
   titulo?: string
@@ -165,6 +168,7 @@ export async function TelaExplorar({
       </header>
 
       <div className="flex flex-col gap-3 px-5 pb-6 pt-3.5 md:px-0 md:pt-6">
+        {topo}
         <p className="text-[13px] text-barro-600" aria-live="polite">
           {resumo}
         </p>

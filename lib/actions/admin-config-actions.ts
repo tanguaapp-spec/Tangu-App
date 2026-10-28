@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { verificarAdmin } from '@/lib/auth/require-admin'
 import { createServiceClient } from '@/lib/supabase/server'
 import { interpretarConfig, lerLimite, lerPrecoCentavos, schemaPlano } from '@/lib/admin/configuracoes'
+import { CHAVES_RECURSO, type ChaveRecurso } from '@/lib/planos/limites'
 
 /**
  * Configuração do produto pelo painel (sem precisar abrir o banco).
@@ -54,10 +55,7 @@ export async function salvarPlano(formData: FormData) {
       max_posts_mes: lerLimite(formData.get('max_posts_mes')),
       max_fotos_galeria: lerLimite(formData.get('max_fotos_galeria')),
     },
-    recursos: {
-      estatisticas_avancadas: formData.get('estatisticas_avancadas') === 'on',
-      destaque_busca: formData.get('destaque_busca') === 'on',
-    },
+    recursos: Object.fromEntries(CHAVES_RECURSO.map((c) => [c, formData.get(c) === 'on'])),
   }
   const validado = schemaPlano.safeParse(bruto)
   if (!validado.success) {
@@ -87,5 +85,44 @@ export async function salvarPlano(formData: FormData) {
   await auditar(auth.user.id, anterior ? 'plano.alterar' : 'plano.criar', 'plano', plano.id, { de: anterior ?? null, para: plano })
   revalidatePath('/painel/admin/planos')
   revalidatePath('/planos')
+  return { erro: null }
+}
+
+/** Liga/desliga um recurso de um plano com um toque (grade de Planos e recursos). */
+export async function alternarRecursoPlano(formData: FormData) {
+  const auth = await verificarAdmin()
+  if ('erro' in auth) return { erro: auth.erro }
+  const planoId = String(formData.get('plano_id') ?? '')
+  const chave = String(formData.get('recurso') ?? '') as ChaveRecurso
+  if (!CHAVES_RECURSO.includes(chave)) return { erro: 'Recurso desconhecido.' }
+  const db = createServiceClient()
+  const { data: plano } = await db.from('planos').select('recursos').eq('id', planoId).maybeSingle()
+  if (!plano) return { erro: 'Plano não encontrado.' }
+  const antes = plano.recursos?.[chave] === true
+  const recursos = { ...(plano.recursos ?? {}), [chave]: !antes }
+  const { error } = await db.from('planos').update({ recursos, atualizado_em: new Date().toISOString() }).eq('id', planoId)
+  if (error) return { erro: 'Não foi possível salvar.' }
+  await auditar(auth.user.id, 'plano.recurso', 'plano', planoId, { recurso: chave, de: antes, para: !antes })
+  revalidatePath('/painel/admin/planos')
+  revalidatePath('/planos')
+  return { erro: null }
+}
+
+/** Liga/desliga partes inteiras do app (Admin → Recursos do app). */
+export async function alternarModulo(formData: FormData) {
+  const auth = await verificarAdmin()
+  if ('erro' in auth) return { erro: auth.erro }
+  const modulo = String(formData.get('modulo') ?? '')
+  if (!/^[a-z_]{2,40}$/.test(modulo)) return { erro: 'Módulo inválido.' }
+  const db = createServiceClient()
+  const { data } = await db.from('configuracoes_sistema').select('valor').eq('chave', 'modulos_ativos').maybeSingle()
+  const atual = (data?.valor ?? {}) as Record<string, boolean>
+  const novo = { ...atual, [modulo]: atual[modulo] === false }
+  const { error } = await db
+    .from('configuracoes_sistema')
+    .upsert({ chave: 'modulos_ativos', valor: novo, publico: true, atualizado_por: auth.user.id, atualizado_em: new Date().toISOString() }, { onConflict: 'chave' })
+  if (error) return { erro: 'Não foi possível salvar.' }
+  await auditar(auth.user.id, 'config.modulo', 'configuracao', 'modulos_ativos', { modulo, ligado: novo[modulo] })
+  revalidatePath('/', 'layout')
   return { erro: null }
 }

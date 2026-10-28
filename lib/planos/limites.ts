@@ -1,7 +1,23 @@
 export const CHAVES_LIMITE = ['max_produtos', 'max_cupons_ativos', 'max_posts_mes', 'max_fotos_galeria'] as const
 export type ChaveLimite = (typeof CHAVES_LIMITE)[number]
 
-export const CHAVES_RECURSO = ['estatisticas_avancadas', 'destaque_busca'] as const
+/**
+ * Recursos que cada plano liga ou desliga (Admin → Planos e recursos).
+ * Recurso novo = acrescentar aqui; o admin passa a ver o interruptor e o
+ * servidor confere com recursoLiberado(). Ausente no plano = desligado.
+ */
+export const CHAVES_RECURSO = [
+  'pedidos_whatsapp',
+  'agenda_whatsapp',
+  'estatisticas_avancadas',
+  'relatorio_mensal',
+  'destaque_busca',
+  'horarios_especiais',
+  'redes_sociais',
+  'equipe',
+  'fidelidade',
+  'selo_profissional',
+] as const
 export type ChaveRecurso = (typeof CHAVES_RECURSO)[number]
 
 export const ROTULO_LIMITE: Record<ChaveLimite, { curto: string; frase: string }> = {
@@ -12,8 +28,35 @@ export const ROTULO_LIMITE: Record<ChaveLimite, { curto: string; frase: string }
 }
 
 export const ROTULO_RECURSO: Record<ChaveRecurso, string> = {
+  pedidos_whatsapp: 'Pedidos pelo WhatsApp (carrinho no catálogo)',
+  agenda_whatsapp: 'Agendamento pelo WhatsApp',
   estatisticas_avancadas: 'Estatísticas completas (30 dias, comparativos)',
+  relatorio_mensal: 'Relatório mensal para baixar (planilha)',
   destaque_busca: 'Topo da busca e da página inicial',
+  horarios_especiais: 'Feriados e horários especiais',
+  redes_sociais: 'Instagram e site no perfil',
+  equipe: 'Equipe (gerente e atendente)',
+  fidelidade: 'Cartão fidelidade',
+  selo_profissional: 'Selo "Parceiro Tanguá" no perfil',
+}
+
+/** Explicação curta mostrada ao lojista quando o recurso está bloqueado. */
+export const AJUDA_RECURSO: Record<ChaveRecurso, string> = {
+  pedidos_whatsapp: 'Cliente monta o pedido pelo seu catálogo e manda pronto no seu WhatsApp.',
+  agenda_whatsapp: 'Cliente escolhe serviço, dia e horário livre e manda o pedido de horário no seu WhatsApp.',
+  estatisticas_avancadas: 'Veja 30 dias de visitas, cliques no WhatsApp e de onde vêm seus clientes.',
+  relatorio_mensal: 'Baixe uma planilha por mês com visitas, contatos e avaliações.',
+  destaque_busca: 'Apareça primeiro na busca e na página inicial.',
+  horarios_especiais: 'Avise feriados e horários diferentes; o selo "aberto agora" acerta sozinho.',
+  redes_sociais: 'Mostre seu Instagram e seu site no perfil.',
+  equipe: 'Dê acesso ao painel para quem ajuda você.',
+  fidelidade: 'Carimbe o cartão de quem volta e premie clientes fiéis.',
+  selo_profissional: 'Selo de parceiro no perfil, que passa mais confiança.',
+}
+
+/** Recurso ligado no plano? (plano sem a chave = desligado) */
+export function temRecurso(recursos: Partial<Record<ChaveRecurso, boolean>> | null | undefined, chave: ChaveRecurso) {
+  return recursos?.[chave] === true
 }
 
 export type UsoPlano = {

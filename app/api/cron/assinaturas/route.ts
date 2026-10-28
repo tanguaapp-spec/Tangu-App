@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { reconciliarAssinaturas } from '@/lib/pagamentos/processar-evento'
+import { rotinaCompras } from '@/lib/pagamentos/compras'
 import { mercadoPagoConfigurado } from '@/lib/pagamentos/mercadopago'
 import { registrarErro } from '@/lib/observabilidade/registrar-erro'
 
@@ -24,6 +25,8 @@ export async function GET(request: NextRequest) {
   const inicio = Date.now()
 
   const relatorio = mercadoPagoConfigurado() ? await reconciliarAssinaturas() : { pulado: 'MERCADOPAGO_ACCESS_TOKEN ausente' }
+  // divulgação paga: encerra o que venceu e confere pendentes no Mercado Pago
+  const compras = mercadoPagoConfigurado() ? await rotinaCompras().catch((e) => ({ erro: (e as Error).message })) : null
 
   const doisDiasAtras = new Date(Date.now() - 2 * 86400e3).toISOString()
   await db.from('rate_limits').delete().lt('janela_inicio', doisDiasAtras)
@@ -34,7 +37,7 @@ export async function GET(request: NextRequest) {
   await db.from('registros_auditoria').insert({
     acao: 'cron.assinaturas',
     entidade: 'sistema',
-    dados: { ...relatorio, duracao_ms: Date.now() - inicio },
+    dados: { ...relatorio, compras, duracao_ms: Date.now() - inicio },
   })
 
   if ('erros' in relatorio && relatorio.erros.length > 0) {

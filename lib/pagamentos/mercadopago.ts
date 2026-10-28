@@ -76,7 +76,20 @@ export interface ClienteMercadoPago {
   cancelarAssinatura(id: string): Promise<PreapprovalMP>
   buscarPagamentoAutorizado(id: string): Promise<PagamentoAutorizadoMP>
   buscarPagamento(id: string): Promise<PagamentoMP>
+  /** Checkout Pro (pagamento único): devolve o link de pagamento. */
+  criarPreferencia(dados: {
+    titulo: string
+    valor: number
+    referenciaExterna: string
+    emailPagador: string
+    urlRetorno: string
+    urlNotificacao: string
+  }): Promise<PreferenciaMP>
+  /** Pagamentos de uma referência externa (reconciliação sem depender do webhook). */
+  buscarPagamentosPorReferencia(referencia: string): Promise<PagamentoMP[]>
 }
+
+export type PreferenciaMP = { id: string; init_point: string; sandbox_init_point?: string }
 
 async function chamar<T>(metodo: string, caminho: string, corpo?: unknown, idempotencia?: string): Promise<T> {
   const token = process.env.MERCADOPAGO_ACCESS_TOKEN?.trim()
@@ -139,4 +152,30 @@ export const clienteMercadoPago: ClienteMercadoPago = {
   cancelarAssinatura: (id) => chamar('PUT', `/preapproval/${encodeURIComponent(id)}`, { status: 'cancelled' }),
   buscarPagamentoAutorizado: (id) => chamar('GET', `/authorized_payments/${encodeURIComponent(id)}`),
   buscarPagamento: (id) => chamar('GET', `/v1/payments/${encodeURIComponent(id)}`),
+  criarPreferencia({ titulo, valor, referenciaExterna, emailPagador, urlRetorno, urlNotificacao }) {
+    return chamar<PreferenciaMP>(
+      'POST',
+      '/checkout/preferences',
+      {
+        items: [{ id: referenciaExterna, title: titulo, quantity: 1, unit_price: valor, currency_id: 'BRL' }],
+        payer: emailPagador ? { email: emailPagador } : undefined,
+        external_reference: referenciaExterna,
+        back_urls: { success: urlRetorno, pending: urlRetorno, failure: urlRetorno },
+        auto_return: 'approved',
+        notification_url: urlNotificacao,
+        statement_descriptor: 'TANGUAAPP',
+        // link vale 3 dias; depois a compra é encerrada pela rotina diária
+        expires: true,
+        expiration_date_to: new Date(Date.now() + 3 * 86400e3).toISOString(),
+      },
+      `preferencia-${referenciaExterna}`
+    )
+  },
+  async buscarPagamentosPorReferencia(referencia) {
+    const r = await chamar<{ results?: PagamentoMP[] }>(
+      'GET',
+      `/v1/payments/search?external_reference=${encodeURIComponent(referencia)}&sort=date_created&criteria=desc&limit=10`
+    )
+    return r.results ?? []
+  },
 }

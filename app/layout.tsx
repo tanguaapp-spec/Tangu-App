@@ -7,6 +7,7 @@ import { SplashScreen } from '@/components/pwa/splash-screen'
 import { SCRIPT_TEMA_INICIAL } from '@/lib/tema/preferencia'
 import { SincronizarTema } from '@/components/tema/sincronizar-tema'
 import { BarraProgresso } from '@/components/layout/barra-progresso'
+import { CompactarFotos } from '@/components/layout/compactar-fotos'
 import './globals.css'
 
 // Identidade "Tanguá" (out/2026): títulos, texto e números/códigos.
@@ -97,6 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-body antialiased">
         <SincronizarTema />
         <BarraProgresso />
+        <CompactarFotos />
         <SplashScreen />
         <RegistrarServiceWorker />
         {children}

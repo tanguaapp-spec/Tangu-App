@@ -63,6 +63,11 @@ const securityHeaders = [
 ]
 
 const nextConfig = {
+  experimental: {
+    // fotos chegam reduzidas pelo aparelho (components/layout/compactar-fotos.tsx);
+    // 4 MB fica abaixo do teto de 4,5 MB das funções da Vercel
+    serverActions: { bodySizeLimit: '4mb' },
+  },
   images: {
     remotePatterns: [
       {

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { CHAVES_RECURSO, type ChaveRecurso } from '@/lib/planos/limites'
 
 export const SECOES_HOME = ['ofertas', 'novidades', 'populares', 'profissionais', 'eventos', 'anuncie'] as const
 
@@ -103,10 +104,7 @@ export const schemaPlano = z.object({
     max_posts_mes: limite,
     max_fotos_galeria: limite,
   }),
-  recursos: z.object({
-    estatisticas_avancadas: z.boolean(),
-    destaque_busca: z.boolean(),
-  }),
+  recursos: z.object(Object.fromEntries(CHAVES_RECURSO.map((c) => [c, z.boolean()])) as Record<ChaveRecurso, z.ZodBoolean>),
 })
 
 /** "" ou "ilimitado" → null; número → inteiro. */

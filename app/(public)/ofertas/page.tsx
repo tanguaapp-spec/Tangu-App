@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { VitrineBanners } from '@/components/divulgacao/vitrine-banners'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { categoriasOrdenadas, ofertasVigentes } from '@/lib/queries/home'
@@ -79,6 +80,7 @@ export default async function PaginaOfertas({ searchParams }: { searchParams: { 
           </nav>
         )}
       </header>
+      <VitrineBanners posicao="banner_ofertas" className="px-5 pt-4 md:px-0" />
 
       <div className="flex flex-col gap-6 px-5 pb-6 pt-4 md:px-0 md:pt-6">
         {meus.length > 0 && (
