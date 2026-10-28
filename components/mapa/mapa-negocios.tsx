@@ -29,6 +29,7 @@ export function MapaNegocios({ pontos }: { pontos: PontoMapa[] }) {
 
   useEffect(() => {
     let cancelado = false
+    const lista = marcadores.current
     import('leaflet').then((L) => {
       if (cancelado || !caixa.current || mapa.current) return
       const m = L.map(caixa.current, { zoomControl: true, attributionControl: true }).setView(CENTRO, 14)
@@ -51,7 +52,7 @@ export function MapaNegocios({ pontos }: { pontos: PontoMapa[] }) {
         link.style.fontWeight = '700'
         div.append(titulo, sub, link)
         mk.bindPopup(div)
-        marcadores.current.set(p.id, mk)
+        lista.set(p.id, mk)
       }
       mapa.current = m
     })
@@ -59,7 +60,7 @@ export function MapaNegocios({ pontos }: { pontos: PontoMapa[] }) {
       cancelado = true
       mapa.current?.remove()
       mapa.current = null
-      marcadores.current.clear()
+      lista.clear()
     }
   }, [pontos])
 

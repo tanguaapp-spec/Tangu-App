@@ -164,3 +164,25 @@ export async function responderComoSuporte(chamadoId: string, formData: FormData
   revalidatePath('/painel/admin/suporte')
   return { erro: null }
 }
+
+/** Nota de 1 a 5 para o atendimento (CSAT do painel de crescimento). Só de quem abriu, uma vez. */
+export async function avaliarAtendimento(formData: FormData) {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Entre na sua conta.' }
+  const chamadoId = String(formData.get('chamado_id') ?? '')
+  const nota = Number(formData.get('nota'))
+  if (!Number.isInteger(nota) || nota < 1 || nota > 5) return { erro: 'Escolha de 1 a 5.' }
+  const { error } = await createServiceClient()
+    .from('chamados_suporte')
+    .update({ avaliacao: nota })
+    .eq('id', chamadoId)
+    .eq('perfil_id', user.id)
+    .in('status', ['respondido', 'resolvido', 'fechado'])
+    .is('avaliacao', null)
+  if (error) return { erro: 'Não foi possível salvar agora.' }
+  revalidatePath(`/ajuda/chamados/${chamadoId}`)
+  return { erro: null }
+}

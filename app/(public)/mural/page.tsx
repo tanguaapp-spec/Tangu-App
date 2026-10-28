@@ -10,7 +10,7 @@ export const revalidate = 60
 export default async function PaginaMural() {
   await exigirModulo('mural')
   const supabase = createClient()
-  const [avisos, { data: { user } }] = await Promise.all([buscarAvisosCidade(), supabase.auth.getUser()])
+  const [avisos, { data: { user } }] = await Promise.all([buscarAvisosCidade({ semEventos: true }), supabase.auth.getUser()])
 
   const avisoIds = avisos.map((a) => a.id)
   const [respostasPorAviso, { contagens, minhas }] = await Promise.all([
@@ -26,7 +26,13 @@ export default async function PaginaMural() {
         </span>
         <div>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">Mural da cidade</h1>
-          <p className="text-barro-600">Avisos, eventos, utilidade pública e perguntas de Tanguá</p>
+          <p className="text-barro-600">
+            Recados, perguntas e utilidade pública de Tanguá. Eventos ficam na{' '}
+            <a href="/agenda" className="font-semibold text-casca-700 underline">
+              Agenda
+            </a>
+            .
+          </p>
         </div>
       </div>
 

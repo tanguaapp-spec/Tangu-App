@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { AvaliarAtendimento } from '@/components/ajuda/avaliar-atendimento'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { ArrowLeft, CheckCircle2 } from 'lucide-react'
@@ -21,7 +22,7 @@ export default async function PaginaChamado({ params, searchParams }: { params: 
   // RLS: só devolve se o chamado for desta pessoa
   const { data: chamado } = await supabase
     .from('chamados_suporte')
-    .select('id, categoria, assunto, status, criado_em')
+    .select('*')
     .eq('id', params.id)
     .maybeSingle()
   if (!chamado) notFound()
@@ -57,6 +58,12 @@ export default async function PaginaChamado({ params, searchParams }: { params: 
       <div className="mt-6 rounded-casca bg-barro-50 p-4">
         <ConversaChamado mensagens={(mensagens ?? []) as MensagemChamado[]} />
       </div>
+
+      {['respondido', 'resolvido', 'fechado'].includes(chamado.status) && (chamado as { avaliacao?: number | null }).avaliacao == null && (mensagens ?? []).some((m) => m.do_suporte) && (
+        <div className="mt-6">
+          <AvaliarAtendimento chamadoId={chamado.id} />
+        </div>
+      )}
 
       <div className="mt-6">
         <ResponderChamado chamadoId={chamado.id} fechado={chamado.status === 'fechado'} />

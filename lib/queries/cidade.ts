@@ -20,7 +20,7 @@ export async function buscarVagas(filtros: { area?: string; limite?: number } = 
   return data as Vaga[]
 }
 
-export async function buscarAvisosCidade(filtros: { tipo?: string; limite?: number } = {}): Promise<AvisoCidade[]> {
+export async function buscarAvisosCidade(filtros: { tipo?: string; limite?: number; semEventos?: boolean } = {}): Promise<AvisoCidade[]> {
   const supabase = createClient()
   let query = supabase
     .from('avisos_cidade')
@@ -30,6 +30,8 @@ export async function buscarAvisosCidade(filtros: { tipo?: string; limite?: numb
     .order('criado_em', { ascending: false })
 
   if (filtros.tipo) query = query.eq('tipo', filtros.tipo)
+  // eventos têm casa própria (/agenda): no mural ficam recados, perguntas e utilidade pública
+  if (filtros.semEventos) query = query.neq('tipo', 'evento')
   if (filtros.limite) query = query.limit(filtros.limite)
 
   const { data, error } = await query

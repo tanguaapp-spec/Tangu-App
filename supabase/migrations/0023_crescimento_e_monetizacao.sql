@@ -401,3 +401,9 @@ drop policy if exists "leads_admin" on public.leads;
 create policy "leads_admin" on public.leads for select using (public.eh_admin());
 drop policy if exists "interacoes_lead_admin" on public.interacoes_lead;
 create policy "interacoes_lead_admin" on public.interacoes_lead for select using (public.eh_admin());
+
+-- ---------------------------------------------------------------------
+-- 8. Limite diário de notificações opcionais (ofertas, novidades…)
+-- ---------------------------------------------------------------------
+alter table public.notificacoes add column if not exists opcional boolean not null default false;
+create index if not exists notificacoes_opcional_dia_idx on public.notificacoes(perfil_id, criado_em desc) where opcional;
