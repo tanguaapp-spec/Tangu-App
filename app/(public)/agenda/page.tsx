@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { CalendarPlus, MapPin } from 'lucide-react'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { SugerirEvento } from '@/components/agenda/sugerir-evento'
+import { VitrineBanners } from '@/components/divulgacao/vitrine-banners'
 import { BotaoInteresse } from '@/components/agenda/botao-interesse'
 import { linkGoogleAgenda } from '@/lib/agenda/ics'
 
@@ -136,6 +137,7 @@ export default async function PaginaAgenda() {
       <div className="mt-4">
         <SugerirEvento logado={!!user} />
       </div>
+      <VitrineBanners posicao="evento" className="mt-5" />
       {grupos.length > 0 && <CalendarioMes diasComEvento={diasComEvento} />}
 
       {grupos.length === 0 ? (

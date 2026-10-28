@@ -14,6 +14,7 @@ import { enviarImagem } from '@/lib/storage/imagens'
 import { notificar } from '@/lib/notificacoes/notificar'
 import { lerOpcoesServico, type OpcaoServico } from '@/lib/divulgacao/servicos'
 import { urlSegura } from '@/lib/utils'
+import { enviarComunicado } from '@/lib/actions/admin-gestao-actions'
 
 /** Volta do checkout pro mesmo endereço em que a compra começou (preview ou produção). */
 function urlBase() {
@@ -185,9 +186,14 @@ export async function atualizarCompra(formData: FormData) {
   }
 
   const posicao = (compra.servico as { posicao?: string } | null)?.posicao ?? ''
+  const pushTitulo = String(formData.get('push_titulo') ?? '').trim()
+  const pushTexto = String(formData.get('push_texto') ?? '').trim()
+  if (acao === 'no_ar' && posicao === 'push' && (pushTitulo.length < 3 || pushTitulo.length > 120 || pushTexto.length > 400)) {
+    return { erro: 'Escreva o título (3 a 120 letras) e o texto (até 400) da notificação antes de enviar.' }
+  }
   if (acao === 'no_ar') {
     if (!['pago', 'no_ar'].includes(compra.status)) return { erro: 'Só dá pra pôr no ar uma compra paga.' }
-    const ehBanner = posicao.startsWith('banner_')
+    const ehBanner = posicao.startsWith('banner_') || posicao === 'evento' || posicao === 'vaga'
     if (ehBanner && !(patch.arte_url ?? compra.arte_url)) return { erro: 'Envie a arte do banner antes de pôr no ar.' }
     const inicioTexto = String(formData.get('inicia_em') ?? '')
     const inicio = inicioTexto ? new Date(`${inicioTexto}T00:00:00-03:00`) : new Date()
@@ -209,6 +215,17 @@ export async function atualizarCompra(formData: FormData) {
   const { error } = await db.from('compras_servicos').update(patch).eq('id', id)
   if (error) return { erro: 'Não foi possível salvar.' }
   await auditar(auth.user.id, `compra.${acao}`, id, { de: compra.status, para: patch.status ?? compra.status })
+  // notificação patrocinada: sai na hora pra todo mundo (com e sem conta), uma única vez
+  if (acao === 'no_ar' && posicao === 'push' && compra.status === 'pago') {
+    const fd = new FormData()
+    fd.set('publico', 'todos')
+    fd.set('titulo', pushTitulo)
+    fd.set('corpo', pushTexto)
+    const destino = String(patch.link_destino ?? compra.link_destino ?? '')
+    if (destino.startsWith('/')) fd.set('url', destino)
+    const envio = await enviarComunicado(fd)
+    if (envio.erro) return { erro: `Salvo, mas a notificação não saiu: ${envio.erro}` }
+  }
   if (acao === 'no_ar' && compra.perfil_id) {
     await notificar([compra.perfil_id], {
       tipo: 'compra',

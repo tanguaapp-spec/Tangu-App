@@ -1,3 +1,4 @@
+import { VitrineBanners } from '@/components/divulgacao/vitrine-banners'
 import { exigirModulo } from '@/lib/config/ler'
 import { buscarVagas } from '@/lib/queries/cidade'
 import { CardVaga } from '@/components/negocio/card-vaga'
@@ -20,6 +21,8 @@ export default async function PaginaVagas() {
           <p className="text-barro-600">{vagas.length} vagas abertas em Tanguá agora</p>
         </div>
       </div>
+
+      <VitrineBanners posicao="vaga" className="mt-6" />
 
       {vagas.length === 0 ? (
         <div className="mt-16 text-center">

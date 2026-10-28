@@ -220,6 +220,18 @@ export default async function PaginaAdminDivulgacao({ searchParams }: { searchPa
                       <span className="text-barro-600">Começa em (vazio = hoje)</span>
                       <input type="date" name="inicia_em" className={campo} />
                     </label>
+                    {c.servico_id === 'notificacao_patrocinada' && c.status === 'pago' && (
+                      <>
+                        <label className="text-sm">
+                          <span className="text-barro-600">Título da notificação</span>
+                          <input name="push_titulo" maxLength={120} placeholder="Ex.: Rodízio de pizza hoje na Pizzaria X" className={campo} />
+                        </label>
+                        <label className="text-sm">
+                          <span className="text-barro-600">Texto da notificação</span>
+                          <input name="push_texto" maxLength={400} placeholder="Ex.: Das 18h às 23h, só R$ 39,90" className={campo} />
+                        </label>
+                      </>
+                    )}
                     <label className="text-sm">
                       <span className="text-barro-600">Anotação interna</span>
                       <input name="nota_interna" defaultValue={c.nota_interna ?? ''} className={campo} />
