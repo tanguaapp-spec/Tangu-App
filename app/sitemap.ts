@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { createPublicClient } from '@/lib/supabase/server'
 import { ARTIGOS } from '@/lib/ajuda/artigos'
+import { bairrosComNegocios } from '@/lib/queries/negocios'
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tangua-app.vercel.app').replace(/\/+$/, '')
 
@@ -31,6 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'monthly',
     priority: 0.5,
   }))
+  const paginasBairros: MetadataRoute.Sitemap = (await bairrosComNegocios()).map((b) => ({ url: `${SITE_URL}/bairro/${b.slug}`, changeFrequency: 'weekly', priority: 0.6 }))
   const { data: categorias } = await supabase.from('categorias').select('slug')
   const paginasCategorias: MetadataRoute.Sitemap = (categorias ?? []).map((c) => ({
     url: `${SITE_URL}/categoria/${c.slug}`,
@@ -52,5 +54,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  return [...paginasEstaticas, ...paginasCategorias, ...paginasNegocios, ...paginasNoticias]
+  return [...paginasEstaticas, ...paginasCategorias, ...paginasNegocios, ...paginasNoticias, ...paginasBairros]
 }

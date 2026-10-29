@@ -440,3 +440,27 @@ export async function buscarBairros() {
   const uniqueBairros = Array.from(new Set(data.map(n => n.bairro))).sort()
   return uniqueBairros
 }
+
+/** "Posse dos Coutinhos" → "posse-dos-coutinhos" (endereço da página do bairro). */
+export function slugBairro(nome: string) {
+  return nome
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+/** Bairros com pelo menos um negócio, com quantos tem (cliente público: serve em página estática). */
+export async function bairrosComNegocios(): Promise<{ nome: string; slug: string; total: number }[]> {
+  const { data } = await createPublicClient().from('negocios').select('bairro').eq('ativo', true).eq('status_cadastro', 'aprovado').not('bairro', 'is', null).limit(10000)
+  const contagem = new Map<string, number>()
+  for (const n of data ?? []) {
+    const b = String(n.bairro).trim()
+    if (b) contagem.set(b, (contagem.get(b) ?? 0) + 1)
+  }
+  return Array.from(contagem.entries())
+    .map(([nome, total]) => ({ nome, slug: slugBairro(nome), total }))
+    .filter((b) => b.slug)
+    .sort((a, b) => b.total - a.total)
+}

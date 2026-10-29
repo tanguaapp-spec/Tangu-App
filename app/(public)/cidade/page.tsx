@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Briefcase, CalendarDays, ChevronRight, FileText, Map, MessagesSquare, Newspaper, Phone, type LucideIcon } from 'lucide-react'
 import { lerConfig } from '@/lib/config/ler'
+import { bairrosComNegocios } from '@/lib/queries/negocios'
 
 export const metadata: Metadata = {
   title: 'Tanguá: o que acontece na cidade',
@@ -21,7 +22,7 @@ const ATALHOS: { href: string; titulo: string; detalhe: string; icone: LucideIco
 
 /** Tudo da cidade num lugar só (no celular, a barra de baixo fica pros atalhos principais). */
 export default async function PaginaCidade() {
-  const modulos = await lerConfig('modulos_ativos')
+  const [modulos, bairros] = await Promise.all([lerConfig('modulos_ativos'), bairrosComNegocios()])
   const itens = ATALHOS.filter((a) => !a.modulo || modulos[a.modulo] !== false)
   return (
     <div className="mx-auto max-w-3xl px-5 pb-8 pt-5 md:px-6 md:pt-10">
@@ -43,6 +44,23 @@ export default async function PaginaCidade() {
           </li>
         ))}
       </ul>
+
+      {bairros.length > 0 && (
+        <section aria-labelledby="t-bairros" className="mt-8">
+          <h2 id="t-bairros" className="font-display text-xl font-bold text-barro-900">
+            Por bairro
+          </h2>
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {bairros.map((b) => (
+              <li key={b.slug}>
+                <Link href={`/bairro/${b.slug}`} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-barro-200/80 bg-superficie px-4 text-sm font-semibold text-barro-900">
+                  {b.nome} <span className="font-mono text-xs text-barro-500">{b.total}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   )
 }
