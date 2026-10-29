@@ -164,7 +164,8 @@ export function NavPainel({
       )}
 
       {/* barra lateral — só no desktop */}
-      <aside className="relative hidden w-64 shrink-0 border-r border-barro-100 bg-superficie p-5 sm:block">
+      {/* barra lateral rola sozinha e "Sair" fica no fim, sem cobrir os itens */}
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col overflow-y-auto border-r border-barro-100 bg-superficie p-5 sm:flex">
         <Link href="/" className="flex items-center gap-2">
           <MarcaTangua tamanho="sm" className="text-mata-700" />
           <span className="rounded-full border border-barro-200 px-2 py-0.5 text-xs font-semibold text-barro-600">painel</span>
@@ -176,7 +177,7 @@ export function NavPainel({
           <SeletorTema />
         </div>
 
-        <form action={acaoSair} className="absolute bottom-5 left-5">
+        <form action={acaoSair} className="mt-auto pt-6">
           <button className="flex items-center gap-2 text-sm text-barro-500 hover:text-red-600">
             <LogOut className="h-4 w-4" /> Sair
           </button>

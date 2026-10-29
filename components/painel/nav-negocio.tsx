@@ -129,9 +129,7 @@ export function NavNegocio({
               <Eye className="h-4 w-4" aria-hidden="true" /> Ver como o cliente vê
             </a>
           )}
-          <div className="rounded-xl bg-white/[0.06] p-2 [&_*]:!text-[#E3F0E8]">
-            <SeletorTema />
-          </div>
+          <SeletorTema sobreEscuro />
           <form action={acaoSair}>
             <button className="flex items-center gap-2 px-2 text-sm text-[#A9D9BC] hover:text-white">
               <LogOut className="h-4 w-4" aria-hidden="true" /> Sair

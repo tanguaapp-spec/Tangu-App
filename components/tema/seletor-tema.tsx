@@ -8,14 +8,14 @@ import { aplicarTema, lerPreferencia, type PreferenciaTema } from '@/lib/tema/pr
 const OPCOES: { valor: PreferenciaTema; rotulo: string; icone: typeof Sun }[] = [
   { valor: 'claro', rotulo: 'Claro', icone: Sun },
   { valor: 'escuro', rotulo: 'Escuro', icone: Moon },
-  { valor: 'sistema', rotulo: 'Automático', icone: Monitor },
+  { valor: 'sistema', rotulo: 'Auto', icone: Monitor },
 ]
 
 /**
  * Claro / Escuro / Automático (segue o celular). `compacto` = um botão só
  * que alterna claro↔escuro, pra cabeçalhos.
  */
-export function SeletorTema({ compacto, className }: { compacto?: boolean; className?: string }) {
+export function SeletorTema({ compacto, className, sobreEscuro = false }: { compacto?: boolean; className?: string; /** em fundo escuro (menu lateral do painel) */ sobreEscuro?: boolean }) {
   const [preferencia, setPreferencia] = useState<PreferenciaTema>('sistema')
   const [escuro, setEscuro] = useState(false)
 
@@ -55,7 +55,12 @@ export function SeletorTema({ compacto, className }: { compacto?: boolean; class
   }
 
   return (
-    <div role="radiogroup" aria-label="Aparência" className={cn('inline-flex rounded-xl border border-barro-200 bg-superficie p-1', className)}>
+    // grade de 3 colunas que ocupa a largura disponível: não estoura menu estreito
+    <div
+      role="radiogroup"
+      aria-label="Aparência"
+      className={cn('grid w-full max-w-sm grid-cols-3 gap-1 rounded-xl p-1', sobreEscuro ? 'bg-white/[0.08]' : 'border border-barro-200 bg-superficie', className)}
+    >
       {OPCOES.map((o) => {
         const ativo = preferencia === o.valor
         return (
@@ -66,12 +71,18 @@ export function SeletorTema({ compacto, className }: { compacto?: boolean; class
             aria-checked={ativo}
             onClick={() => escolher(o.valor)}
             className={cn(
-              'flex min-h-[40px] items-center gap-1.5 rounded-lg px-3 text-sm font-semibold transition-colors',
-              ativo ? 'bg-mata-100 text-mata-800' : 'text-barro-600 hover:bg-barro-50'
+              'flex min-h-11 min-w-0 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-xs font-semibold transition-colors',
+              sobreEscuro
+                ? ativo
+                  ? 'bg-[#E3F0E8] text-[#0E4D3A]'
+                  : 'text-[#E3F0E8] hover:bg-white/10'
+                : ativo
+                  ? 'bg-mata-100 text-mata-800'
+                  : 'text-barro-600 hover:bg-barro-50'
             )}
           >
             <o.icone className="h-4 w-4" aria-hidden="true" />
-            {o.rotulo}
+            <span className="truncate">{o.rotulo}</span>
           </button>
         )
       })}

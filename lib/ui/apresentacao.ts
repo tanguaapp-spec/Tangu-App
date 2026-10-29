@@ -22,6 +22,8 @@ export type NegocioResumo = {
   total_avaliacoes?: number | null
   horario_funcionamento?: Record<string, string> | null
   aberto_agora?: boolean | null
+  /** sem dono ainda = perfil criado pela plataforma, aguardando reivindicação */
+  reivindicado_por?: string | null
   categoria?: { nome: string; slug?: string; icone?: string | null } | null
 }
 

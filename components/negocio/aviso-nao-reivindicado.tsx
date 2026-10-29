@@ -22,9 +22,9 @@ export function AvisoNaoReivindicado({ negocioId, nome }: { negocioId: string; n
   const [ok, setOk] = useState(false)
 
   return (
-    <section aria-label="Sobre este perfil" className="flex flex-col gap-3 rounded-[22px] border border-mata-200 bg-mata-50 p-4 text-mata-950">
+    <section id="reivindicar" aria-label="Reivindicar este perfil" className="flex scroll-mt-24 flex-col gap-3 rounded-[22px] border-2 border-laranja bg-casca-50 p-4 text-barro-900">
       <div className="flex gap-3">
-        <HeartHandshake className="mt-0.5 h-6 w-6 shrink-0 text-mata-700" aria-hidden="true" />
+        <HeartHandshake className="mt-0.5 h-6 w-6 shrink-0 text-casca-700" aria-hidden="true" />
         <div className="flex flex-col gap-1.5 text-[15px] leading-relaxed">
           <b className="font-display text-lg">É o dono de {nome}?</b>
           <p>
@@ -42,7 +42,7 @@ export function AvisoNaoReivindicado({ negocioId, nome }: { negocioId: string; n
         <button
           type="button"
           onClick={() => setAberto(true)}
-          className="min-h-11 rounded-[14px] px-3 text-sm font-semibold text-mata-800 underline underline-offset-4"
+          className="min-h-11 rounded-[14px] px-3 text-sm font-semibold text-barro-700 underline underline-offset-4"
         >
           Prefiro que oculte este perfil
         </button>

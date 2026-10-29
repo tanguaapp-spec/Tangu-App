@@ -36,6 +36,7 @@ export function CartaoNegocio({
           )}
         </span>
         <span className="block truncate text-xs text-barro-600 md:text-[13px]">{metaNegocio(negocio, { comBairro: true })}</span>
+        {negocio.reivindicado_por === null && <span className="mt-1 inline-block rounded-full bg-laranja px-2 py-0.5 text-xs font-bold text-tinta">Aguardando reivindicação</span>}
       </span>
     </Link>
   )

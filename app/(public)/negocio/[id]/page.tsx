@@ -309,6 +309,11 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
                   <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" /> Verificado
                 </span>
               )}
+              {!negocio.reivindicado_por && (
+                <a href="#reivindicar" className="inline-flex items-center gap-1 rounded-full bg-laranja px-2.5 py-0.5 text-xs font-bold text-tinta md:px-3 md:py-1 md:text-[13px]">
+                  Aguardando reivindicação
+                </a>
+              )}
               {negocio.so_hora_marcada && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-mata-100 px-2.5 py-0.5 text-xs font-bold text-mata-800 md:px-3 md:py-1 md:text-[13px]">
                   Com hora marcada
@@ -346,6 +351,7 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
           </div>
 
           <div className="flex flex-col gap-4 px-4 pt-4 md:gap-6 md:p-0">
+            {!negocio.reivindicado_por && <AvisoNaoReivindicado negocioId={id} nome={negocio.nome} />}
             {cupomAtivo && <CupomBanner cupom={cupomAtivo} logado={!!user} codigoExistente={meuResgate?.codigo ?? null} voltarPara={caminho} linkCompartilhar={`${urlPublica}#oferta`} />}
 
             {(podePedido || podeAgenda) && (
@@ -499,7 +505,6 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
               </section>
             )}
 
-            {!negocio.reivindicado_por && <AvisoNaoReivindicado negocioId={id} nome={negocio.nome} />}
             {eDono && (
               <Link href="/painel/negocio" className="rounded-[18px] bg-mata-100 p-4 text-sm font-semibold text-mata-700">
                 Este é o seu negócio. Toque aqui pra editar no painel.
