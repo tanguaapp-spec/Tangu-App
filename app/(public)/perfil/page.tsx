@@ -250,6 +250,9 @@ export default async function PaginaVoce({ searchParams }: { searchParams: { sen
             preferencias={(perfil as Perfil & { preferencias_notificacao?: Record<string, boolean> }).preferencias_notificacao ?? null}
             resumoDiario={perfil.notificacoes_resumo_diario ?? true}
           />
+          <Link href="/bem-vindo" className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-mata-700 underline">
+            Escolher as categorias que me interessam
+          </Link>
         </Painel>
         <Painel titulo="Aparência" descricao="Claro, escuro ou automático">
           <SeletorTema />

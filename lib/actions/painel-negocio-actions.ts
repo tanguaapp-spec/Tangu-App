@@ -662,6 +662,13 @@ export async function criarCupom(negocioId: string, formData: FormData) {
 
   // avisa quem favoritou — escassez real, então vale a pena notificar
   const { data: favoritos } = await supabase.from('favoritos').select('perfil_id').eq('negocio_id', negocioId)
+  // e quem marcou a categoria do negócio (ou a categoria-mãe) como interesse — sem repetir quem já favoritou
+  avisarPorInteresse(negocioId, new Set((favoritos ?? []).map((f) => f.perfil_id as string)), {
+    tipo: 'oferta',
+    titulo: `Oferta: ${negocio.nome}`,
+    corpo: `${dados.titulo} — ${dados.descontoTexto}`,
+    url: `/negocio/${negocioId}`,
+  }).catch((e) => console.error('Aviso por interesse:', e))
   if (favoritos && favoritos.length > 0) {
     await notificar(
       favoritos.map((f) => f.perfil_id),
@@ -678,6 +685,18 @@ export async function criarCupom(negocioId: string, formData: FormData) {
   revalidatePath('/painel/negocio')
   revalidatePath(`/negocio/${negocioId}`)
   return { erro: null }
+}
+
+/** Quem escolheu a categoria do negócio nos interesses recebe a oferta (categoria opcional "ofertas_interesse"). */
+async function avisarPorInteresse(negocioId: string, jaAvisados: Set<string>, aviso: { tipo: string; titulo: string; corpo: string; url: string }) {
+  const db = createServiceClient()
+  const { data: n } = await db.from('negocios').select('categoria_id, reivindicado_por').eq('id', negocioId).maybeSingle()
+  if (!n?.categoria_id) return
+  const { data: cat } = await db.from('categorias').select('id, parent_id').eq('id', n.categoria_id).maybeSingle()
+  const ids = [n.categoria_id, cat?.parent_id].filter(Boolean) as string[]
+  const { data: interessados } = await db.from('perfis').select('id').overlaps('categorias_interesse', ids).is('suspenso_em', null).limit(5000)
+  const destino = (interessados ?? []).map((p) => p.id as string).filter((id) => !jaAvisados.has(id) && id !== n.reivindicado_por)
+  if (destino.length) await notificar(destino, aviso, { categoria: 'ofertas_interesse' })
 }
 
 export async function encerrarCupom(cupomId: string, negocioId: string) {
