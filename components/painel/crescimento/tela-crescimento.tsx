@@ -40,7 +40,7 @@ export async function TelaCrescimento({ linkLeads }: { linkLeads: string }) {
         aria-label="Parecer do app"
         className={cn(
           'rounded-[24px] p-5 md:p-6',
-          gargalo ? (gargalo.situacao === 'critico' ? 'bg-red-50 text-red-950' : 'bg-casca-50 text-casca-950') : 'bg-mata-50 text-mata-950'
+          gargalo ? (gargalo.situacao === 'critico' ? 'bg-red-50 text-red-900' : 'bg-casca-50 text-casca-900') : 'bg-mata-50 text-mata-900'
         )}
       >
         <span className="text-xs font-bold uppercase tracking-wider opacity-70">Parecer do app</span>

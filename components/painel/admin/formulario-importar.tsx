@@ -56,7 +56,7 @@ export function FormularioImportar() {
         </p>
       )}
       {rel && !rel.erro && (
-        <section role="status" className={`flex flex-col gap-3 rounded-2xl p-4 ${rel.simulacao ? 'bg-casca-50 text-casca-950' : 'bg-mata-50 text-mata-950'}`}>
+        <section role="status" className={`flex flex-col gap-3 rounded-2xl p-4 ${rel.simulacao ? 'bg-casca-50 text-casca-900' : 'bg-mata-50 text-mata-900'}`}>
           <b className="font-display text-lg">{rel.simulacao ? 'Prévia: nada foi gravado ainda' : 'Importação concluída'}</b>
           <ul className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
             <li>Linhas lidas: <b>{rel.lidas}</b></li>

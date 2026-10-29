@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 const TEMP = {
   quente: { rotulo: 'Quente', classe: 'bg-red-100 text-red-800', Icone: Flame },
   morno: { rotulo: 'Morno', classe: 'bg-casca-100 text-casca-900', Icone: ThermometerSun },
-  frio: { rotulo: 'Frio', classe: 'bg-sky-100 text-sky-900', Icone: Snowflake },
+  frio: { rotulo: 'Frio', classe: 'bg-barro-100 text-barro-800', Icone: Snowflake },
 } as const
 
 const campo = 'w-full rounded-lg border border-barro-300 bg-superficie px-3 py-2 text-sm'
@@ -114,7 +114,7 @@ export async function TelaLeads({ searchParams, base }: { searchParams: { lista?
                 30 dias: {l.sinais.visitas30d} visitas · {l.sinais.cliquesWhats30d} cliques no WhatsApp · {l.sinais.favoritos30d} favoritos
                 {l.lead?.proximo_contato_em && ` · retorno ${l.lead.proximo_contato_em.split('-').reverse().join('/')}`}
               </p>
-              <p className="rounded-xl bg-mata-50 p-3 text-sm text-mata-950">
+              <p className="rounded-xl bg-mata-50 p-3 text-sm text-mata-900">
                 <b>Sugestão do app:</b> {l.parecer}
               </p>
               {l.lead?.ultimaNota && <p className="text-sm text-barro-700">Última anotação: “{l.lead.ultimaNota}”</p>}

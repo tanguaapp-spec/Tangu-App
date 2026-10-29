@@ -113,7 +113,7 @@ export function PedidoWhatsapp({ negocioId, negocio, whatsapp, produtos, config 
           </label>
           {config.observacao && <p className="rounded-xl bg-barro-50 p-3 text-sm text-barro-700">{config.observacao}</p>}
 
-          <div className="flex items-center justify-between rounded-xl bg-mata-50 p-3 text-mata-950">
+          <div className="flex items-center justify-between rounded-xl bg-mata-50 p-3 text-mata-900">
             <span>
               {totalItens} {totalItens === 1 ? 'item' : 'itens'}
               {entrega && conta.taxa > 0 && ` + entrega ${reais(conta.taxa)}`}
