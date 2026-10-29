@@ -6,6 +6,7 @@ import { HeartHandshake } from 'lucide-react'
 import { BottomSheet } from '@/components/ui/bottom-sheet'
 import { Botao } from '@/components/ui/botao'
 import { BotaoReivindicar } from '@/components/negocio/botao-reivindicar'
+import { AssumirPorCodigo } from '@/components/negocio/assumir-por-codigo'
 import { pedirOcultarPerfil } from '@/lib/actions/negocio-actions'
 
 const campo = 'w-full rounded-[14px] border border-barro-200 bg-superficie px-3 py-3 text-base text-barro-900'
@@ -15,7 +16,20 @@ const campo = 'w-full rounded-[14px] border border-barro-200 bg-superficie px-3 
  * cuidado, por que o comércio dele está aqui e dá as duas saídas: assumir
  * de graça ou pedir para ocultar.
  */
-export function AvisoNaoReivindicado({ negocioId, nome }: { negocioId: string; nome: string }) {
+export function AvisoNaoReivindicado({
+  negocioId,
+  nome,
+  temTelefone = false,
+  logado = false,
+  caminho = '/',
+}: {
+  negocioId: string
+  nome: string
+  /** tem WhatsApp/telefone no cadastro: dá pra assumir por código */
+  temTelefone?: boolean
+  logado?: boolean
+  caminho?: string
+}) {
   const [aberto, setAberto] = useState(false)
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -37,8 +51,18 @@ export function AvisoNaoReivindicado({ negocioId, nome }: { negocioId: string; n
           </p>
         </div>
       </div>
+      {temTelefone && <AssumirPorCodigo negocioId={negocioId} logado={logado} voltarPara={caminho} />}
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        <BotaoReivindicar negocioId={negocioId} />
+        {temTelefone ? (
+          <details className="text-sm">
+            <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-barro-700 underline underline-offset-4">O número mudou? Peça de outro jeito</summary>
+            <div className="mt-2">
+              <BotaoReivindicar negocioId={negocioId} />
+            </div>
+          </details>
+        ) : (
+          <BotaoReivindicar negocioId={negocioId} />
+        )}
         <button
           type="button"
           onClick={() => setAberto(true)}

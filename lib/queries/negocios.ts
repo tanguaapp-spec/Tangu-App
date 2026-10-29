@@ -54,6 +54,12 @@ function contarImpressoesDestaque(lista: Negocio[]) {
 
 export type ResultadoBusca = Negocio & { oferta?: string | null }
 
+/** A coluna "completude" (0027) existe? Antes da migration a busca segue na ordem antiga. */
+const temCompletude = cache(async () => {
+  const { error } = await createPublicClient().from('negocios').select('completude').limit(1)
+  return !error
+})
+
 /**
  * Troca o horário da semana pelos feriados/horários especiais dos próximos
  * 7 dias (tabela horarios_especiais, 0023). Antes da migration, não faz nada.
@@ -99,10 +105,10 @@ export async function buscarNegocios(
   } else if (filtros.ordem === 'novos') {
     query = query.order('criado_em', { ascending: false })
   } else {
-    query = query
-      .order('destaque_ativo', { ascending: false })
-      .order('verificado', { ascending: false })
-      .order('nota_google', { ascending: false, nullsFirst: false })
+    // destaque pago → perfil com dono e foto → verificado → nota
+    query = query.order('destaque_ativo', { ascending: false })
+    if (await temCompletude()) query = query.order('completude', { ascending: false })
+    query = query.order('verificado', { ascending: false }).order('nota_google', { ascending: false, nullsFirst: false })
   }
 
   const termo = filtros.termo ? termoSeguro(filtros.termo) : ''
@@ -232,6 +238,7 @@ export async function buscarNegociosVitrine(limite: number, excluirId?: string |
     .eq('ativo', true)
     .eq('status_cadastro', 'aprovado')
     .order('destaque_ativo', { ascending: false })
+    .order((await temCompletude()) ? 'completude' : 'verificado', { ascending: false })
     .order('verificado', { ascending: false })
     .order('nota_google', { ascending: false, nullsFirst: false })
     .limit(excluirId ? limite + 1 : limite)

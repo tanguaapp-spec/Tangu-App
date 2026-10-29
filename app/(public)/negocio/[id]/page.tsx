@@ -351,7 +351,9 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
           </div>
 
           <div className="flex flex-col gap-4 px-4 pt-4 md:gap-6 md:p-0">
-            {!negocio.reivindicado_por && <AvisoNaoReivindicado negocioId={id} nome={negocio.nome} />}
+            {!negocio.reivindicado_por && (
+              <AvisoNaoReivindicado negocioId={id} nome={negocio.nome} temTelefone={!!(negocio.whatsapp || negocio.telefone)} logado={!!user} caminho={caminho} />
+            )}
             {cupomAtivo && <CupomBanner cupom={cupomAtivo} logado={!!user} codigoExistente={meuResgate?.codigo ?? null} voltarPara={caminho} linkCompartilhar={`${urlPublica}#oferta`} />}
 
             {(podePedido || podeAgenda) && (

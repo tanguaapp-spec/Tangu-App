@@ -151,3 +151,22 @@ describe('acesso de crescimento (0026)', () => {
     await expect(como(db, amigo, (tx) => tx.query(`insert into public.equipe_plataforma (perfil_id) values ($1)`, [outro]))).rejects.toThrow(/permission denied/)
   })
 })
+
+describe('0027: ordem da busca e reivindicação por código', () => {
+  it('completude: dono e foto vale mais', async () => {
+    const { rows } = await db.query<{ id: string }>(`insert into public.negocios (nome) values ('[T] Sem nada') returning id`)
+    await db.query(`update public.negocios set foto_capa_url = 'https://x/f.webp' where id = $1`, [rows[0].id])
+    const r = await db.query<{ completude: number }>(`select completude from public.negocios where id = $1`, [rows[0].id])
+    expect(r.rows[0].completude).toBe(1)
+    const comDono = await db.query<{ completude: number }>(`select completude from public.negocios where reivindicado_por is not null and foto_capa_url is null limit 1`)
+    expect(comDono.rows[0].completude).toBe(2)
+  })
+
+  it('códigos de reivindicação: só o servidor grava, só admin lê', async () => {
+    await expect(
+      como(db, dono, (tx) => tx.query(`insert into public.codigos_reivindicacao (negocio_id, perfil_id, codigo_hash, telefone) select id, $1, 'x', '21' from public.negocios limit 1`, [dono]))
+    ).rejects.toThrow(/permission denied/)
+    const lidos = await como(db, dono, (tx) => tx.query('select * from public.codigos_reivindicacao'))
+    expect(lidos.rows).toHaveLength(0)
+  })
+})
