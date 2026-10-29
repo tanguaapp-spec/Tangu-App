@@ -36,7 +36,7 @@ export function PrivacidadeDados({ temNegocio }: { temNegocio: boolean }) {
           action={async (formData) => {
             setCarregando(true)
             setErro(null)
-            const r = await chamarAcao(excluirConta(formData))
+            const r = await chamarAcao(excluirConta(formData), { redireciona: true })
             // em caso de sucesso a action redireciona
             if (r?.erro) {
               setErro(r.erro)

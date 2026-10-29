@@ -13,7 +13,7 @@ export function FormularioEntrar({ proximo }: { proximo?: string }) {
   async function handleSubmit(formData: FormData) {
     setCarregando(true)
     setErro(null)
-    const resultado = await chamarAcao(entrarComEmail(formData))
+    const resultado = await chamarAcao(entrarComEmail(formData), { redireciona: true })
     if (resultado?.erro) {
       setErro(resultado.erro)
       setCarregando(false)

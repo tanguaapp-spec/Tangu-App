@@ -28,7 +28,7 @@ export function FormularioCadastrar({
     if (codigoConvite) formData.set('codigo_convite', codigoConvite)
     if (origem) formData.set('origem', origem)
 
-    const resultado = await chamarAcao(cadastrarComEmail(formData))
+    const resultado = await chamarAcao(cadastrarComEmail(formData), { redireciona: true })
     if (resultado?.erro) {
       setErro(resultado.erro)
       setCarregando(false)

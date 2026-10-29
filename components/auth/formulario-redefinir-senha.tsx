@@ -13,7 +13,7 @@ export function FormularioRedefinirSenha() {
   async function handleSubmit(formData: FormData) {
     setCarregando(true)
     setErro(null)
-    const resultado = await chamarAcao(redefinirSenha(formData))
+    const resultado = await chamarAcao(redefinirSenha(formData), { redireciona: true })
     if (resultado?.erro) {
       setErro(resultado.erro)
       setCarregando(false)

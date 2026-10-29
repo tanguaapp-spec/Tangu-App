@@ -5,10 +5,15 @@ export const SEM_RESPOSTA = 'Não foi possível concluir agora. Confira a intern
  * Chama uma server action sem deixar a tela quebrar: se a resposta vier
  * vazia ou a chamada falhar no caminho, devolve { erro } com a mensagem
  * acima (antes, "r.erro" em resposta vazia derrubava a página inteira).
+ *
+ * `redireciona`: para ações que, dando certo, terminam em redirect() (entrar,
+ * cadastrar…). No Next 14 elas voltam vazias para a tela enquanto a navegação
+ * acontece; isso é sucesso, não falha, então não mostra erro nem vai pros Logs.
  */
-export async function chamarAcao<T>(promessa: Promise<T>): Promise<T> {
+export async function chamarAcao<T>(promessa: Promise<T>, opcoes?: { redireciona?: boolean }): Promise<T> {
   try {
     const r = await promessa
+    if (r == null && opcoes?.redireciona) return {} as T
     if (r == null) avisarLogs('A ação do servidor voltou sem resposta')
     return (r ?? { erro: SEM_RESPOSTA }) as T
   } catch (err) {
