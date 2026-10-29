@@ -7,8 +7,6 @@ import { situacaoHorario } from '@/lib/horario/funcionamento'
 /** Linha do Explorar: foto quadrada, nome, selos, categoria/bairro/nota e chips. */
 export function LinhaNegocio({ negocio, oferta, origem = 'busca' }: { negocio: NegocioResumo; oferta?: string | null; origem?: string }) {
   const marcada = !!(negocio as { so_hora_marcada?: boolean }).so_hora_marcada
-  // undefined = consulta não trouxe o campo: não afirma nada
-  const semDono = negocio.reivindicado_por === null
   const horario = marcada ? { aberto: null, rotulo: null } : situacaoHorario(negocio.horario_funcionamento, negocio.aberto_agora ?? null)
   return (
     <Link
@@ -32,9 +30,8 @@ export function LinhaNegocio({ negocio, oferta, origem = 'busca' }: { negocio: N
           )}
         </span>
         <span className="truncate text-[13px] text-barro-600">{metaNegocio(negocio, { comBairro: true })}</span>
-        {(horario.aberto !== null || oferta || marcada || semDono) && (
+        {(horario.aberto !== null || oferta || marcada) && (
           <span className="flex flex-wrap gap-1.5">
-            {semDono && <span className="rounded-full bg-laranja px-2 py-0.5 text-xs font-bold text-tinta">Aguardando reivindicação</span>}
             {marcada && <span className="rounded-full bg-mata-100 px-2 py-0.5 text-xs font-bold text-mata-700">Com hora marcada</span>}
             {horario.aberto === true && (
               <span className="rounded-full bg-mata-100 px-2 py-0.5 text-xs font-bold text-mata-700">{horario.rotulo}</span>

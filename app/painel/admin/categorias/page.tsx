@@ -44,7 +44,7 @@ function Formulario({ c, principais }: { c?: Categoria; principais: Categoria[] 
 function Linha({ c, uso, principais, sub = false }: { c: Categoria; uso: number; principais: Categoria[]; sub?: boolean }) {
   const Icone = iconeCategoria(c.icone)
   return (
-    <details className={`rounded-[18px] border border-barro-200/80 bg-superficie ${sub ? 'ml-6' : ''} ${c.ativo === false ? 'opacity-60' : ''}`}>
+    <details className={`rounded-[18px] border border-barro-200/80 bg-superficie ${c.ativo === false ? 'opacity-60' : ''}`}>
       <summary className="flex cursor-pointer list-none flex-wrap items-center gap-3 p-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-mata-100 text-mata-700">
           <Icone className="h-5 w-5" aria-hidden="true" />
@@ -126,16 +126,27 @@ export default async function PaginaCategorias() {
       </section>
 
       <ul className="flex flex-col gap-2">
-        {ativas.map((m) => (
-          <li key={m.id} className="flex flex-col gap-2">
-            <Linha c={m} uso={(uso.get(m.id) ?? 0) + totalFilhas(m.id)} principais={ativas} />
-            {categorias
-              .filter((f) => f.parent_id === m.id)
-              .map((f) => (
-                <Linha key={f.id} c={f} uso={uso.get(f.id) ?? 0} principais={ativas} sub />
-              ))}
-          </li>
-        ))}
+        {ativas.map((m) => {
+          const filhas = categorias.filter((f) => f.parent_id === m.id)
+          return (
+            <li key={m.id} className="flex flex-col gap-2">
+              <Linha c={m} uso={(uso.get(m.id) ?? 0) + totalFilhas(m.id)} principais={ativas} />
+              {/* subcategorias recolhidas: a lista fica curta e abre só a que interessa */}
+              {filhas.length > 0 && (
+                <details className="ml-6">
+                  <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-mata-700">
+                    {filhas.length} subcategoria{filhas.length > 1 ? 's' : ''} de {m.nome}
+                  </summary>
+                  <div className="mt-2 flex flex-col gap-2">
+                    {filhas.map((f) => (
+                      <Linha key={f.id} c={f} uso={uso.get(f.id) ?? 0} principais={ativas} sub />
+                    ))}
+                  </div>
+                </details>
+              )}
+            </li>
+          )
+        })}
       </ul>
 
       {desativadas.length > 0 && (
