@@ -5,6 +5,7 @@ import { formatarCentavos } from '@/lib/queries/planos'
 import { cn } from '@/lib/utils'
 import { createServiceClient } from '@/lib/supabase/server'
 import { contarLeadsHoje } from '@/lib/leads/dados'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export const dynamic = 'force-dynamic'
 
@@ -89,6 +90,7 @@ export default async function PainelAdminVisaoGeral({ searchParams }: { searchPa
           ))}
         </nav>
       </div>
+      <GuiaPagina chave="visao" />
 
       <Secao titulo="Precisa da sua atenção">
         <Cartao rotulo="Cadastros sinalizados" valor={moderacao.cadastrosPendentes} href="/painel/admin/negocios-pendentes" alerta={moderacao.cadastrosPendentes > 0} />

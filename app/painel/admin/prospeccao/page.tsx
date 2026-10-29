@@ -4,6 +4,7 @@ import { SincronizarProspeccao } from '@/components/painel/sincronizar-prospecca
 import { LinhaProspeccao } from '@/components/painel/linha-prospeccao'
 import { Radar, Info } from 'lucide-react'
 import Link from 'next/link'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -58,6 +59,7 @@ export default async function PainelProspeccao({
         Lista privada — nunca aparece pro público. Sincronize com o Google Maps pra ver quem em Tanguá ainda não tem
         perfil no app e chamar no WhatsApp.
       </p>
+      <GuiaPagina chave="prospeccao" />
 
       <div className="mt-3 flex items-start gap-2 rounded-lg bg-barro-50 p-3 text-sm text-barro-600">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-barro-400" />

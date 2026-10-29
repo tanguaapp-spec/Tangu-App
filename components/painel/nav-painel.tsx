@@ -31,6 +31,7 @@ import {
   Upload,
   Newspaper,
   ToggleRight,
+  BookOpen,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -53,6 +54,7 @@ const LINKS_PROFISSIONAL: LinkPainel[] = [
 ]
 const LINKS_ADMIN: LinkPainel[] = [
   { href: '/painel/admin', rotulo: 'Visão geral', icone: LayoutDashboard },
+  { href: '/painel/admin/como-funciona', rotulo: 'Como o app funciona', icone: BookOpen },
   { href: '/painel/admin/crescimento', rotulo: 'Crescimento (métricas)', icone: TrendingUp },
   { href: '/painel/admin/leads', rotulo: 'Leads (quem contatar)', icone: Target },
   { href: '/painel/admin/divulgacao', rotulo: 'Divulgação paga', icone: Rocket },

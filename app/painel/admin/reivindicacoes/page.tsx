@@ -4,6 +4,7 @@ import { ShieldCheck } from 'lucide-react'
 import { FormularioAcao } from '@/components/painel/admin/formulario-acao'
 import { marcarCodigoEnviado } from '@/lib/actions/reivindicacao-codigo-actions'
 import { requireAdminOrRedirect } from '@/lib/auth/require-admin'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export default async function PainelReivindicacoes() {
   await requireAdminOrRedirect()
@@ -34,6 +35,7 @@ export default async function PainelReivindicacoes() {
     <div>
       <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">Reivindicações pendentes</h1>
       <p className="text-barro-600">Confirme se quem solicitou é mesmo o responsável pelo negócio.</p>
+      <GuiaPagina chave="reivindicacoes" />
 
       <section id="codigos" className="mt-6 flex scroll-mt-20 flex-col gap-3">
         <h2 className="font-display text-xl font-semibold text-barro-900">Códigos para enviar ({(codigos ?? []).filter((c) => c.status === 'aguardando_envio').length})</h2>

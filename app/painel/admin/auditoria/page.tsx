@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createServiceClient } from '@/lib/supabase/server'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,6 +40,7 @@ export default async function PaginaAuditoria({ searchParams }: { searchParams: 
           Exportar CSV
         </a>
       </div>
+      <GuiaPagina chave="auditoria" />
 
       <form className="mt-4 flex gap-2" role="search">
         <label htmlFor="acao" className="sr-only">

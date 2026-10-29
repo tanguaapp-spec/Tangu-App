@@ -5,6 +5,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 /** Valores usados enquanto a migration 0023 não rodou (ou a chave foi apagada). */
 const PADROES = {
   max_negocios_por_dono: 5,
+  dias_teste_gratis: 14,
   whatsapp_comercial: '',
   modulos_ativos: {
     agenda_whatsapp: true,

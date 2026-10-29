@@ -1,6 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { formatarCentavos } from '@/lib/queries/planos'
 import { Selo } from '@/components/ui/selo'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,6 +51,7 @@ export default async function PaginaAdminAssinaturas() {
           Situação vem do Mercado Pago, confirmada pelo servidor. Este painel é só leitura — mudanças acontecem pelo
           próprio lojista ou pelo provedor de pagamento.
         </p>
+        <GuiaPagina chave="assinaturas" />
       </div>
 
       <section aria-labelledby="t-assinaturas">

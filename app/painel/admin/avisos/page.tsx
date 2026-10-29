@@ -3,6 +3,7 @@ import { FormularioCriarAviso } from '@/components/painel/formulario-criar-aviso
 import { BotaoRemoverAviso } from '@/components/painel/botao-remover-aviso'
 import { Selo } from '@/components/ui/selo'
 import { requireAdminOrRedirect } from '@/lib/auth/require-admin'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export default async function PainelAvisos() {
   await requireAdminOrRedirect()
@@ -18,6 +19,7 @@ export default async function PainelAvisos() {
     <div>
       <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">Mural da cidade</h1>
       <p className="text-barro-600">Publique avisos, eventos e utilidade pública para Tanguá.</p>
+      <GuiaPagina chave="avisos" />
 
       <div className="mt-6 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         <h2 className="font-display text-lg font-semibold text-barro-900">Novo aviso</h2>

@@ -2,6 +2,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { salvarConfiguracao } from '@/lib/actions/admin-config-actions'
 import { FormularioAcao } from '@/components/painel/admin/formulario-acao'
 import { DEFINICOES_CONFIG, type ChaveConfig } from '@/lib/admin/configuracoes'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,6 +20,7 @@ export default async function PaginaAdminConfiguracoes() {
     <div className="mx-auto max-w-3xl">
       <h1 className="font-display text-3xl font-semibold tracking-tight text-barro-900">Configurações</h1>
       <p className="mt-1 text-barro-600">Regras globais do app. Cada alteração fica registrada na auditoria.</p>
+      <GuiaPagina chave="configuracoes" />
 
       <div className="mt-6 space-y-4">
         {(Object.keys(DEFINICOES_CONFIG) as ChaveConfig[]).map((chave) => {

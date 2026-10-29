@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { decidirSugestaoEvento, removerServicoUtil, salvarNoticia, salvarServicoUtil } from '@/lib/actions/conteudo-actions'
 import { FormularioAcao } from '@/components/painel/admin/formulario-acao'
 import { cn } from '@/lib/utils'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Conteúdo da cidade', robots: { index: false } }
@@ -120,6 +121,7 @@ export default async function PaginaConteudo({ searchParams }: { searchParams: {
           </Link>
           .
         </p>
+        <GuiaPagina chave="conteudo" />
       </header>
       <nav aria-label="Seções" className="flex flex-wrap gap-2">
         {ABAS.map(([a, r]) => (

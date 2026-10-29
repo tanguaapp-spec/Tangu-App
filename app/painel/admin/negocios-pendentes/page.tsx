@@ -2,6 +2,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { AcoesNegocioPendente } from '@/components/painel/acoes-negocio-pendente'
 import { Store } from 'lucide-react'
 import { requireAdminOrRedirect } from '@/lib/auth/require-admin'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export default async function PainelNegociosPendentes() {
   await requireAdminOrRedirect()
@@ -25,6 +26,7 @@ export default async function PainelNegociosPendentes() {
         Cadastros comuns entram no ar sozinhos. Aqui ficam só os que uma regra automática segurou (ou todos, se a
         moderação prévia estiver ligada em Configurações).
       </p>
+      <GuiaPagina chave="pendentes" />
 
       {!negocios || negocios.length === 0 ? (
         <div className="mt-10 text-center text-barro-500">

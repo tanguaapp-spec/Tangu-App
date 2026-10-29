@@ -5,6 +5,7 @@ import { formatarCentavos } from '@/lib/queries/planos'
 import { FormularioAcao } from '@/components/painel/admin/formulario-acao'
 import { AJUDA_RECURSO, CHAVES_LIMITE, CHAVES_RECURSO, ROTULO_LIMITE, ROTULO_RECURSO, formatarLimite } from '@/lib/planos/limites'
 import type { Plano } from '@/lib/queries/planos'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export const dynamic = 'force-dynamic'
 
@@ -87,6 +88,7 @@ export default async function PaginaAdminPlanos() {
         limites são conferidos pelo banco quando o lojista tenta criar algo; reduzir um limite não apaga nada. Toda mudança fica
         na auditoria.
       </p>
+      <GuiaPagina chave="planos" />
 
       <section aria-label="Recursos por plano" className="mt-6 overflow-x-auto rounded-casca border border-barro-100 bg-superficie">
         <table className="w-full min-w-[640px] text-sm">

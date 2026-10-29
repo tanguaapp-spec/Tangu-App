@@ -6,6 +6,7 @@ import { Store } from 'lucide-react'
 import Link from 'next/link'
 import { FormularioAcao } from '@/components/painel/admin/formulario-acao'
 import { alternarVerificado } from '@/lib/actions/admin-gestao-actions'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,6 +39,7 @@ export default async function PainelNegocios({
       <p className="text-barro-600">
         Ative o destaque manualmente depois de confirmar o pagamento combinado pelo WhatsApp.
       </p>
+      <GuiaPagina chave="negocios" />
 
       <form method="get" className="mt-4 max-w-sm">
         <input

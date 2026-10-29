@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 import { AlertTriangle, CheckCircle2, CircleDashed, OctagonAlert } from 'lucide-react'
 import { buscarDadosCrescimento } from '@/lib/crescimento/dados'
 import { montarPainel, type Situacao } from '@/lib/crescimento/metricas'
@@ -34,6 +35,7 @@ export async function TelaCrescimento({ linkLeads }: { linkLeads: string }) {
           </Link>
           .
         </p>
+        <GuiaPagina chave="crescimento" semManual={!linkLeads.startsWith('/painel/admin')} />
       </header>
 
       <section

@@ -7,7 +7,7 @@
 export const SEGMENTOS = [
   { chave: 'hoje', titulo: 'Contatar hoje', descricao: 'Retornos que vocês marcaram para hoje ou que já passaram.' },
   { chave: 'quente', titulo: 'Gratuito com movimento', descricao: 'Negócios no plano grátis que já recebem visitas e cliques no WhatsApp. Os mais fáceis de virar pagantes.' },
-  { chave: 'teste', titulo: 'Teste grátis acabando', descricao: 'O teste termina nos próximos 7 dias. Hora de mostrar o resultado.' },
+  { chave: 'teste', titulo: 'Fim do teste grátis', descricao: 'Negócios novos que estão no período de teste grátis do plano pago e terminam nos próximos 7 dias. Hora de mostrar o resultado e oferecer a assinatura.' },
   { chave: 'abandono', titulo: 'Abandonou o pagamento', descricao: 'Abriram o pagamento do plano ou da divulgação e não concluíram.' },
   { chave: 'incompleto', titulo: 'Cadastro incompleto', descricao: 'Cadastraram o negócio e pararam no meio (sem foto, WhatsApp ou produto).' },
   { chave: 'nao_reivindicado', titulo: 'Ainda não reivindicados', descricao: 'Perfis criados pela plataforma. O dono ainda não assumiu.' },

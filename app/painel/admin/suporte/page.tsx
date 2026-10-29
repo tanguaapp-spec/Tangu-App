@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { Selo } from '@/components/ui/selo'
 import { CATEGORIAS_CHAMADO, STATUS_CHAMADO, type CategoriaChamado } from '@/lib/ajuda/chamados'
 import { cn } from '@/lib/utils'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,6 +36,7 @@ export default async function PaginaAdminSuporte({ searchParams }: { searchParam
     <div className="mx-auto max-w-5xl">
       <h1 className="font-display text-3xl font-semibold tracking-tight text-barro-900">Chamados de suporte</h1>
       <p className="text-barro-600">Os mais antigos sem resposta aparecem primeiro.</p>
+      <GuiaPagina chave="suporte" />
 
       <nav aria-label="Filtro" className="mt-4 flex flex-wrap gap-2">
         {FILTROS.map(([f, rotulo]) => (

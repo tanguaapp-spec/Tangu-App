@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { alternarModulo } from '@/lib/actions/admin-config-actions'
 import { InterruptorAcao } from '@/components/painel/admin/interruptor-acao'
 import { lerConfig } from '@/lib/config/ler'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Recursos do app', robots: { index: false } }
@@ -36,6 +37,7 @@ export default async function PaginaRecursos() {
           </Link>
           .
         </p>
+        <GuiaPagina chave="recursos" />
       </header>
       <ul className="flex flex-col divide-y divide-barro-100 rounded-casca border border-barro-100 bg-superficie">
         {MODULOS.map((m) => (

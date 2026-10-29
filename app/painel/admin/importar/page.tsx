@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { decidirPedidoOcultar } from '@/lib/actions/importacao-actions'
 import { FormularioAcao } from '@/components/painel/admin/formulario-acao'
 import { FormularioImportar } from '@/components/painel/admin/formulario-importar'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Importar comércios', robots: { index: false } }
@@ -24,6 +25,7 @@ export default async function PaginaImportar() {
           <b>não reivindicados</b>: só nome, categoria, endereço, bairro, telefone e horário. No perfil aparece um aviso explicando
           que foi o Tanguá App que criou para facilitar, com botões para o dono assumir de graça ou pedir para ocultar.
         </p>
+        <GuiaPagina chave="importar" />
         <p className="mt-2 text-sm text-barro-600">
           Hoje: {naoReivindicados ?? 0} perfis sem dono no ar · {importados ?? 0} vieram de lista. Para chamar os donos, use{' '}
           <Link href="/painel/admin/leads?lista=nao_reivindicado" className="font-semibold text-mata-700 underline">

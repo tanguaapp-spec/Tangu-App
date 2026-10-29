@@ -10,6 +10,7 @@ import { lerOpcoesServico, linkWhatsappComercial, rotuloPeriodo, ROTULO_STATUS_C
 import { lerConfig } from '@/lib/config/ler'
 import { mercadoPagoConfigurado } from '@/lib/pagamentos/mercadopago'
 import { cn } from '@/lib/utils'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export const dynamic = 'force-dynamic'
 
@@ -138,6 +139,7 @@ export default async function PaginaAdminDivulgacao({ searchParams }: { searchPa
           O lojista compra sozinho pelo painel e paga no Mercado Pago. Quando o pagamento é aprovado você recebe um aviso, combina a
           arte pelo WhatsApp e põe no ar aqui. O destaque na busca entra no ar sozinho.
         </p>
+        <GuiaPagina chave="divulgacao" />
         {!mercadoPagoConfigurado() && (
           <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-800">MERCADOPAGO_ACCESS_TOKEN não está configurado neste ambiente: ninguém consegue comprar.</p>
         )}

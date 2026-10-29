@@ -5,6 +5,8 @@ import { ETAPAS, SEGMENTOS, type Segmento } from '@/lib/leads/segmentos'
 import { atualizarLead } from '@/lib/actions/leads-actions'
 import { FormularioAcao } from '@/components/painel/admin/formulario-acao'
 import { cn } from '@/lib/utils'
+import { lerConfig } from '@/lib/config/ler'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 
 const TEMP = {
@@ -17,7 +19,10 @@ const campo = 'w-full rounded-lg border border-barro-300 bg-superficie px-3 py-2
 
 /** Tela de Leads, usada no admin e na área de crescimento (muda só o endereço base). */
 export async function TelaLeads({ searchParams, base }: { searchParams: { lista?: string; um?: string; i?: string }; base: string }) {
-  const segmento = (SEGMENTOS.some((s) => s.chave === searchParams.lista) ? searchParams.lista : 'quente') as Segmento
+  // sem teste grátis ligado (Configurações → 0 dias), a lista do fim do teste não faz sentido
+  const diasTeste = Number(await lerConfig('dias_teste_gratis')) || 0
+  const listas = SEGMENTOS.filter((s) => s.chave !== 'teste' || diasTeste > 0)
+  const segmento = (listas.some((s) => s.chave === searchParams.lista) ? searchParams.lista : 'quente') as Segmento
   const info = SEGMENTOS.find((s) => s.chave === segmento)!
   const todas = await buscarLeads(segmento)
   // modo "um de cada vez": mostra só o contato da vez, com anterior/próximo
@@ -36,10 +41,11 @@ export async function TelaLeads({ searchParams, base }: { searchParams: { lista?
           Listas montadas sozinhas a partir do uso do app. Cada contato traz o motivo, quão quente está e a mensagem pronta para o
           WhatsApp. Depois de falar, registre o que aconteceu e marque o próximo retorno.
         </p>
+        <GuiaPagina chave="leads" semManual={!base.startsWith('/painel/admin')} />
       </header>
 
-      <nav aria-label="Listas" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
-        {SEGMENTOS.map((s) => (
+      <nav aria-label="Listas" className="flex flex-wrap gap-2">
+        {listas.map((s) => (
           <Link
             key={s.chave}
             href={`${base}?lista=${s.chave}`}
@@ -59,7 +65,10 @@ export async function TelaLeads({ searchParams, base }: { searchParams: { lista?
           <h2 id="titulo-lista" className="font-display text-xl font-semibold text-barro-900">
             {info.titulo} <span className="font-mono text-base text-barro-500">({todas.length})</span>
           </h2>
-          <p className="text-sm text-barro-600">{info.descricao}</p>
+          <p className="text-sm text-barro-600">
+            {info.descricao}
+            {segmento === 'teste' && ` Hoje cada negócio novo ganha ${diasTeste} dias de teste (muda em Configurações; 0 desliga o teste e esta lista).`}
+          </p>
         </div>
         {todas.length > 1 && (
           <div className="flex flex-wrap items-center gap-2">

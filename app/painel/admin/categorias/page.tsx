@@ -8,6 +8,7 @@ import { SeletorIcone } from '@/components/painel/admin/seletor-icone'
 import { alternarCampoCategoria, moverCategoria, removerCategoria, salvarCategoria } from '@/lib/actions/admin-gestao-actions'
 import { iconeCategoria } from '@/lib/ui/icone-categoria'
 import type { Categoria } from '@/lib/types/database'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export const metadata: Metadata = { title: 'Categorias', robots: { index: false } }
 export const dynamic = 'force-dynamic'
@@ -116,6 +117,7 @@ export default async function PaginaCategorias() {
           a principal vê todos os negócios das subcategorias também. “Início” coloca o atalho na página inicial; desativar esconde do app sem
           apagar nada.
         </p>
+        <GuiaPagina chave="categorias" />
       </header>
 
       <section className="rounded-[20px] border border-dashed border-barro-300 bg-superficie p-4">

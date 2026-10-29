@@ -5,6 +5,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { agruparErros, type RegistroErro } from '@/lib/admin/agrupar-erros'
 import { AcoesErro } from '@/components/painel/admin/acoes-erro'
 import { cn } from '@/lib/utils'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export const metadata: Metadata = { title: 'Logs de erro', robots: { index: false } }
 export const dynamic = 'force-dynamic'
@@ -86,6 +87,7 @@ export default async function PainelLogs({ searchParams }: { searchParams: { fil
       <p className="text-barro-600">
         Erros que aconteceram no app (na tela de alguém, nos pagamentos, nas tarefas automáticas). Erros iguais aparecem juntos. Resolva aqui e anote o que foi feito.
       </p>
+      <GuiaPagina chave="logs" />
 
       {error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-800">Não foi possível ler os logs: {error.message}</p>}
       {semColunaResolvido && (

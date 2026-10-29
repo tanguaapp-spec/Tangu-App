@@ -5,6 +5,7 @@ import { Flag, ShieldCheck } from 'lucide-react'
 import { Selo } from '@/components/ui/selo'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 const rotulosTipo: Record<string, string> = {
   avaliacao: 'Avaliação',
@@ -54,6 +55,7 @@ export default async function PainelDenuncias() {
     <div>
       <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">Denúncias</h1>
       <p className="text-barro-600">Conteúdo denunciado por usuários, aguardando revisão.</p>
+      <GuiaPagina chave="denuncias" />
 
       {!denuncias || denuncias.length === 0 ? (
         <div className="mt-10 text-center text-barro-500">

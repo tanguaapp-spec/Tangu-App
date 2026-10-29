@@ -3,6 +3,7 @@ import { FormularioCriarVaga } from '@/components/painel/formulario-criar-vaga'
 import { BotaoEncerrarVaga } from '@/components/painel/botao-encerrar-vaga'
 import { Selo } from '@/components/ui/selo'
 import { requireAdminOrRedirect } from '@/lib/auth/require-admin'
+import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
 
 export default async function PainelVagas() {
   await requireAdminOrRedirect()
@@ -17,6 +18,7 @@ export default async function PainelVagas() {
     <div>
       <h1 className="font-display text-3xl font-semibold tracking-tight text-balance text-barro-900">Vagas de emprego</h1>
       <p className="text-barro-600">Publique vagas solicitadas por empresas e comércios da cidade.</p>
+      <GuiaPagina chave="vagas" />
 
       <div className="mt-6 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
         <h2 className="font-display text-lg font-semibold text-barro-900">Nova vaga</h2>
