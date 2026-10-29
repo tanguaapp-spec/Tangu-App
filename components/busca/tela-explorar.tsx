@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { arvoreCategorias, buscarBairros, buscarCategorias, buscarNegocios, type OrdemBusca } from '@/lib/queries/negocios'
 import { LinhaNegocio } from '@/components/vitrine/linha-negocio'
 import { CampoBusca } from '@/components/busca/campo-busca'
+import { BotoesDivulgar } from '@/components/pwa/convite-divulgar'
 import { SeletorFiltro } from '@/components/busca/seletor-filtro'
 import { cn } from '@/lib/utils'
 import type { ModalidadeAtendimento } from '@/lib/types/database'
@@ -224,6 +225,10 @@ export async function TelaExplorar({
               peça um orçamento pra cidade
             </Link>
             : quem atende responde pelo app.
+            <div className="mt-4 flex flex-col items-center gap-2 border-t border-barro-200/80 pt-4">
+              <p className="font-semibold text-barro-900">Conhece alguém que faz isso e ainda não está no app? Indique!</p>
+              <BotoesDivulgar compacto />
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2 md:gap-4 lg:grid-cols-3">

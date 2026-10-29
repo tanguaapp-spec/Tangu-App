@@ -5,6 +5,7 @@ import { ProvedorSessao } from '@/components/layout/sessao'
 import { PullToRefresh } from '@/components/pwa/pull-to-refresh'
 import { ConviteApp } from '@/components/pwa/convite-app'
 import { RegistrarAtividade } from '@/components/metricas/registrar-atividade'
+import { ConviteDivulgar } from '@/components/pwa/convite-divulgar'
 
 export default function LayoutPublico({ children }: { children: React.ReactNode }) {
   return (
@@ -19,6 +20,7 @@ export default function LayoutPublico({ children }: { children: React.ReactNode 
         <NavInferior />
         <ConviteApp />
         <RegistrarAtividade />
+        <ConviteDivulgar />
       </div>
     </ProvedorSessao>
   )
