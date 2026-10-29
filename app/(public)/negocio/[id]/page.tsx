@@ -450,7 +450,7 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
 
             <div className="md:hidden">{quadroHorario}</div>
 
-            <section aria-labelledby="t-aval" className="flex flex-col gap-3.5 rounded-[24px] border border-barro-200/80 bg-superficie p-5 md:px-6">
+            <section id="avaliar" aria-labelledby="t-aval" className="flex scroll-mt-24 flex-col gap-3.5 rounded-[24px] border border-barro-200/80 bg-superficie p-5 md:px-6">
               <div className="flex items-baseline justify-between gap-2">
                 <h2 id="t-aval" className="font-display text-lg font-bold text-barro-900 md:text-[22px]">
                   Avaliações da comunidade

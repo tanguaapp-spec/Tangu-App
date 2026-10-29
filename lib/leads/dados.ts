@@ -140,7 +140,9 @@ export async function buscarLeads(segmento: Segmento, agora = new Date()): Promi
   const linhas = negocios.map((n): LinhaLead => {
     const s = contagem.get(n.id) ?? { visitas30d: 0, cliquesWhats30d: 0, favoritos30d: 0 }
     const sinais = { nome: n.nome, ...s, ...extra.get(n.id) }
-    const sug = sugestao(segmento, sinais)
+    // o link leva direto ao "Sou o dono" do perfil
+    const site = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tangua-app.vercel.app').replace(/\/+$/, '')
+    const sug = sugestao(segmento, sinais, n.slug ? `${site}/negocio/${n.slug}#reivindicar` : site)
     const lead = porNegocio.get(n.id)
     return {
       negocioId: n.id,

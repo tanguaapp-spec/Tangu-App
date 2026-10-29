@@ -10,13 +10,20 @@ export const metadata: Metadata = { title: 'Cartaz do negócio', robots: { index
 export const dynamic = 'force-dynamic'
 
 /** A4 pra imprimir: cores fixas (não segue o tema), sem menus na impressão. */
-export default async function PaginaCartaz() {
+export default async function PaginaCartaz({ searchParams }: { searchParams: { tipo?: string } }) {
+  const avaliar = searchParams.tipo === 'avaliar'
   const { negocio } = await exigirNegocio('/painel/negocio/divulgar/cartaz')
-  const url = `${urlDoSite()}${urlNegocio(negocio)}?origem=qr`
+  const url = `${urlDoSite()}${urlNegocio(negocio)}?origem=qr${avaliar ? '#avaliar' : ''}`
   const qr = await QRCode.toString(url, { type: 'svg', margin: 0, color: { dark: '#0E4D3A', light: '#FFFFFF' } })
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="flex gap-2 print:hidden">
+      <div className="flex flex-wrap gap-2 print:hidden">
+        <a href="/painel/negocio/divulgar/cartaz" className={`inline-flex h-12 items-center rounded-[14px] px-4 font-semibold ${!avaliar ? 'bg-serra text-white' : 'border border-barro-200'}`}>
+          Cartaz “favorite”
+        </a>
+        <a href="/painel/negocio/divulgar/cartaz?tipo=avaliar" className={`inline-flex h-12 items-center rounded-[14px] px-4 font-semibold ${avaliar ? 'bg-serra text-white' : 'border border-barro-200'}`}>
+          Cartaz “avalie a gente”
+        </a>
         <BotaoImprimir />
       </div>
       <article
@@ -33,10 +40,12 @@ export default async function PaginaCartaz() {
         </div>
         <div className="w-[58%] rounded-[20px] [&>svg]:h-auto [&>svg]:w-full border-[6px] border-[#F26A1B] bg-white p-[4%]" dangerouslySetInnerHTML={{ __html: qr }} />
         <div className="flex flex-col gap-1">
-          <p className="font-display text-xl font-bold">Aponte a câmera e favorite</p>
-          <p className="text-base text-[#3B4A43]">Receba nossas ofertas e fale com a gente direto no WhatsApp.</p>
+          <p className="font-display text-xl font-bold">{avaliar ? 'Gostou? Avalie a gente!' : 'Aponte a câmera e favorite'}</p>
+          <p className="text-base text-[#3B4A43]">
+            {avaliar ? 'Aponte a câmera e deixe sua nota. Leva 30 segundos e ajuda muito a gente.' : 'Receba nossas ofertas e fale com a gente direto no WhatsApp.'}
+          </p>
         </div>
-        <p className="font-mono text-xs text-[#55655D]">{url.replace(/^https?:\/\//, '').replace('?origem=qr', '')}</p>
+        <p className="font-mono text-xs text-[#55655D]">{url.replace(/^https?:\/\//, '').replace(/\?origem=qr.*$/, '')}</p>
       </article>
     </div>
   )

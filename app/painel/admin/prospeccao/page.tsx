@@ -23,8 +23,15 @@ export default async function PainelProspeccao({
 }: {
   searchParams: { filtro?: string }
 }) {
-  await requireAdminOrRedirect()
+  const { user } = await requireAdminOrRedirect()
   const supabase = createClient()
+  // nome de quem manda a mensagem ("Sou o Gabriel, do APP TANGUÁ") e nome legível das categorias
+  const [{ data: eu }, { data: cats }] = await Promise.all([
+    supabase.from('perfis').select('nome_completo').eq('id', user.id).maybeSingle(),
+    supabase.from('categorias').select('slug, nome'),
+  ])
+  const remetente = (eu?.nome_completo ?? '').split(' ')[0]
+  const nomeCategoria = new Map((cats ?? []).map((c) => [c.slug as string, c.nome as string]))
   const filtro = searchParams.filtro ?? 'faltando'
 
   let query = supabase.from('prospeccoes_negocios').select('*').order('nome')
@@ -91,7 +98,7 @@ export default async function PainelProspeccao({
       ) : (
         <div className="mt-6 space-y-3">
           {prospeccoes.map((p: any) => (
-            <LinhaProspeccao key={p.id} prospeccao={p} />
+            <LinhaProspeccao key={p.id} prospeccao={p} remetente={remetente} categoriaNome={nomeCategoria.get(p.categoria_slug) ?? null} />
           ))}
         </div>
       )}

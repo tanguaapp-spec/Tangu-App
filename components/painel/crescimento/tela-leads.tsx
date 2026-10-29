@@ -16,10 +16,16 @@ const TEMP = {
 const campo = 'w-full rounded-lg border border-barro-300 bg-superficie px-3 py-2 text-sm'
 
 /** Tela de Leads, usada no admin e na área de crescimento (muda só o endereço base). */
-export async function TelaLeads({ searchParams, base }: { searchParams: { lista?: string }; base: string }) {
+export async function TelaLeads({ searchParams, base }: { searchParams: { lista?: string; um?: string; i?: string }; base: string }) {
   const segmento = (SEGMENTOS.some((s) => s.chave === searchParams.lista) ? searchParams.lista : 'quente') as Segmento
   const info = SEGMENTOS.find((s) => s.chave === segmento)!
-  const linhas = await buscarLeads(segmento)
+  const todas = await buscarLeads(segmento)
+  // modo "um de cada vez": mostra só o contato da vez, com anterior/próximo
+  const sequencia = searchParams.um === '1'
+  const indice = Math.min(Math.max(0, Number(searchParams.i) || 0), Math.max(0, todas.length - 1))
+  const linhas = sequencia ? todas.slice(indice, indice + 1) : todas
+  const linkSeq = (i: number) => `${base}?lista=${segmento}&um=1&i=${i}`
+  const admin = base.startsWith('/painel/admin')
   const amanha = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date(Date.now() + 2 * 86400e3))
 
   return (
@@ -51,10 +57,38 @@ export async function TelaLeads({ searchParams, base }: { searchParams: { lista?
       <section aria-labelledby="titulo-lista" className="flex flex-col gap-3">
         <div>
           <h2 id="titulo-lista" className="font-display text-xl font-semibold text-barro-900">
-            {info.titulo} <span className="font-mono text-base text-barro-500">({linhas.length})</span>
+            {info.titulo} <span className="font-mono text-base text-barro-500">({todas.length})</span>
           </h2>
           <p className="text-sm text-barro-600">{info.descricao}</p>
         </div>
+        {todas.length > 1 && (
+          <div className="flex flex-wrap items-center gap-2">
+            {sequencia ? (
+              <>
+                <Link href={linkSeq(Math.max(0, indice - 1))} aria-disabled={indice === 0} className={cn('inline-flex min-h-11 items-center rounded-xl border border-barro-200 px-4 text-sm font-semibold', indice === 0 && 'pointer-events-none opacity-40')}>
+                  ← Anterior
+                </Link>
+                <span className="font-mono text-sm text-barro-700">
+                  {indice + 1} de {todas.length}
+                </span>
+                <Link
+                  href={linkSeq(Math.min(todas.length - 1, indice + 1))}
+                  aria-disabled={indice >= todas.length - 1}
+                  className={cn('inline-flex min-h-11 items-center rounded-xl bg-serra px-4 text-sm font-bold text-white', indice >= todas.length - 1 && 'pointer-events-none opacity-40')}
+                >
+                  Próximo →
+                </Link>
+                <Link href={`${base}?lista=${segmento}`} className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-barro-600 underline">
+                  Ver lista
+                </Link>
+              </>
+            ) : (
+              <Link href={linkSeq(0)} className="inline-flex min-h-11 items-center rounded-xl bg-serra px-4 text-sm font-bold text-white">
+                Contatar um de cada vez
+              </Link>
+            )}
+          </div>
+        )}
 
         {linhas.length === 0 && (
           <p className="rounded-2xl border border-dashed border-barro-300 p-6 text-center text-barro-600">Ninguém nesta lista agora.</p>
@@ -100,6 +134,11 @@ export async function TelaLeads({ searchParams, base }: { searchParams: { lista?
                 {l.slug && (
                   <a href={`/negocio/${l.slug}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-barro-200 px-4 text-sm font-semibold text-barro-800">
                     <ExternalLink className="h-4 w-4" aria-hidden="true" /> Ver perfil
+                  </a>
+                )}
+                {admin && segmento === 'nao_reivindicado' && (
+                  <a href={`/painel/admin/cartaz?negocio=${l.negocioId}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center rounded-xl border border-barro-200 px-4 text-sm font-semibold text-barro-800">
+                    Cartaz pro balcão
                   </a>
                 )}
               </div>

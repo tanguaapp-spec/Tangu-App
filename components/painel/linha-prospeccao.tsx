@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { atualizarStatusProspeccao } from '@/lib/actions/prospeccao-actions'
 import { linkWhatsapp, urlSegura } from '@/lib/utils'
 import type { ProspeccaoNegocio } from '@/lib/types/database'
+import { VERSOES, mensagemProspeccao, versaoSugerida, type VersaoMensagem } from '@/lib/leads/mensagens-prospeccao'
 
 const OPCOES_STATUS = [
   { valor: 'novo', rotulo: 'Novo' },
@@ -16,7 +17,7 @@ const OPCOES_STATUS = [
   { valor: 'ignorado', rotulo: 'Ignorado' },
 ]
 
-export function LinhaProspeccao({ prospeccao }: { prospeccao: ProspeccaoNegocio }) {
+export function LinhaProspeccao({ prospeccao, remetente = '', categoriaNome }: { prospeccao: ProspeccaoNegocio; remetente?: string; categoriaNome?: string | null }) {
   const router = useRouter()
   const [observacoes, setObservacoes] = useState(prospeccao.observacoes ?? '')
   const [salvando, setSalvando] = useState(false)
@@ -35,7 +36,8 @@ export function LinhaProspeccao({ prospeccao }: { prospeccao: ProspeccaoNegocio 
     router.refresh()
   }
 
-  const mensagemConvite = `Olá! Aqui é da equipe do Tanguá App 🍊. Vi o "${prospeccao.nome}" no Google Maps e queria convidar vocês a criarem um perfil gratuito no nosso diretório de profissionais e comércios de Tanguá. Posso te contar mais?`
+  const [versao, setVersao] = useState<VersaoMensagem>(versaoSugerida(categoriaNome ?? prospeccao.categoria_slug))
+  const mensagemConvite = mensagemProspeccao(versao, { loja: prospeccao.nome, remetente, busca: categoriaNome ?? prospeccao.categoria_slug?.replace(/-/g, ' ') })
 
   return (
     <div className="rounded-casca border border-barro-100 bg-superficie p-4 shadow-feira">
@@ -64,6 +66,20 @@ export function LinhaProspeccao({ prospeccao }: { prospeccao: ProspeccaoNegocio 
                 <Star className="h-3.5 w-3.5 fill-current" /> {prospeccao.nota_google.toFixed(1)} (
                 {prospeccao.total_avaliacoes_google ?? 0})
               </span>
+            )}
+            {prospeccao.telefone && (
+              <select
+                value={versao}
+                onChange={(e) => setVersao(e.target.value as VersaoMensagem)}
+                aria-label="Versão da mensagem"
+                className="h-9 rounded-lg border border-barro-200 bg-superficie px-2 text-xs"
+              >
+                {VERSOES.map((v) => (
+                  <option key={v.valor} value={v.valor}>
+                    Mensagem: {v.rotulo}
+                  </option>
+                ))}
+              </select>
             )}
             {prospeccao.telefone && (
               <a

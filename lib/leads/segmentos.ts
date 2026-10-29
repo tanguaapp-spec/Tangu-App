@@ -51,7 +51,7 @@ export function temperatura(segmento: Segmento, s: SinaisLead): Temperatura {
 const primeiroNome = (nome: string) => nome.trim().split(/\s+/)[0] ?? ''
 
 /** O que o app recomenda dizer, e a mensagem pronta pro WhatsApp. */
-export function sugestao(segmento: Segmento, s: SinaisLead, linkApp = 'tangua-app.vercel.app'): { parecer: string; mensagem: string } {
+export function sugestao(segmento: Segmento, s: SinaisLead, linkApp = 'https://tangua-app.vercel.app'): { parecer: string; mensagem: string } {
   const numeros = `${s.visitas30d} visita${s.visitas30d === 1 ? '' : 's'} e ${s.cliquesWhats30d} clique${s.cliquesWhats30d === 1 ? '' : 's'} no WhatsApp`
   switch (segmento) {
     case 'quente':
@@ -80,7 +80,7 @@ export function sugestao(segmento: Segmento, s: SinaisLead, linkApp = 'tangua-ap
           s.visitas30d > 0
             ? `Mesmo sem dono, o perfil teve ${numeros}. Ótimo argumento pra ele assumir o perfil grátis.`
             : 'Perfil criado pela plataforma. Convide o dono para assumir de graça e completar com fotos e preços.',
-        mensagem: `Olá! Aqui é do Tanguá App, o guia de Tanguá. A ${s.nome} já aparece no app com nome e endereço${s.visitas30d > 0 ? ` e teve ${numeros} este mês` : ''}. É grátis assumir o perfil e colocar fotos, preços e ofertas: ${linkApp}. Se preferir, a gente oculta, é só avisar.`,
+        mensagem: `Olá! Aqui é do Tanguá App, o guia de Tanguá. A ${s.nome} já aparece no app com nome e endereço${s.visitas30d > 0 ? ` e teve ${numeros} este mês` : ''}. É grátis assumir o perfil e colocar fotos, preços e ofertas. Toque em “Sou o dono” aqui: ${linkApp} Se preferir, a gente oculta, é só avisar.`,
       }
     case 'cancelou':
       return {
