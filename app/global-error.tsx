@@ -21,7 +21,8 @@ export default function GlobalError({
     registrarErroCliente(
       `[app inteiro] ${error.message || `Erro sem mensagem (digest: ${error.digest ?? 'nenhum'})`}`,
       error.stack,
-      typeof window !== 'undefined' ? window.location.href : undefined
+      typeof window !== 'undefined' ? window.location.href : undefined,
+      { origem: 'tela', digest: error.digest, tela: typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : undefined, online: typeof navigator !== 'undefined' ? navigator.onLine : undefined }
     ).catch(() => undefined)
   }, [error])
 

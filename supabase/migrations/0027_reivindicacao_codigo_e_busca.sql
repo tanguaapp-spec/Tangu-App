@@ -46,3 +46,12 @@ create policy "codigos_reivindicacao_admin" on public.codigos_reivindicacao for 
 -- 3. Avisos por interesse: quem marcou a categoria recebe as ofertas dela
 -- ---------------------------------------------------------------------
 create index if not exists perfis_categorias_interesse_idx on public.perfis using gin (categorias_interesse);
+
+-- ---------------------------------------------------------------------
+-- 4. Logs do admin mais detalhados
+-- ---------------------------------------------------------------------
+-- origem: tela, navegador, promessa, acao_sem_resposta, servidor, pagamento, cron…
+-- detalhes: navegador, sistema, tela, ambiente (produção/preview), versão do app, etc.
+alter table public.error_logs add column if not exists origem text;
+alter table public.error_logs add column if not exists detalhes jsonb not null default '{}'::jsonb;
+create index if not exists error_logs_origem_idx on public.error_logs(origem, criado_em desc);

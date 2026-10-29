@@ -20,7 +20,8 @@ export default function Error({
     registrarErroCliente(
       error.message || 'Erro sem mensagem (digest: ' + (error.digest ?? 'nenhum') + ')',
       error.stack,
-      typeof window !== 'undefined' ? window.location.href : undefined
+      typeof window !== 'undefined' ? window.location.href : undefined,
+      { origem: 'tela', digest: error.digest, tela: typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : undefined, online: typeof navigator !== 'undefined' ? navigator.onLine : undefined }
     ).catch(() => {
       // se nem o registro funcionar, não tem mais o que fazer aqui
     })

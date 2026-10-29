@@ -29,7 +29,19 @@ function dica(mensagem: string, contextos: string[]) {
   return 'Copie os detalhes e mande pra quem desenvolve, junto com o que a pessoa estava fazendo.'
 }
 
-export default async function PainelLogs({ searchParams }: { searchParams: { filtro?: string; q?: string; dias?: string } }) {
+const ROTULO_ORIGEM: Record<string, string> = {
+  tela: 'Tela do app',
+  navegador: 'Navegador',
+  promessa: 'Navegador (assíncrono)',
+  acao_sem_resposta: 'Ação sem resposta',
+  servidor: 'Servidor',
+  pagamento: 'Pagamento',
+  cron: 'Tarefa automática',
+  notificacao: 'Notificação',
+  email: 'E-mail',
+}
+
+export default async function PainelLogs({ searchParams }: { searchParams: { filtro?: string; q?: string; dias?: string; origem?: string } }) {
   const filtro = FILTROS.some((f) => f.valor === searchParams.filtro) ? searchParams.filtro! : 'abertos'
   const dias = [1, 7, 30, 90].includes(Number(searchParams.dias)) ? Number(searchParams.dias) : 30
   // layout de /painel/admin já garante que é admin; service role pra não depender da regra antiga de RLS
@@ -52,15 +64,19 @@ export default async function PainelLogs({ searchParams }: { searchParams: { fil
 
   const termo = (searchParams.q ?? '').toLowerCase().trim()
   const todos = agruparErros(registros)
+  const origem = searchParams.origem && ROTULO_ORIGEM[searchParams.origem] ? searchParams.origem : ''
+  const origensPresentes = Array.from(new Set(todos.flatMap((g) => g.origens)))
   const grupos = todos
     .filter((g) => (filtro === 'abertos' ? !g.resolvido : filtro === 'resolvidos' ? g.resolvido : true))
+    .filter((g) => !origem || g.origens.includes(origem))
     .filter((g) => !termo || `${g.mensagem} ${g.contextos.join(' ')} ${g.urls.join(' ')}`.toLowerCase().includes(termo))
   const abertos = todos.filter((g) => !g.resolvido)
   const ocorrenciasAbertas = abertos.reduce((s, g) => s + g.total, 0)
   const hoje = registros.filter((r) => Date.now() - new Date(r.criado_em).getTime() < 86400e3).length
 
   const url = (muda: Record<string, string>) => {
-    const q = new URLSearchParams({ filtro, dias: String(dias), ...(termo ? { q: termo } : {}), ...muda })
+    const q = new URLSearchParams({ filtro, dias: String(dias), ...(termo ? { q: termo } : {}), ...(origem ? { origem } : {}), ...muda })
+    for (const [k, v] of Array.from(q.entries())) if (!v) q.delete(k)
     return `/painel/admin/logs?${q.toString()}`
   }
 
@@ -113,12 +129,31 @@ export default async function PainelLogs({ searchParams }: { searchParams: { fil
             {d === 1 ? '24h' : `${d}d`}
           </Link>
         ))}
+        <a href={`/api/admin/logs.csv?dias=${dias}`} className="flex h-10 items-center rounded-full border border-barro-200 bg-superficie px-3 text-sm font-semibold text-barro-900">
+          Baixar planilha
+        </a>
         <form method="get" className="ml-auto flex min-w-[200px] flex-1 gap-2 sm:flex-none">
           <input type="hidden" name="filtro" value={filtro} />
           <input type="hidden" name="dias" value={dias} />
+          {origem && <input type="hidden" name="origem" value={origem} />}
           <input name="q" defaultValue={searchParams.q} placeholder="Buscar na mensagem ou página" aria-label="Buscar erro" className="h-10 min-w-0 flex-1 rounded-xl border border-barro-200 bg-superficie px-3 text-sm" />
         </form>
       </div>
+
+      {origensPresentes.length > 0 && (
+        <nav aria-label="Origem" className="mt-3 flex flex-wrap gap-2">
+          {['', ...origensPresentes].map((o) => (
+            <Link
+              key={o || 'todas'}
+              href={url({ origem: o })}
+              aria-current={origem === o ? 'page' : undefined}
+              className={cn('flex h-10 items-center rounded-full px-3 text-xs font-semibold', origem === o ? 'bg-casca-100 text-casca-900' : 'border border-barro-200 bg-superficie text-barro-800')}
+            >
+              {o ? ROTULO_ORIGEM[o] ?? o : 'Todas as origens'}
+            </Link>
+          ))}
+        </nav>
+      )}
 
       {grupos.length === 0 ? (
         <div className="mt-10 flex flex-col items-center gap-2 text-center text-barro-600">
@@ -138,6 +173,9 @@ export default async function PainelLogs({ searchParams }: { searchParams: { fil
               `Primeira: ${fmt(g.primeiro)} · Última: ${fmt(g.ultimo)}`,
               g.contextos.length ? `Onde: ${g.contextos.join(', ')}` : null,
               g.urls.length ? `Páginas: ${g.urls.join(', ')}` : null,
+              g.origens.length ? `Origem: ${g.origens.map((o) => ROTULO_ORIGEM[o] ?? o).join(', ')}` : null,
+              Object.keys(g.aparelhos).length ? `Aparelhos: ${Object.entries(g.aparelhos).map(([a, n]) => `${a} (${n})`).join(', ')}` : null,
+              g.detalhes ? `Detalhes: ${JSON.stringify(g.detalhes)}` : null,
               g.stack ? `\n${g.stack}` : null,
             ]
               .filter(Boolean)
@@ -169,6 +207,29 @@ export default async function PainelLogs({ searchParams }: { searchParams: { fil
                       </p>
                     )}
                     {pessoas.length > 0 && <p className="mt-1 text-xs text-barro-600">Com: {pessoas.join(', ')}</p>}
+                    {(g.origens.length > 0 || Object.keys(g.aparelhos).length > 0 || g.detalhes) && (
+                      <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
+                        {g.origens.map((o) => (
+                          <span key={o} className="rounded-full bg-casca-100 px-2 py-0.5 font-semibold text-casca-900">
+                            {ROTULO_ORIGEM[o] ?? o}
+                          </span>
+                        ))}
+                        {Object.entries(g.aparelhos)
+                          .sort((a, b) => b[1] - a[1])
+                          .slice(0, 4)
+                          .map(([a, n]) => (
+                            <span key={a} className="rounded-full bg-barro-100 px-2 py-0.5 text-barro-800">
+                              {a} ×{n}
+                            </span>
+                          ))}
+                        {typeof g.detalhes?.ambiente === 'string' && (
+                          <span className="rounded-full bg-barro-100 px-2 py-0.5 text-barro-800">
+                            {g.detalhes.ambiente === 'production' ? 'produção' : g.detalhes.ambiente === 'preview' ? 'preview' : String(g.detalhes.ambiente)}
+                            {typeof g.detalhes.versao === 'string' && ` · versão ${g.detalhes.versao}`}
+                          </span>
+                        )}
+                      </div>
+                    )}
                     {g.resolvido ? (
                       <p className="mt-2 text-sm text-mata-700">
                         Resolvido em {fmt(g.resolvidoEm!)}
@@ -177,10 +238,22 @@ export default async function PainelLogs({ searchParams }: { searchParams: { fil
                     ) : (
                       <p className="mt-2 rounded-xl bg-feira p-2.5 text-sm text-barro-800">{dica(g.mensagem, g.contextos)}</p>
                     )}
-                    {g.stack && (
+                    {(g.stack || g.detalhes) && (
                       <details className="mt-2">
                         <summary className="cursor-pointer text-sm font-semibold text-barro-700">Detalhes técnicos</summary>
-                        <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap break-all rounded-xl bg-feira p-3 font-mono text-xs text-barro-800">{g.stack}</pre>
+                        {g.detalhes && (
+                          <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 rounded-xl bg-feira p-3 text-xs">
+                            {Object.entries(g.detalhes)
+                              .filter(([, v]) => v !== null && v !== undefined && v !== '')
+                              .map(([k, v]) => (
+                                <div key={k} className="contents">
+                                  <dt className="font-semibold text-barro-700">{k}</dt>
+                                  <dd className="break-all font-mono text-barro-900">{String(v)}</dd>
+                                </div>
+                              ))}
+                          </dl>
+                        )}
+                        {g.stack && <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap break-all rounded-xl bg-feira p-3 font-mono text-xs text-barro-800">{g.stack}</pre>}
                       </details>
                     )}
                     <div className="mt-3">

@@ -14,6 +14,9 @@ export type RegistroErro = {
   criado_em: string
   resolvido_em?: string | null
   nota_resolucao?: string | null
+  // 0027
+  origem?: string | null
+  detalhes?: Record<string, unknown> | null
 }
 
 export type GrupoErro = {
@@ -31,6 +34,11 @@ export type GrupoErro = {
   resolvido: boolean
   resolvidoEm: string | null
   nota: string | null
+  origens: string[]
+  /** detalhes da ocorrência mais recente (navegador, sistema, ambiente, versão…) */
+  detalhes: Record<string, unknown> | null
+  /** em quais navegadores/sistemas aconteceu, com contagem */
+  aparelhos: Record<string, number>
 }
 
 export function chaveErro(mensagem: string) {
@@ -74,6 +82,9 @@ export function agruparErros(registros: RegistroErro[]): GrupoErro[] {
         resolvido: true,
         resolvidoEm: null,
         nota: null,
+        origens: [],
+        detalhes: r.detalhes ?? null,
+        aparelhos: {},
         _usuarios: new Set(),
       }
       grupos.set(chave, g)
@@ -85,6 +96,13 @@ export function agruparErros(registros: RegistroErro[]): GrupoErro[] {
       g.ultimo = r.criado_em
       g.mensagem = r.mensagem
       g.stack = r.stack ?? g.stack
+      g.detalhes = r.detalhes ?? g.detalhes
+    }
+    if (r.origem && !g.origens.includes(r.origem)) g.origens.push(r.origem)
+    const d = r.detalhes as { navegador?: string; sistema?: string } | null | undefined
+    if (d?.navegador || d?.sistema) {
+      const ap = [d.sistema, d.navegador].filter(Boolean).join(' · ')
+      g.aparelhos[ap] = (g.aparelhos[ap] ?? 0) + 1
     }
     if (r.contexto && !g.contextos.includes(r.contexto)) g.contextos.push(r.contexto)
     const rota = rotaDoErro(r.url)

@@ -8,6 +8,7 @@ import { SCRIPT_TEMA_INICIAL } from '@/lib/tema/preferencia'
 import { SincronizarTema } from '@/components/tema/sincronizar-tema'
 import { BarraProgresso } from '@/components/layout/barra-progresso'
 import { CompactarFotos } from '@/components/layout/compactar-fotos'
+import { CapturarErros } from '@/components/layout/capturar-erros'
 import './globals.css'
 
 // Identidade "Tanguá" (out/2026): títulos, texto e números/códigos.
@@ -99,6 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SincronizarTema />
         <BarraProgresso />
         <CompactarFotos />
+        <CapturarErros />
         <SplashScreen />
         <RegistrarServiceWorker />
         {children}
