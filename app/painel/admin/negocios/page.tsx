@@ -68,6 +68,9 @@ export default async function PainelNegocios({
                 <p className="text-sm text-barro-500">
                   {n.categoria?.nome} {n.bairro ? `· ${n.bairro}` : ''}
                 </p>
+                <Link href={`/painel/admin/negocios/${n.id}`} className="inline-flex min-h-11 items-center text-sm font-semibold text-mata-700 underline">
+                  Editar dados
+                </Link>
                 {n.verificado && (
                   <span className="mt-1 inline-block">
                     <Selo tom="verde">Verificado</Selo>

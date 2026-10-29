@@ -286,3 +286,54 @@ export async function alterarAcessoCrescimento(formData: FormData) {
   revalidatePath('/painel/admin/usuarios')
   return { erro: null }
 }
+
+// --- edição de negócio pelo admin -------------------------------------------
+
+const DIAS_ADMIN = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'] as const
+
+/**
+ * Admin corrige os dados de qualquer negócio (útil nos importados, que
+ * ainda não têm dono). Fica na auditoria com o antes e o depois.
+ */
+export async function salvarNegocioAdmin(negocioId: string, formData: FormData) {
+  const auth = await verificarAdmin()
+  if ('erro' in auth) return { erro: auth.erro }
+  if (!uuid(negocioId)) return { erro: 'Negócio inválido.' }
+  const texto = (c: string, max: number) => String(formData.get(c) ?? '').trim().slice(0, max) || null
+  const nome = texto('nome', 120)
+  if (!nome || nome.length < 2) return { erro: 'Informe o nome.' }
+  const categoriaId = texto('categoria_id', 36)
+  if (categoriaId && !uuid(categoriaId)) return { erro: 'Categoria inválida.' }
+  const digitos = (c: string) => {
+    const d = (texto(c, 30) ?? '').replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, '')
+    return d ? (d.length === 10 || d.length === 11 ? d : false) : null
+  }
+  const whatsapp = digitos('whatsapp')
+  const telefone = digitos('telefone')
+  if (whatsapp === false || telefone === false) return { erro: 'Telefone/WhatsApp com DDD: 10 ou 11 números.' }
+  const horario: Record<string, string> = {}
+  for (const d of DIAS_ADMIN) {
+    const v = texto(`horario_${d}`, 40)
+    if (v) horario[d] = v
+  }
+  const dados = {
+    nome,
+    categoria_id: categoriaId,
+    descricao: texto('descricao', 2000),
+    whatsapp,
+    telefone,
+    endereco: texto('endereco', 200),
+    bairro: texto('bairro', 100),
+    horario_funcionamento: Object.keys(horario).length ? horario : null,
+    ativo: formData.get('ativo') === 'on',
+  }
+  const db = createServiceClient()
+  const { data: antes } = await db.from('negocios').select('nome, categoria_id, descricao, whatsapp, telefone, endereco, bairro, horario_funcionamento, ativo, slug').eq('id', negocioId).maybeSingle()
+  if (!antes) return { erro: 'Negócio não encontrado.' }
+  const { error } = await db.from('negocios').update(dados).eq('id', negocioId)
+  if (error) return { erro: 'Não foi possível salvar.' }
+  await auditar(auth.user.id, 'negocio.editar_admin', 'negocio', negocioId, { antes, depois: dados })
+  revalidatePath(`/negocio/${antes.slug ?? negocioId}`)
+  revalidatePath('/painel/admin/negocios')
+  return { erro: null }
+}
