@@ -1,5 +1,6 @@
 'use client'
 
+import { CampoFotoRecortada } from '@/components/ui/campo-foto-recortada'
 import { OpcoesCategoria } from '@/components/ui/opcoes-categoria'
 import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
@@ -155,18 +156,21 @@ export function FormularioEditarNegocio({ negocio, categorias }: { negocio: Nego
         <label htmlFor="foto_capa" className="text-sm font-medium text-barro-800">
           Foto de capa
         </label>
-        {negocio.foto_capa_url && (
-          <div className="relative mt-2 h-32 w-full max-w-xs overflow-hidden rounded-xl bg-barro-100">
-            <Image src={negocio.foto_capa_url} alt="Capa atual" fill className="object-cover" />
-          </div>
-        )}
-        <input
-          type="file"
-          id="foto_capa"
-          name="foto_capa"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          className="mt-2 block w-full text-sm text-barro-600 file:mr-3 file:rounded-lg file:border-0 file:bg-barro-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-barro-700 hover:file:bg-barro-200"
-        />
+        <div className="mt-2">
+          <CampoFotoRecortada
+            name="foto_capa"
+            id="foto_capa"
+            proporcao={16 / 9}
+            atual={negocio.foto_capa_url}
+            rotulo="Escolher e recortar a capa"
+            dica="Aparece no topo do seu perfil e nos cartões da busca e da página inicial."
+            previas={[
+              { rotulo: 'Topo do perfil', proporcao: 390 / 220, largura: 195 },
+              { rotulo: 'Página inicial', proporcao: 2.3, largura: 150 },
+              { rotulo: 'Lista da busca', proporcao: 1, largura: 76 },
+            ]}
+          />
+        </div>
       </div>
 
       <div id="fotos" className="scroll-mt-20">

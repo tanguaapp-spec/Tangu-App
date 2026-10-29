@@ -1,3 +1,4 @@
+import { CampoFotoRecortada } from '@/components/ui/campo-foto-recortada'
 import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
 import { createServiceClient } from '@/lib/supabase/server'
@@ -210,7 +211,12 @@ export default async function PaginaAdminDivulgacao({ searchParams }: { searchPa
                   <div className="grid gap-3 sm:grid-cols-2">
                     <label className="text-sm">
                       <span className="text-barro-600">Arte (imagem, até 5 MB; banner fica melhor em 1200×400)</span>
-                      <input type="file" name="arte" accept="image/*" className={campo} />
+                      <CampoFotoRecortada
+                        name="arte"
+                        proporcao={3}
+                        rotulo="Escolher e recortar a arte"
+                        previas={[{ rotulo: 'Banner no celular', proporcao: 3, largura: 300 }]}
+                      />
                     </label>
                     <label className="text-sm">
                       <span className="text-barro-600">Link ao tocar (vazio = perfil do negócio)</span>

@@ -1,5 +1,6 @@
 'use client'
 
+import { RecortarFoto } from '@/components/ui/recortar-foto'
 import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -25,6 +26,8 @@ export function FormularioProduto({
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [previa, setPrevia] = useState<string | null>(produto?.imagem_url ?? null)
+  const [paraRecortar, setParaRecortar] = useState<File | null>(null)
+  const campoFoto = useRef<HTMLInputElement>(null)
   const id = produto?.id ?? 'novo'
 
   return (
@@ -59,17 +62,39 @@ export function FormularioProduto({
             </span>
           )}
           <input
+            ref={campoFoto}
             type="file"
             name="foto"
             accept="image/jpeg,image/png,image/webp"
+            data-compactado="1"
             className="sr-only"
             aria-label="Foto do item (opcional)"
             onChange={(e) => {
               const f = e.target.files?.[0]
-              if (f) setPrevia(URL.createObjectURL(f))
+              // abre o recorte; o arquivo recortado volta pra este mesmo campo (preencher por código não dispara "change")
+              if (f) setParaRecortar(f)
             }}
           />
         </label>
+        {paraRecortar && (
+          <RecortarFoto
+            arquivo={paraRecortar}
+            proporcao={1}
+            titulo="Ajustar foto do item"
+            previas={[{ rotulo: 'No catálogo', proporcao: 1, largura: 76 }]}
+            aoCancelar={() => {
+              setParaRecortar(null)
+              if (campoFoto.current) campoFoto.current.value = ''
+            }}
+            aoConfirmar={(foto, url) => {
+              const dt = new DataTransfer()
+              dt.items.add(foto)
+              if (campoFoto.current) campoFoto.current.files = dt.files
+              setPrevia(url)
+              setParaRecortar(null)
+            }}
+          />
+        )}
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <label className="sr-only" htmlFor={`nome-${id}`}>
             Nome do item

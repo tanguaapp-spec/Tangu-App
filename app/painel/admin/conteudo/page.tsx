@@ -1,3 +1,4 @@
+import { CampoFotoRecortada } from '@/components/ui/campo-foto-recortada'
 import Link from 'next/link'
 import { createServiceClient } from '@/lib/supabase/server'
 import { decidirSugestaoEvento, removerServicoUtil, salvarNoticia, salvarServicoUtil } from '@/lib/actions/conteudo-actions'
@@ -67,7 +68,12 @@ function FormNoticia({ n }: { n?: Noticia }) {
           </label>
           <label className="text-sm">
             <span className="text-barro-600">Imagem</span>
-            <input type="file" name="imagem" accept="image/*" className={campo} />
+            <CampoFotoRecortada
+              name="imagem"
+              proporcao={16 / 9}
+              rotulo="Escolher e recortar"
+              previas={[{ rotulo: 'Na notícia', proporcao: 16 / 9, largura: 200 }, { rotulo: 'Na lista', proporcao: 1, largura: 96 }]}
+            />
           </label>
           <label className="text-sm">
             <span className="text-barro-600">Situação</span>
