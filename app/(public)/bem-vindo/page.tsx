@@ -31,7 +31,11 @@ export default async function PaginaBemVindo() {
         agora mesmo.
       </p>
       <div className="mt-8 rounded-casca border border-barro-100 bg-superficie p-6 shadow-feira">
-        <AssistenteBoasVindas categorias={categorias as Categoria[]} bairroAtual={perfil?.bairro ?? null} />
+        <AssistenteBoasVindas
+          categorias={categorias as Categoria[]}
+          bairroAtual={perfil?.bairro ?? null}
+          iniciais={(perfil as (Perfil & { categorias_interesse?: string[] }) | null)?.categorias_interesse ?? []}
+        />
       </div>
       <p className="mt-6 text-sm text-barro-600">
         Tem um negócio ou trabalha por conta própria?{' '}

@@ -9,8 +9,8 @@ import { salvarInteresses } from '@/lib/actions/perfil-actions'
 import { cn } from '@/lib/utils'
 import type { Categoria } from '@/lib/types/database'
 
-export function AssistenteBoasVindas({ categorias, bairroAtual }: { categorias: Categoria[]; bairroAtual: string | null }) {
-  const [escolhidas, setEscolhidas] = useState<string[]>([])
+export function AssistenteBoasVindas({ categorias, bairroAtual, iniciais = [] }: { categorias: Categoria[]; bairroAtual: string | null; iniciais?: string[] }) {
+  const [escolhidas, setEscolhidas] = useState<string[]>(iniciais)
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const router = useRouter()
