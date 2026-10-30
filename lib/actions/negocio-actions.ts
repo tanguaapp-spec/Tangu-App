@@ -58,7 +58,7 @@ export async function alternarFavorito(negocioId: string) {
 
     if (error) return { erro: traduzirErroBanco(error) }
     await registrarEventoPerfil(negocioId, 'favorito', { usuarioId: user.id })
-    creditarPontos(user.id, 'favorito').catch(() => {})
+    creditarPontos(user.id, 'favorito', negocioId).catch(() => {})
   }
 
   revalidatePath(`/negocio/${negocioId}`)
@@ -139,7 +139,7 @@ export async function enviarAvaliacao(negocioId: string, formData: FormData) {
   if (error) return { erro: traduzirErroBanco(error) }
 
   if (!avaliacaoExistente) {
-    creditarPontos(user.id, 'avaliacao').catch(() => {})
+    creditarPontos(user.id, 'avaliacao', negocioId).catch(() => {})
     // avisa o dono (e a equipe dele) — responder avaliação aumenta a confiança
     const { data: negocio } = await createServiceClient().from('negocios').select('*').eq('id', negocioId).maybeSingle()
     if (negocio?.reivindicado_por && negocio.reivindicado_por !== user.id) {

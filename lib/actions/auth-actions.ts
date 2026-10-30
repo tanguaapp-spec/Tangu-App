@@ -89,18 +89,9 @@ export async function cadastrarComEmail(formData: FormData) {
   // congelada logo depois da resposta, então um "fire-and-forget" aqui
   // corre o risco de nunca completar.
   if (cadastro.user) {
-    await creditarPontos(cadastro.user.id, 'boas_vindas').catch(() => {})
-
-    if (codigoConvite) {
-      const { data: perfilNovo } = await createServiceClient()
-        .from('perfis')
-        .select('convidado_por')
-        .eq('id', cadastro.user.id)
-        .maybeSingle()
-      if (perfilNovo?.convidado_por) {
-        await creditarPontos(perfilNovo.convidado_por, 'indicacao').catch(() => {})
-      }
-    }
+    await creditarPontos(cadastro.user.id, 'boas_vindas', 'unico').catch(() => {})
+    // a indicação (+20 pra quem convidou) é creditada pelo banco quando este
+    // e-mail for confirmado (migration 0029): conta falsa não rende pontos
   }
 
   redirect('/cadastrar/confirme-seu-email')

@@ -59,6 +59,23 @@ export const GUIAS = {
     passos: ['Escolha a lista', 'Use "Contatar um de cada vez" para ir em sequência', 'Envie a mensagem', 'Registre o resultado e marque o retorno'],
     dica: 'A equipe de crescimento (cadastrada em Usuários) vê esta mesma tela em /painel/crescimento.',
   },
+  engajamento: {
+    titulo: 'Engajamento e prêmios',
+    href: '/painel/admin/engajamento',
+    resumo: 'Ranking mensal de quem mais participa do app e os prêmios que os parceiros oferecem aos moradores mais engajados.',
+    sozinho: [
+      'Laranjas são dadas sozinhas: boas-vindas (+10), avaliar (+10, uma vez por negócio), favoritar (+2, uma vez por negócio), completar o perfil (+5) e indicar um vizinho (+20, só quando ele confirma o e-mail).',
+      'O ranking do mês soma as Laranjas ganhas no mês. Admins, equipe e contas suspensas ficam fora.',
+      'O selo de cada morador aparece ao lado do nome nas avaliações.',
+      'Quem recebe um prêmio é avisado no app e no celular. Sem prêmio visível, os moradores veem "prêmios chegando em breve".',
+    ],
+    voces: [
+      'Fechar a parceria e cadastrar o prêmio (o que é, quem oferece, como ganhar).',
+      'No fim do mês, olhar o ranking (ou baixar a planilha, que traz e-mail e WhatsApp) e tocar em "Dar prêmio".',
+      'Combinar a entrega com o morador e o parceiro, e marcar como entregue.',
+    ],
+    passos: ['Cadastrar o prêmio', 'Fim do mês: ver o ranking', 'Dar prêmio', 'Combinar a entrega', 'Marcar entregue'],
+  },
   divulgacao: {
     titulo: 'Divulgação paga',
     href: '/painel/admin/divulgacao',
@@ -371,6 +388,16 @@ export const FLUXOS: Fluxo[] = [
     sozinho: ['Lojista publica pelo próprio painel.'],
     voces: ['Quem não tem perfil: publicar por eles em Vagas.'],
     onde: { rotulo: 'Vagas', href: '/painel/admin/vagas' },
+  },
+  {
+    titulo: 'Morador ganha Laranjas e prêmios',
+    quem: 'Morador, ao usar o app',
+    sozinho: [
+      'Cada ação conta uma vez só (favoritar o mesmo negócio de novo não soma). Indicação só conta quando o vizinho confirma o e-mail.',
+      'A página Prêmios mostra os prêmios, como ganhar e a posição da pessoa no ranking do mês.',
+    ],
+    voces: ['Cadastrar prêmios dos parceiros, escolher os ganhadores no ranking e entregar.'],
+    onde: { rotulo: 'Engajamento', href: '/painel/admin/engajamento' },
   },
   {
     titulo: 'Usuário exclui a conta',

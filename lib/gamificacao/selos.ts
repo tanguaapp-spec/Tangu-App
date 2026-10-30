@@ -27,3 +27,10 @@ export function calcularSelos(totalAvaliacoes: number, totalFavoritos: number): 
 
   return selos
 }
+
+/** O selo mais alto, para mostrar ao lado do nome (nas avaliações). */
+export function seloPrincipal(totalAvaliacoes: number, totalFavoritos: number): DefinicaoSelo | null {
+  const selos = calcularSelos(totalAvaliacoes, totalFavoritos)
+  const ordem = ['vizinho-nota-10', 'vizinho-ativo', 'explorador-tangua', 'primeira-avaliacao']
+  return ordem.map((c) => selos.find((s) => s.chave === c)).find(Boolean) ?? null
+}

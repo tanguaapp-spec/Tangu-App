@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound, permanentRedirect } from 'next/navigation'
-import { BadgeCheck, ChevronLeft, FileText, Globe, Instagram, MessageCircle, Navigation, Star } from 'lucide-react'
+import { Award, BadgeCheck, ChevronLeft, FileText, Globe, Instagram, MessageCircle, Navigation, Star } from 'lucide-react'
 import { buscarNegocioPorSlugOuId, isFavorito, buscarCupomAtivo, buscarCartaoFidelidade } from '@/lib/queries/negocios'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { registrarEventoPerfil, lerOrigem } from '@/lib/metricas/eventos-perfil'
@@ -28,6 +28,8 @@ import { AgendaWhatsapp } from '@/components/negocio/agenda-whatsapp'
 import { lerConfig } from '@/lib/config/ler'
 import { recursosDoNegocio } from '@/lib/planos/recursos'
 import type { Negocio } from '@/lib/types/database'
+import { selosDosAutores } from '@/lib/gamificacao/selos-publicos'
+import type { DefinicaoSelo } from '@/lib/gamificacao/selos'
 
 export const dynamic = 'force-dynamic'
 
@@ -86,7 +88,9 @@ type Avaliacao = {
   foto_url: string | null
   resposta_profissional: string | null
   criado_em: string
+  autor_id: string
   autor: { nome_completo: string; avatar_url: string | null } | null
+  selo?: DefinicaoSelo | null
 }
 
 const botaoCapa = 'flex h-11 w-11 items-center justify-center rounded-[14px] bg-white text-[#13241D] shadow-sm'
@@ -134,6 +138,9 @@ export default async function PaginaNegocio({ params, searchParams }: { params: 
       : { data: null }
 
   const avaliacoes = (avaliacoesBrutas ?? []) as unknown as Avaliacao[]
+  // selo de quem avaliou, ao lado do nome (reconhecimento público)
+  const selos = await selosDosAutores(supabase, avaliacoes.map((a) => a.autor_id))
+  for (const a of avaliacoes) a.selo = selos.get(a.autor_id) ?? null
   const salvosIds = new Set(((salvos as { data: { produto_id: string }[] | null }).data ?? []).map((s) => s.produto_id))
   // nota: a da comunidade (trigger da 0020) — antes da migration, calcula aqui
   const notaCalculada = avaliacoes.length ? avaliacoes.reduce((s, a) => s + a.nota, 0) / avaliacoes.length : null
@@ -592,7 +599,14 @@ function ItemAvaliacao({ av, negocioId, logado }: { av: Avaliacao; negocioId: st
   return (
     <article className="flex flex-col gap-1.5 border-b border-barro-100 pb-3.5 last:border-0 last:pb-0">
       <span className="flex items-center justify-between gap-2">
-        <b className="truncate text-barro-900">{av.autor?.nome_completo ?? 'Morador(a)'}</b>
+        <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
+          <b className="truncate text-barro-900">{av.autor?.nome_completo ?? 'Morador(a)'}</b>
+          {av.selo && (
+            <span title={av.selo.descricao} className="inline-flex items-center gap-1 rounded-full bg-casca-100 px-2 py-0.5 text-xs font-semibold text-casca-900">
+              <Award className="h-3 w-3" aria-hidden="true" /> {av.selo.rotulo}
+            </span>
+          )}
+        </span>
         <span className="shrink-0 font-bold tracking-wider text-casca-700" aria-label={`${av.nota} de 5 estrelas`}>
           {'★'.repeat(av.nota)}
           <span className="text-barro-200">{'★'.repeat(5 - av.nota)}</span>

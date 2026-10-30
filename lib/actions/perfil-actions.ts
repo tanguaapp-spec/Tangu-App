@@ -39,7 +39,7 @@ export async function atualizarPerfil(dados: { nome_completo?: string; telefone?
   }
 
   if (validado.data.bairro && !(await jaCreditouPontos(user.id, 'perfil_completo'))) {
-    await creditarPontos(user.id, 'perfil_completo').catch(() => {})
+    await creditarPontos(user.id, 'perfil_completo', 'unico').catch(() => {})
   }
 
   revalidatePath('/perfil')

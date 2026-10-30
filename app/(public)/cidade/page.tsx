@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Briefcase, CalendarDays, ChevronRight, FileText, Map, MessagesSquare, Newspaper, Phone, type LucideIcon } from 'lucide-react'
+import { Briefcase, CalendarDays, ChevronRight, FileText, Map, MessagesSquare, Newspaper, Phone, Trophy, type LucideIcon } from 'lucide-react'
 import { lerConfig } from '@/lib/config/ler'
 import { bairrosComNegocios } from '@/lib/queries/negocios'
 
@@ -17,6 +17,7 @@ const ATALHOS: { href: string; titulo: string; detalhe: string; icone: LucideIco
   { href: '/mapa', titulo: 'Mapa', detalhe: 'Comércios perto de você', icone: Map, modulo: 'mapa' },
   { href: '/vagas', titulo: 'Vagas de emprego', detalhe: 'Trabalhe perto de casa', icone: Briefcase, modulo: 'vagas' },
   { href: '/mural', titulo: 'Mural', detalhe: 'Recados e perguntas entre vizinhos', icone: MessagesSquare, modulo: 'mural' },
+  { href: '/premios', titulo: 'Prêmios', detalhe: 'Participe e concorra a prêmios dos parceiros', icone: Trophy },
   { href: '/orcamentos/novo', titulo: 'Pedir orçamento', detalhe: 'Vários profissionais respondem', icone: FileText, modulo: 'orcamentos' },
 ]
 

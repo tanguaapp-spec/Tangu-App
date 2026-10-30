@@ -16,6 +16,7 @@ import {
   Sparkles,
   Store,
   Ticket,
+  Trophy,
   type LucideIcon,
 } from 'lucide-react'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
@@ -161,7 +162,9 @@ export default async function PaginaVoce({ searchParams }: { searchParams: { sen
           <h1 className="truncate font-display text-2xl font-bold text-barro-900">{perfil.nome_completo}</h1>
           <p className="text-sm text-barro-600">
             {perfil.bairro ? `${perfil.bairro} · ` : ''}
-            <span className="font-mono font-bold text-casca-700">{saldoLaranjas}</span> {saldoLaranjas === 1 ? 'laranja' : 'laranjas'}
+            <Link href="/premios" className="underline-offset-2 hover:underline">
+              <span className="font-mono font-bold text-casca-700">{saldoLaranjas}</span> {saldoLaranjas === 1 ? 'laranja' : 'laranjas'}
+            </Link>
           </p>
         </div>
       </header>
@@ -229,6 +232,7 @@ export default async function PaginaVoce({ searchParams }: { searchParams: { sen
         <Linha href="/notificacoes" icone={Bell} rotulo="Notificações" detalhe={naoLidas} />
         <Linha href="/agenda" icone={CalendarDays} rotulo="Agenda da cidade" />
         <Linha href="/bem-vindo" icone={Bookmark} rotulo="Seus interesses" />
+        <Linha href="/premios" icone={Trophy} rotulo="Prêmios e Laranjas" detalhe={saldoLaranjas} />
       </Grupo>
 
       {cartoesFidelidade.length > 0 && <CartoesFidelidade cartoes={cartoesFidelidade as never} />}
