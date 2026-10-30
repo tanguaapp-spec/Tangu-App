@@ -1,12 +1,30 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { FormularioCadastrar } from '@/components/auth/formulario-cadastrar'
+import { createClient } from '@/lib/supabase/server'
+import { caminhoInternoSeguro } from '@/lib/site'
+import { negocioDoPainel } from '@/lib/painel/negocio-atual'
 
-export default function PaginaCadastrar({
+export const dynamic = 'force-dynamic'
+
+export default async function PaginaCadastrar({
   searchParams,
 }: {
-  searchParams: { papel?: string; convite?: string; origem?: string }
+  searchParams: { papel?: string; convite?: string; origem?: string; next?: string }
 }) {
   const papelInicial = searchParams.papel === 'profissional' ? 'profissional' : 'morador'
+
+  // quem já está logado não precisa criar conta: segue pro destino
+  // (lojista vai pro painel, que oferece cadastrar o negócio se ainda não tiver)
+  const {
+    data: { user },
+  } = await createClient().auth.getUser()
+  if (user) {
+    let destino = caminhoInternoSeguro(searchParams.next, papelInicial === 'profissional' ? '/painel/negocio' : '/')
+    // sem negócio ainda, as telas internas do painel mandariam de volta pro painel: vai direto
+    if (destino.startsWith('/painel/negocio/') && !(await negocioDoPainel()).negocio) destino = '/painel/negocio'
+    redirect(destino)
+  }
 
   return (
     <div className="rounded-casca border border-barro-100 bg-superficie p-8 shadow-feira-lg">

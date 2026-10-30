@@ -1,7 +1,18 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { FormularioEntrar } from '@/components/auth/formulario-entrar'
+import { createClient } from '@/lib/supabase/server'
+import { caminhoInternoSeguro } from '@/lib/site'
 
-export default function PaginaEntrar({ searchParams }: { searchParams: { erro?: string; next?: string } }) {
+export const dynamic = 'force-dynamic'
+
+export default async function PaginaEntrar({ searchParams }: { searchParams: { erro?: string; next?: string } }) {
+  // já logado: vai direto pra onde queria ir
+  const {
+    data: { user },
+  } = await createClient().auth.getUser()
+  if (user) redirect(caminhoInternoSeguro(searchParams.next, '/'))
+
   return (
     <div className="rounded-casca border border-barro-100 bg-superficie p-8 shadow-feira-lg">
       <h1 className="font-display text-2xl font-semibold text-barro-900">Entrar</h1>

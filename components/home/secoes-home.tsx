@@ -32,7 +32,7 @@ export function SecaoOfertas({ ofertas }: { ofertas: OfertaHome[] }) {
       {ofertas.length === 0 ? (
         <Vazio>
           Nenhuma oferta valendo agora. Tem um negócio?{' '}
-          <Link href="/cadastrar?papel=profissional" className="font-bold text-casca-700 underline">
+          <Link href="/cadastrar?papel=profissional&next=/painel/negocio/ofertas" className="font-bold text-casca-700 underline">
             Publique a primeira — é grátis.
           </Link>
         </Vazio>

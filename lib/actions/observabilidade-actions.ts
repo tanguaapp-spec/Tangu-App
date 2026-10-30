@@ -29,7 +29,9 @@ export async function registrarErroCliente(
     url: typeof url === 'string' ? url : undefined,
     usuarioId: user?.id ?? null,
     // ação sem resposta costuma ser internet ruim: aviso, não erro
-    nivel: origem === 'acao_sem_resposta' ? 'warning' : 'error',
+    // #419 = o React terminou de montar a página no navegador (acontece quando a página
+    // redireciona enquanto carrega); a pessoa não percebe nada, então é só aviso
+    nivel: origem === 'acao_sem_resposta' || /Minified React error #419/.test(mensagem) ? 'warning' : 'error',
     origem,
     detalhes: {
       ...lerUserAgent(headers().get('user-agent')),

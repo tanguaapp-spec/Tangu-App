@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { registrarErroCliente } from '@/lib/actions/observabilidade-actions'
 
 /** Barulho que não é bug do app (extensões, abortos de navegação, avisos do navegador). */
-const IGNORAR = /ResizeObserver loop|chrome-extension:|moz-extension:|safari-extension:|AbortError|The user aborted|Load failed$|NEXT_REDIRECT|NEXT_NOT_FOUND|Non-Error promise rejection/i
+const IGNORAR = /ResizeObserver loop|chrome-extension:|moz-extension:|safari-extension:|AbortError|The user aborted|Load failed$|NEXT_REDIRECT|NEXT_NOT_FOUND|Non-Error promise rejection|^Script error\.?$/i
 
 function extra(origem: string) {
   return {
