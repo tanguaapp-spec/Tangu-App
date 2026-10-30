@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { dataHora } from '@/lib/datas'
 
 export type MensagemChamado = { id: string; corpo: string; do_suporte: boolean; criado_em: string }
 
@@ -13,7 +14,7 @@ export function ConversaChamado({ mensagens, visaoSuporte }: { mensagens: Mensag
           <li key={m.id} className={cn('flex', minha ? 'justify-end' : 'justify-start')}>
             <div className={cn('max-w-[85%] rounded-2xl px-4 py-3 text-sm', m.do_suporte ? 'bg-mata-50 text-mata-900' : 'bg-superficie text-barro-900 shadow-sm')}>
               <p className="mb-1 text-xs font-semibold text-barro-500">
-                {m.do_suporte ? 'Suporte Tanguá App' : visaoSuporte ? 'Usuário' : 'Você'} · {new Date(m.criado_em).toLocaleString('pt-BR')}
+                {m.do_suporte ? 'Suporte Tanguá App' : visaoSuporte ? 'Usuário' : 'Você'} · {dataHora(m.criado_em)}
               </p>
               <p className="whitespace-pre-wrap break-words">{m.corpo}</p>
             </div>

@@ -3,6 +3,7 @@ import { salvarConfiguracao } from '@/lib/actions/admin-config-actions'
 import { FormularioAcao } from '@/components/painel/admin/formulario-acao'
 import { DEFINICOES_CONFIG, type ChaveConfig } from '@/lib/admin/configuracoes'
 import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
+import { dataHora } from '@/lib/datas'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,7 +59,7 @@ export default async function PaginaAdminConfiguracoes() {
                     className="mt-2 w-full max-w-sm rounded-lg border border-barro-300 px-3 py-1.5 text-sm"
                   />
                 )}
-                {atual && <p className="mt-1 text-xs text-barro-400">Alterado em {new Date(atual.atualizado_em).toLocaleString('pt-BR')}</p>}
+                {atual && <p className="mt-1 text-xs text-barro-400">Alterado em {dataHora(atual.atualizado_em)}</p>}
               </FormularioAcao>
             </section>
           )

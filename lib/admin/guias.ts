@@ -231,7 +231,11 @@ export const GUIAS = {
       'Quando vocês respondem ou resolvem, a pessoa é avisada no app e pode responder de volta.',
       'Depois de resolvido, a pessoa dá uma nota ao atendimento (vai para Crescimento).',
     ],
-    voces: ['Responder dentro do chamado e mudar a situação (respondido, resolvido). Responder no mesmo dia sempre que possível.'],
+    voces: [
+      'Responder dentro do chamado e mudar a situação (respondido, resolvido). Responder no mesmo dia sempre que possível.',
+      'Pedidos de acesso pelo WhatsApp (quadro laranja no topo): tocar em "Gerar link e enviar no WhatsApp" e mandar a mensagem. O link vale 1 hora, então gere só na hora de enviar.',
+    ],
+    dica: 'Para mandar o link de nova senha a alguém que pediu por outro canal, use Usuários → Ver dados → "Mandar link de nova senha no WhatsApp".',
   },
   assinaturas: {
     titulo: 'Assinaturas e pagamentos',
@@ -327,6 +331,18 @@ export const FLUXOS: Fluxo[] = [
     ],
     voces: ['Nada. Só entram se houver denúncia ou chamado de suporte.'],
     onde: { rotulo: 'Denúncias', href: '/painel/admin/denuncias' },
+  },
+  {
+    titulo: 'Usuário esqueceu a senha',
+    quem: 'Qualquer pessoa, em Entrar → Esqueci minha senha',
+    sozinho: [
+      'Pelo e-mail: o link de nova senha chega sozinho (vale 1 hora).',
+      'Se o e-mail não chega, a pessoa toca em "Receber pelo WhatsApp". Vocês recebem notificação e o pedido aparece no topo do Suporte.',
+      'O link só vai para o WhatsApp que já está na conta (perfil ou negócio). Ninguém consegue pedir para outro número.',
+      'Abrir o link mostra o botão "Criar nova senha"; só ao tocar ele é usado (a prévia do WhatsApp não gasta o link).',
+    ],
+    voces: ['Tocar em "Gerar link e enviar no WhatsApp" e enviar a mensagem pronta.', 'Conta sem WhatsApp: pedir que a pessoa fale com vocês por outro canal e confirme quem é.'],
+    onde: { rotulo: 'Chamados de suporte', href: '/painel/admin/suporte' },
   },
   {
     titulo: 'Usuário abre um chamado de suporte',

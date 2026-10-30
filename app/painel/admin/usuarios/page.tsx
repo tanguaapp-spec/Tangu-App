@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { EnviarAcessoWhatsapp } from '@/components/painel/admin/enviar-acesso-whatsapp'
 import { createServiceClient } from '@/lib/supabase/server'
 import { FormularioAcao } from '@/components/painel/admin/formulario-acao'
 import { alterarAcessoCrescimento, reativarUsuario, suspenderUsuario } from '@/lib/actions/admin-gestao-actions'
 import { termoSeguro } from '@/lib/queries/negocios'
 import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
+import { dataCurta } from '@/lib/datas'
 
 export const metadata: Metadata = { title: 'Usuários', robots: { index: false } }
 export const dynamic = 'force-dynamic'
@@ -150,7 +152,7 @@ export default async function PaginaUsuarios({ searchParams }: { searchParams: {
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <b className="text-barro-900">{u.nome_completo}</b>
               <span className="text-xs text-barro-600">
-                {u.papel} · desde {new Date(u.criado_em).toLocaleDateString('pt-BR')}
+                {u.papel} · desde {dataCurta(u.criado_em)}
                 {u.origem_cadastro ? ` · veio de ${u.origem_cadastro}` : ''}
               </span>
             </div>
@@ -162,7 +164,7 @@ export default async function PaginaUsuarios({ searchParams }: { searchParams: {
             {u.suspenso_em ? (
               <div className="mt-2 flex flex-wrap items-center gap-3 rounded-xl bg-red-50 p-3 text-sm text-red-800">
                 <span className="flex-1">
-                  Suspenso em {new Date(u.suspenso_em).toLocaleDateString('pt-BR')}: {u.motivo_suspensao}
+                  Suspenso em {dataCurta(u.suspenso_em)}: {u.motivo_suspensao}
                 </span>
                 <FormularioAcao acao={reativarUsuario.bind(null, u.id)} rotuloBotao="Reativar">
                   <span />
@@ -230,6 +232,9 @@ function FichaUsuario({ u, conta, extra }: { u: Linha; conta?: DadosAuth; extra:
             </div>
           ))}
         </dl>
+        <div>
+          <EnviarAcessoWhatsapp perfilId={u.id} rotulo="Mandar link de nova senha no WhatsApp" />
+        </div>
         {negocios.length > 0 && (
           <div>
             <b className="text-barro-900">Negócios</b>

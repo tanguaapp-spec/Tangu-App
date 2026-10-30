@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { dentroDoLimite } from '@/lib/seguranca/rate-limit'
+import { diaISO } from '@/lib/datas'
 
 export const dynamic = 'force-dynamic'
 
@@ -87,7 +88,7 @@ export async function GET() {
   return new NextResponse(JSON.stringify(exportacao, null, 2), {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
-      'Content-Disposition': `attachment; filename="meus-dados-tangua-app-${new Date().toISOString().slice(0, 10)}.json"`,
+      'Content-Disposition': `attachment; filename="meus-dados-tangua-app-${diaISO()}.json"`,
       'Cache-Control': 'no-store',
     },
   })

@@ -17,6 +17,7 @@ import { dentroDoLimite } from '@/lib/seguranca/rate-limit'
 import { agendarLembreteAvaliacao } from '@/lib/avaliacoes/lembretes'
 import { normalizarInstagram, normalizarSite, normalizarTelefoneBR } from '@/lib/utils'
 import type { ModalidadeAtendimento } from '@/lib/types/database'
+import { dataHora } from '@/lib/datas'
 
 const MODALIDADES_VALIDAS = ['loja_fisica', 'atende_em_casa', 'atende_domicilio', 'servico_digital'] as const
 
@@ -848,7 +849,7 @@ export async function validarCodigoCupom(formData: FormData) {
     return { erro: null, mensagem: `Cupom válido: ${r.titulo} — ${r.desconto}. Marcado como usado.` }
   }
   if (r.resultado === 'ja_usado') {
-    return { erro: `Esse código já foi usado em ${new Date(r.usado_em!).toLocaleString('pt-BR')}.` }
+    return { erro: `Esse código já foi usado em ${dataHora(r.usado_em!)}.` }
   }
   return { erro: 'Código não encontrado entre os cupons do seu negócio.' }
 }

@@ -6,6 +6,7 @@ import { marcarPedidoVisto } from '@/lib/actions/orcamento-actions'
 import { ResponderOrcamento } from '@/components/painel/responder-orcamento'
 import { negocioDoPainel } from '@/lib/painel/negocio-atual'
 import { formatarCentavos } from '@/lib/queries/planos'
+import { dataCurta, dataHora } from '@/lib/datas'
 
 export const metadata: Metadata = { title: 'Pedido de orçamento', robots: { index: false } }
 export const dynamic = 'force-dynamic'
@@ -49,7 +50,7 @@ export default async function PaginaPedidoRecebido({ params }: { params: { id: s
       <h1 className="mt-2 font-display text-2xl font-semibold text-barro-900">{pedido.titulo}</h1>
       <p className="text-sm text-barro-500">
         {primeiroNome}
-        {pedido.bairro ? ` · ${pedido.bairro}` : ''} · {new Date(pedido.criado_em).toLocaleDateString('pt-BR')}
+        {pedido.bairro ? ` · ${pedido.bairro}` : ''} · {dataCurta(pedido.criado_em)}
       </p>
       <p className="mt-4 whitespace-pre-wrap rounded-[20px] border border-barro-200/80 bg-superficie p-4 text-barro-800">{pedido.descricao}</p>
 
@@ -63,7 +64,7 @@ export default async function PaginaPedidoRecebido({ params }: { params: { id: s
                 <p className="mt-1 text-xs">
                   {r.valor_centavos !== null && `${formatarCentavos(r.valor_centavos)} · `}
                   {r.prazo && `${r.prazo} · `}
-                  {new Date(r.criado_em).toLocaleString('pt-BR')}
+                  {dataHora(r.criado_em)}
                   {r.vista_em ? ' · visto pelo morador' : ' · ainda não visto'}
                 </p>
               </li>

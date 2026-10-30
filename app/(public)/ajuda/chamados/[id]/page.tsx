@@ -8,6 +8,7 @@ import { Selo } from '@/components/ui/selo'
 import { ConversaChamado, type MensagemChamado } from '@/components/ajuda/conversa-chamado'
 import { ResponderChamado } from '@/components/ajuda/responder-chamado'
 import { CATEGORIAS_CHAMADO, STATUS_CHAMADO, type CategoriaChamado } from '@/lib/ajuda/chamados'
+import { dataHora } from '@/lib/datas'
 
 export const metadata: Metadata = { title: 'Chamado', robots: { index: false } }
 export const dynamic = 'force-dynamic'
@@ -49,7 +50,7 @@ export default async function PaginaChamado({ params, searchParams }: { params: 
         <div>
           <h1 className="font-display text-2xl font-semibold text-barro-900">{chamado.assunto}</h1>
           <p className="text-sm text-barro-500">
-            {CATEGORIAS_CHAMADO[chamado.categoria as CategoriaChamado]} · aberto em {new Date(chamado.criado_em).toLocaleString('pt-BR')}
+            {CATEGORIAS_CHAMADO[chamado.categoria as CategoriaChamado]} · aberto em {dataHora(chamado.criado_em)}
           </p>
         </div>
         <Selo tom={STATUS_CHAMADO[chamado.status]?.tom ?? 'neutro'}>{STATUS_CHAMADO[chamado.status]?.rotulo ?? chamado.status}</Selo>

@@ -5,6 +5,7 @@ import type { ModalidadeAtendimento, Negocio } from '@/lib/types/database'
 import { headers } from 'next/headers'
 import { aplicarEspeciais, situacaoHorario, type HorarioEspecial } from '@/lib/horario/funcionamento'
 import { ehRobo } from '@/lib/metricas/eventos-perfil'
+import { diaISO } from '@/lib/datas'
 
 export type OrdemBusca = 'relevancia' | 'nota' | 'novos'
 
@@ -203,7 +204,7 @@ export async function buscarAchadoDoDia(): Promise<Negocio | null> {
 
   if (!count || count === 0) return null
 
-  const hoje = new Date().toISOString().slice(0, 10)
+  const hoje = diaISO()
   let hash = 0
   for (const char of hoje) hash = (hash * 31 + char.charCodeAt(0)) % 1_000_000
   const indice = hash % count

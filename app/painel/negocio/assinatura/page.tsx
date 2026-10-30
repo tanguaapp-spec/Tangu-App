@@ -12,6 +12,7 @@ import { BotaoCancelarAssinatura } from '@/components/planos/botao-cancelar-assi
 import { BotaoAtualizarStatus } from '@/components/planos/botao-atualizar-status'
 import { ResumoUsoPlano } from '@/components/planos/uso-plano'
 import { Selo } from '@/components/ui/selo'
+import { dataCurta } from '@/lib/datas'
 
 export const metadata: Metadata = { title: 'Plano e assinatura', robots: { index: false } }
 export const dynamic = 'force-dynamic'
@@ -26,7 +27,7 @@ const ROTULO_PAGAMENTO: Record<string, { texto: string; tom: 'verde' | 'aviso' |
 }
 
 function data(iso: string | null) {
-  return iso ? new Date(iso).toLocaleDateString('pt-BR') : '—'
+  return iso ? dataCurta(iso) : '—'
 }
 
 export default async function PaginaAssinatura({ searchParams }: { searchParams: { retorno?: string } }) {

@@ -5,6 +5,7 @@ import { FormularioAcao } from '@/components/painel/admin/formulario-acao'
 import { marcarCodigoEnviado } from '@/lib/actions/reivindicacao-codigo-actions'
 import { requireAdminOrRedirect } from '@/lib/auth/require-admin'
 import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
+import { dataHora } from '@/lib/datas'
 
 export default async function PainelReivindicacoes() {
   await requireAdminOrRedirect()
@@ -51,7 +52,7 @@ export default async function PainelReivindicacoes() {
             <article key={c.id} className="flex flex-col gap-2 rounded-casca border border-barro-100 bg-superficie p-4">
               <b className="text-barro-900">{(c.negocio as unknown as { nome?: string } | null)?.nome}</b>
               <p className="text-sm text-barro-600">
-                Pedido por {(c.pessoa as unknown as { nome_completo?: string } | null)?.nome_completo ?? 'usuário'} · {new Date(c.criado_em).toLocaleString('pt-BR')} ·{' '}
+                Pedido por {(c.pessoa as unknown as { nome_completo?: string } | null)?.nome_completo ?? 'usuário'} · {dataHora(c.criado_em)} ·{' '}
                 {c.status === 'enviado' ? 'código já enviado' : 'aguardando envio'}
               </p>
               <div className="flex flex-wrap gap-2">

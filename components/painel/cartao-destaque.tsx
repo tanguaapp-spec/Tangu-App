@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Sparkles } from 'lucide-react'
+import { dataCurta } from '@/lib/datas'
 
 /**
  * Antes o destaque era vendido por WhatsApp e ligado à mão pelo admin.
@@ -22,7 +23,7 @@ export function CartaoDestaque({
       {destaqueAtivo ? (
         <p className="mt-2 text-sm text-barro-700">
           Seu negócio está em destaque
-          {destaqueExpiraEm && ` até ${new Date(destaqueExpiraEm).toLocaleDateString('pt-BR')}`} — aparece primeiro na busca
+          {destaqueExpiraEm && ` até ${dataCurta(destaqueExpiraEm)}`} — aparece primeiro na busca
           e na página inicial.
         </p>
       ) : (

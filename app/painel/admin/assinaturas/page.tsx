@@ -2,6 +2,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { formatarCentavos } from '@/lib/queries/planos'
 import { Selo } from '@/components/ui/selo'
 import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
+import { dataHora } from '@/lib/datas'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +19,7 @@ const TOM: Record<string, 'verde' | 'aviso' | 'neutro' | 'laranja'> = {
 }
 
 function data(iso: string | null) {
-  return iso ? new Date(iso).toLocaleString('pt-BR') : '—'
+  return iso ? dataHora(iso) : '—'
 }
 
 export default async function PaginaAdminAssinaturas() {

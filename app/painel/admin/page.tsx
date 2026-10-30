@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { createServiceClient } from '@/lib/supabase/server'
 import { contarLeadsHoje } from '@/lib/leads/dados'
 import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
+import { dataHora } from '@/lib/datas'
 
 export const dynamic = 'force-dynamic'
 
@@ -158,7 +159,7 @@ export default async function PainelAdminVisaoGeral({ searchParams }: { searchPa
         <Cartao rotulo="Webhooks rejeitados (7 dias)" valor={saude.webhooksInvalidos} detalhe="assinatura HMAC inválida — possível tentativa de fraude" alerta={saude.webhooksInvalidos > 0} />
         <Cartao
           rotulo="Última manutenção (cron)"
-          valor={saude.ultimoCron ? new Date(saude.ultimoCron.criado_em).toLocaleString('pt-BR') : 'Nunca rodou'}
+          valor={saude.ultimoCron ? dataHora(saude.ultimoCron.criado_em) : 'Nunca rodou'}
           alerta={saude.cronAtrasado}
           detalhe={saude.cronAtrasado ? 'Mais de 26h sem rodar — confira os Cron Jobs na Vercel' : undefined}
         />
@@ -233,7 +234,7 @@ export default async function PainelAdminVisaoGeral({ searchParams }: { searchPa
               <li key={e.id} className="py-2">
                 <p className="text-barro-800">{e.mensagem.slice(0, 160)}</p>
                 <p className="text-xs text-barro-400">
-                  {new Date(e.criado_em).toLocaleString('pt-BR')} {e.contexto ? `· ${e.contexto}` : ''}
+                  {dataHora(e.criado_em)} {e.contexto ? `· ${e.contexto}` : ''}
                 </p>
               </li>
             ))}

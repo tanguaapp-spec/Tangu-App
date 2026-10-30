@@ -8,6 +8,7 @@ import { encerrarPedidoOrcamento, escolherRespostaOrcamento } from '@/lib/action
 import { formatarCentavos } from '@/lib/queries/planos'
 import { linkWhatsapp } from '@/lib/utils'
 import { Selo } from '@/components/ui/selo'
+import { dataCurta } from '@/lib/datas'
 
 export const metadata: Metadata = { title: 'Orçamento', robots: { index: false } }
 export const dynamic = 'force-dynamic'
@@ -74,7 +75,7 @@ export default async function PaginaPedido({ params, searchParams }: { params: {
       <p className="mt-2 whitespace-pre-wrap text-barro-700">{pedido.descricao}</p>
       <p className="mt-2 text-xs text-barro-500">
         {pedido.bairro ? `${pedido.bairro} · ` : ''}enviado a {destinatarios?.length ?? 0} negócio(s), {vistos} já viram · aberto até{' '}
-        {new Date(pedido.expira_em).toLocaleDateString('pt-BR')}
+        {dataCurta(pedido.expira_em)}
       </p>
 
       <h2 className="mt-8 font-display text-lg font-semibold text-barro-900">Respostas</h2>

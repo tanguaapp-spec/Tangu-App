@@ -7,6 +7,7 @@ import { marcarNotificacoesLidas } from '@/lib/actions/conta-actions'
 import { cn } from '@/lib/utils'
 import { SinoNotificacoes } from '@/components/notificacoes/sino-notificacoes'
 import { AtualizarSessao } from '@/components/layout/atualizar-sessao'
+import { dataHora } from '@/lib/datas'
 
 export const metadata: Metadata = { title: 'Notificações', robots: { index: false } }
 export const dynamic = 'force-dynamic'
@@ -69,7 +70,7 @@ export default async function PaginaNotificacoes() {
                   <span className={cn('font-medium', n.lida_em ? 'text-barro-700' : 'text-barro-900')}>{n.titulo}</span>
                 </span>
                 {n.corpo && <span className="mt-0.5 block text-sm text-barro-600">{n.corpo}</span>}
-                <span className="mt-1 block text-xs text-barro-400">{new Date(n.criado_em).toLocaleString('pt-BR')}</span>
+                <span className="mt-1 block text-xs text-barro-400">{dataHora(n.criado_em)}</span>
               </>
             )
             return (

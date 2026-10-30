@@ -8,6 +8,7 @@ import { ConversaChamado, type MensagemChamado } from '@/components/ajuda/conver
 import { Selo } from '@/components/ui/selo'
 import { ARTIGOS } from '@/lib/ajuda/artigos'
 import { CATEGORIAS_CHAMADO, STATUS_CHAMADO, type CategoriaChamado } from '@/lib/ajuda/chamados'
+import { dataCurta } from '@/lib/datas'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,7 +51,7 @@ export default async function PaginaAdminChamado({ params }: { params: { id: str
           <dt className="text-barro-500">Pessoa</dt>
           <dd className="text-barro-900">
             {perfil?.nome_completo ?? 'conta excluída'}
-            {perfil && <span className="text-barro-400"> · conta desde {new Date(perfil.criado_em).toLocaleDateString('pt-BR')}</span>}
+            {perfil && <span className="text-barro-400"> · conta desde {dataCurta(perfil.criado_em)}</span>}
           </dd>
         </div>
         <div>

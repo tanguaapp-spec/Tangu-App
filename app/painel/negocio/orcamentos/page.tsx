@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Selo } from '@/components/ui/selo'
 import { exigirNegocio } from '@/lib/painel/negocio-atual'
 import { TituloPainel } from '@/components/painel/titulo-painel'
+import { dataCurta } from '@/lib/datas'
 
 export const metadata: Metadata = { title: 'Pedidos de orçamento', robots: { index: false } }
 export const dynamic = 'force-dynamic'
@@ -58,7 +59,7 @@ export default async function PaginaOrcamentosRecebidos() {
                     </span>
                     <span className="text-xs text-barro-500">
                       {p.bairro ? `${p.bairro} · ` : ''}
-                      {new Date(l.criado_em).toLocaleDateString('pt-BR')}
+                      {dataCurta(l.criado_em)}
                     </span>
                   </span>
                   {jaRespondi.has(p.id) ? <Selo tom="verde">Respondido</Selo> : aberto ? <Selo tom="aviso">Aguardando você</Selo> : <Selo>Encerrado</Selo>}

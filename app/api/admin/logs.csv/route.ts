@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verificarAdmin } from '@/lib/auth/require-admin'
 import { createServiceClient } from '@/lib/supabase/server'
+import { diaISO } from '@/lib/datas'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
   return new NextResponse(csv, {
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': `attachment; filename="logs-erro-${new Date().toISOString().slice(0, 10)}.csv"`,
+      'Content-Disposition': `attachment; filename="logs-erro-${diaISO()}.csv"`,
       'Cache-Control': 'no-store',
     },
   })

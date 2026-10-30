@@ -6,6 +6,7 @@ import { montarPainel, type Situacao } from '@/lib/crescimento/metricas'
 import { registrarInvestimento } from '@/lib/actions/crescimento-actions'
 import { FormularioAcao } from '@/components/painel/admin/formulario-acao'
 import { cn } from '@/lib/utils'
+import { dataCurta } from '@/lib/datas'
 
 
 const ESTILO: Record<Situacao, { rotulo: string; classe: string; Icone: typeof CheckCircle2 }> = {
@@ -113,7 +114,7 @@ export async function TelaCrescimento({ linkLeads }: { linkLeads: string }) {
                 <p className="min-w-0 text-sm text-barro-800">
                   {c.comentario}
                   <span className="block text-xs text-barro-500">
-                    {c.publico === 'negocio' ? 'Dono de negócio' : 'Morador'} · {new Date(c.criado_em).toLocaleDateString('pt-BR')}
+                    {c.publico === 'negocio' ? 'Dono de negócio' : 'Morador'} · {dataCurta(c.criado_em)}
                   </span>
                 </p>
               </li>

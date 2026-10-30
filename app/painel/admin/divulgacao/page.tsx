@@ -11,6 +11,7 @@ import { lerConfig } from '@/lib/config/ler'
 import { mercadoPagoConfigurado } from '@/lib/pagamentos/mercadopago'
 import { cn } from '@/lib/utils'
 import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
+import { inicioDoMes } from '@/lib/datas'
 
 export const dynamic = 'force-dynamic'
 
@@ -119,9 +120,7 @@ export default async function PaginaAdminDivulgacao({ searchParams }: { searchPa
   if (filtro === 'producao') consulta = consulta.eq('status', 'pago')
   else if (filtro !== 'todas') consulta = consulta.eq('status', filtro)
 
-  const inicioMes = new Date()
-  inicioMes.setDate(1)
-  inicioMes.setHours(0, 0, 0, 0)
+  const inicioMes = inicioDoMes()
   const [{ data: servicos }, { data: compras }, { data: pagasMes }, whatsapp] = await Promise.all([
     db.from('servicos_pagos').select('*').order('ordem'),
     consulta,

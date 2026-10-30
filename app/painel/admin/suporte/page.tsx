@@ -4,6 +4,8 @@ import { Selo } from '@/components/ui/selo'
 import { CATEGORIAS_CHAMADO, STATUS_CHAMADO, type CategoriaChamado } from '@/lib/ajuda/chamados'
 import { cn } from '@/lib/utils'
 import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
+import { dataHora } from '@/lib/datas'
+import { FilaAcesso } from '@/components/painel/admin/fila-acesso'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,6 +39,7 @@ export default async function PaginaAdminSuporte({ searchParams }: { searchParam
       <h1 className="font-display text-3xl font-semibold tracking-tight text-barro-900">Chamados de suporte</h1>
       <p className="text-barro-600">Os mais antigos sem resposta aparecem primeiro.</p>
       <GuiaPagina chave="suporte" />
+      <FilaAcesso />
 
       <nav aria-label="Filtro" className="mt-4 flex flex-wrap gap-2">
         {FILTROS.map(([f, rotulo]) => (
@@ -65,7 +68,7 @@ export default async function PaginaAdminSuporte({ searchParams }: { searchParam
                   <span className="block font-semibold text-barro-900">{c.assunto}</span>
                   <span className="text-xs text-barro-500">
                     {c.perfil?.nome_completo ?? 'conta excluída'} · {CATEGORIAS_CHAMADO[c.categoria as CategoriaChamado]} ·{' '}
-                    {new Date(c.atualizado_em).toLocaleString('pt-BR')}
+                    {dataHora(c.atualizado_em)}
                   </span>
                 </span>
                 <Selo tom={STATUS_CHAMADO[c.status]?.tom ?? 'neutro'}>{STATUS_CHAMADO[c.status]?.rotulo ?? c.status}</Selo>

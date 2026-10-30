@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createServiceClient } from '@/lib/supabase/server'
 import { GuiaPagina } from '@/components/painel/admin/guia-pagina'
+import { dataHora } from '@/lib/datas'
 
 export const dynamic = 'force-dynamic'
 
@@ -71,7 +72,7 @@ export default async function PaginaAuditoria({ searchParams }: { searchParams: 
             )}
             {linhas.map((l) => (
               <tr key={l.id} className="align-top">
-                <td className="whitespace-nowrap px-3 py-2 text-barro-600">{new Date(l.criado_em).toLocaleString('pt-BR')}</td>
+                <td className="whitespace-nowrap px-3 py-2 text-barro-600">{dataHora(l.criado_em)}</td>
                 <td className="px-3 py-2">{l.ator?.nome_completo ?? <span className="text-barro-400">sistema</span>}</td>
                 <td className="px-3 py-2 font-mono text-xs">{l.acao}</td>
                 <td className="px-3 py-2 text-xs text-barro-600">

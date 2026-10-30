@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Selo } from '@/components/ui/selo'
 import { CATEGORIAS_CHAMADO, STATUS_CHAMADO, type CategoriaChamado } from '@/lib/ajuda/chamados'
+import { dataHora } from '@/lib/datas'
 
 export const metadata: Metadata = { title: 'Meus chamados', robots: { index: false } }
 export const dynamic = 'force-dynamic'
@@ -47,7 +48,7 @@ export default async function PaginaMeusChamados() {
                 <span>
                   <span className="block font-semibold text-barro-900">{c.assunto}</span>
                   <span className="text-xs text-barro-500">
-                    {CATEGORIAS_CHAMADO[c.categoria as CategoriaChamado]} · atualizado {new Date(c.atualizado_em).toLocaleString('pt-BR')}
+                    {CATEGORIAS_CHAMADO[c.categoria as CategoriaChamado]} · atualizado {dataHora(c.atualizado_em)}
                   </span>
                 </span>
                 <Selo tom={STATUS_CHAMADO[c.status]?.tom ?? 'neutro'}>{STATUS_CHAMADO[c.status]?.rotulo ?? c.status}</Selo>

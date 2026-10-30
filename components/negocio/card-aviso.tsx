@@ -2,11 +2,10 @@ import Link from 'next/link'
 import { Calendar, Megaphone, MapPin, Search, PartyPopper, HelpCircle, Store } from 'lucide-react'
 import type { AvisoCidade } from '@/lib/types/database'
 import { Selo } from '@/components/ui/selo'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
 import { ReacoesAviso } from '@/components/mural/reacoes-aviso'
 import { FormularioResponderPergunta } from '@/components/mural/formulario-responder-pergunta'
 import { BotaoDenunciar } from '@/components/moderacao/botao-denunciar'
+import { dataPorExtenso } from '@/lib/datas'
 
 const iconesPorTipo = {
   aviso: Megaphone,
@@ -67,7 +66,7 @@ export function CardAviso({ aviso, indice = 0, contagensReacao = {}, minhaReacao
         {aviso.data_evento && (
           <span className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4" />
-            {format(new Date(aviso.data_evento), "dd 'de' MMMM, HH:mm", { locale: ptBR })}
+            {dataPorExtenso(aviso.data_evento)}
           </span>
         )}
         {aviso.local_evento && (

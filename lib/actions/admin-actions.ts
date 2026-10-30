@@ -238,7 +238,8 @@ export async function criarAviso(formData: FormData) {
     titulo,
     conteudo: formData.get('conteudo') as string,
     local_evento: formData.get('local_evento') as string,
-    data_evento: dataEvento || null,
+    // datetime-local vem sem fuso: é horário de Tanguá (sem isso o banco gravava como UTC, 3h antes)
+    data_evento: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(dataEvento ?? '') ? new Date(`${dataEvento}:00-03:00`).toISOString() : null,
     fixado: formData.get('fixado') === 'on',
     publicado_por: user.id,
   })

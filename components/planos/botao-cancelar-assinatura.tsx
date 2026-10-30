@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Botao } from '@/components/ui/botao'
 import { cancelarAssinatura } from '@/lib/actions/assinatura-actions'
+import { dataCurta } from '@/lib/datas'
 
 export function BotaoCancelarAssinatura({ validoAte }: { validoAte: string | null }) {
   const [confirmando, setConfirmando] = useState(false)
@@ -41,7 +42,7 @@ export function BotaoCancelarAssinatura({ validoAte }: { validoAte: string | nul
       <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-red-800">
         <li>Não haverá novas cobranças.</li>
         <li>
-          Os recursos pagos continuam até {validoAte ? new Date(validoAte).toLocaleDateString('pt-BR') : 'o fim do período pago'}.
+          Os recursos pagos continuam até {validoAte ? dataCurta(validoAte) : 'o fim do período pago'}.
         </li>
         <li>Depois disso o negócio volta pro Gratuito. Nada é apagado — itens acima do limite ficam guardados.</li>
       </ul>
