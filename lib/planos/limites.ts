@@ -92,7 +92,8 @@ export function traduzirErroBanco(erro: ErroBanco, fallback = 'Não foi possíve
     const rotulo = ROTULO_LIMITE[chave]?.frase ?? 'itens'
     return `Você chegou ao limite de ${rotulo} do seu plano. Arquive algo que não usa mais ou veja os planos em Painel → Plano e assinatura.`
   }
-  if (msg.includes('NEGOCIO_DUPLICADO')) return 'Esta conta já tem um negócio cadastrado.'
+  if (msg.includes('NEGOCIO_DUPLICADO')) return 'Esta conta chegou ao limite de negócios. Fale com o suporte se precisar de mais.'
+  if (msg.includes('NEGOCIO_REPETIDO')) return 'Você já cadastrou um negócio com esse nome. Ele está em Painel → Meus negócios.'
   if (erro.code === '42501' || /row-level security|permission denied/i.test(msg)) {
     return 'Você não tem permissão pra fazer isso.'
   }

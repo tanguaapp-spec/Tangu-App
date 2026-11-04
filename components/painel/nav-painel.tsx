@@ -33,6 +33,7 @@ import {
   ToggleRight,
   BookOpen,
   Gift,
+  CopyX,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -66,6 +67,7 @@ const LINKS_ADMIN: LinkPainel[] = [
   { href: '/painel/admin/logs', rotulo: 'Logs de erro', icone: AlertTriangle, contador: 'erros' },
   { href: '/painel/admin/negocios-pendentes', rotulo: 'Cadastros sinalizados', icone: Store },
   { href: '/painel/admin/negocios', rotulo: 'Negócios (destaque e verificação)', icone: Sparkles },
+  { href: '/painel/admin/repetidos', rotulo: 'Repetidos', icone: CopyX },
   { href: '/painel/admin/usuarios', rotulo: 'Usuários', icone: Users },
   { href: '/painel/admin/categorias', rotulo: 'Categorias', icone: Tags },
   { href: '/painel/admin/comunicados', rotulo: 'Comunicados', icone: Send },

@@ -149,6 +149,23 @@ export const GUIAS = {
     voces: ['Aprovar (entra no ar) ou recusar com o motivo (o dono é avisado e pode corrigir e reenviar).'],
     dica: 'Termos sinalizados e moderação prévia ficam em Configurações.',
   },
+  repetidos: {
+    titulo: 'Repetidos',
+    href: '/painel/admin/repetidos',
+    resumo: 'Negócios que parecem o mesmo (nome igual ou mesmo telefone), para escolher qual fica e tirar os outros do app.',
+    sozinho: [
+      'O app compara os nomes sem acento, maiúscula e pontuação ("Max Gym Academia." = "max gym academia").',
+      'Cadastro novo: se a mesma conta envia o mesmo negócio de novo (ex.: tocou duas vezes com a internet lenta), o app não cria outro e leva ao que já existe.',
+      'Se o negócio já está no app sem dono (colocado pela equipe), o lojista é levado a assumir o perfil em vez de criar outro.',
+      'Nome igual ao de negócio de outra pessoa entra em "Cadastros sinalizados" para revisão.',
+    ],
+    voces: [
+      'Abrir esta aba de vez em quando e resolver cada grupo: normalmente fica o mais antigo ou o que tem dono e avaliações.',
+      '"Apagar" só funciona com o perfil vazio (sem avaliação, favorito, produto, oferta ou pagamento). Com algo dentro, use "Ocultar": some do app e nada se perde.',
+      'Mesmo telefone com nome diferente pode ser normal (a mesma pessoa com dois negócios): confira antes.',
+    ],
+    dica: 'Tudo o que for apagado ou ocultado fica registrado na Auditoria, com os dados completos.',
+  },
   negocios: {
     titulo: 'Negócios',
     href: '/painel/admin/negocios',

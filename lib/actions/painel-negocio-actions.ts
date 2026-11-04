@@ -18,6 +18,7 @@ import { agendarLembreteAvaliacao } from '@/lib/avaliacoes/lembretes'
 import { normalizarInstagram, normalizarSite, normalizarTelefoneBR } from '@/lib/utils'
 import type { ModalidadeAtendimento } from '@/lib/types/database'
 import { dataHora } from '@/lib/datas'
+import { chaveNome } from '@/lib/negocios/duplicados'
 
 const MODALIDADES_VALIDAS = ['loja_fisica', 'atende_em_casa', 'atende_domicilio', 'servico_digital'] as const
 
@@ -103,6 +104,21 @@ const DIAS_SEMANA = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'] as const
 // ---------------------------------------------------------------------
 // Autocadastro (profissional sem negócio ainda vindo do Google Places)
 // ---------------------------------------------------------------------
+/** Perfil criado pela equipe (sem dono) com o mesmo nome, ignorando acento, maiúscula e pontuação. */
+async function perfilSemDonoComMesmoNome(nome: string) {
+  const chave = chaveNome(nome)
+  const maiorPalavra = chave.split(' ').sort((a, b) => b.length - a.length)[0]
+  if (!maiorPalavra || maiorPalavra.length < 3) return null
+  const { data } = await createServiceClient()
+    .from('negocios')
+    .select('id, nome, slug')
+    .is('reivindicado_por', null)
+    .neq('status_cadastro', 'rejeitado')
+    .ilike('nome', `%${maiorPalavra}%`)
+    .limit(50)
+  return (data ?? []).find((n) => chaveNome(n.nome as string) === chave) as { id: string; nome: string; slug: string | null } | undefined
+}
+
 export async function cadastrarNegocio(formData: FormData) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -133,9 +149,29 @@ export async function cadastrarNegocio(formData: FormData) {
   }
 
   // uma conta pode cuidar de vários negócios, até o limite do admin (o banco confere de novo)
-  const { count: jaTem } = await supabase.from('negocios').select('id', { count: 'exact', head: true }).eq('reivindicado_por', user.id)
+  const { data: meus } = await supabase.from('negocios').select('id, nome, status_cadastro').eq('reivindicado_por', user.id)
+  const jaTem = meus?.length ?? 0
+
+  // mesmo negócio de novo (ex.: tocou outra vez em "Cadastrar" com a internet lenta):
+  // não cria outro, segue para o que já existe
+  const chave = chaveNome(dados.nome)
+  const repetido = (meus ?? []).find((n) => chaveNome(n.nome as string) === chave)
+  if (repetido) {
+    cookies().set(COOKIE_NEGOCIO_ATIVO, repetido.id as string, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 60 * 60 * 24 * 365 })
+    return { erro: null, negocioId: repetido.id as string, status: repetido.status_cadastro as string, jaExistia: true }
+  }
+
+  // já está no app sem dono (lista da equipe): assumir em vez de criar outro
+  const semDono = await perfilSemDonoComMesmoNome(dados.nome)
+  if (semDono) {
+    return {
+      erro: `"${semDono.nome}" já aparece no Tanguá App (nós colocamos para facilitar). Se é o seu negócio, assuma o perfil de graça: assim ele não fica repetido.`,
+      existente: `/negocio/${semDono.slug ?? semDono.id}#reivindicar`,
+    }
+  }
+
   const maximo = Number(await lerConfig('max_negocios_por_dono'))
-  if ((jaTem ?? 0) >= maximo) {
+  if (jaTem >= maximo) {
     return { erro: `Esta conta já tem ${jaTem} negócios, o máximo permitido. Fale com o suporte se precisar de mais.` }
   }
 

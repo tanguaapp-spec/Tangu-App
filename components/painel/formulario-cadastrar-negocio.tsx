@@ -4,6 +4,7 @@ import { OpcoesCategoria } from '@/components/ui/opcoes-categoria'
 import { chamarAcao } from '@/lib/ui/chamar-acao'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Store, UserRound } from 'lucide-react'
 import { Campo, AreaTexto } from '@/components/ui/campo'
 import { Botao } from '@/components/ui/botao'
@@ -24,6 +25,7 @@ export function FormularioCadastrarNegocio({ categorias }: { categorias: Categor
   const router = useRouter()
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
+  const [existente, setExistente] = useState<string | null>(null)
   const [tipo, setTipo] = useState<TipoPerfil>('estabelecimento')
   const [modalidades, setModalidades] = useState<ModalidadeAtendimento[]>(['loja_fisica'])
 
@@ -35,11 +37,13 @@ export function FormularioCadastrarNegocio({ categorias }: { categorias: Categor
   async function handleSubmit(formData: FormData) {
     setCarregando(true)
     setErro(null)
+    setExistente(null)
     formData.set('tipo_perfil', tipo)
 
     const resultado = await chamarAcao(cadastrarNegocio(formData))
     if (resultado?.erro) {
       setErro(resultado.erro)
+      if ('existente' in resultado && resultado.existente) setExistente(resultado.existente)
       setCarregando(false)
       return
     }
@@ -175,6 +179,14 @@ export function FormularioCadastrarNegocio({ categorias }: { categorias: Categor
       {erro && (
         <p role="alert" className="text-sm text-red-600 sm:col-span-2">
           {erro}
+          {existente && (
+            <>
+              {' '}
+              <Link href={existente} className="font-bold underline">
+                Abrir o perfil e assumir
+              </Link>
+            </>
+          )}
         </p>
       )}
 
